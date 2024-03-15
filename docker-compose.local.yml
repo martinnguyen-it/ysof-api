@@ -1,0 +1,19 @@
+version: "3"
+services:
+    api:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: ysof_api_${ENVIRONMENT}
+        ports:
+            - ${API_PORT}:8000
+        environment:
+            WEB_CONCURRENCY: 1
+
+    mongodb:
+        container_name: ysof_mongodb_${ENVIRONMENT}
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+        ports:
+            - ${MONGODB_EXPOSE_PORT}:27017

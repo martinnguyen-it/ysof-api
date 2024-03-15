@@ -1,0 +1,36 @@
+version: "3"
+services:
+  api:
+    image: ysof_api
+    restart: unless-stopped
+    volumes:
+      - ./logs:/usr/src/app/logs
+      - ./uploads:/usr/src/app/uploads
+    depends_on:
+      - mongodb
+    networks:
+      - localnet
+    env_file:
+      - .env
+    cap_add:
+      - SYS_ADMIN
+
+  mongodb:
+    image: mongo:7.0.2-jammy
+    restart: always
+    command: mongod
+    volumes:
+      - ./scripts/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+      - mongodb_data:/data/db
+    env_file:
+      - .env
+    networks:
+      - localnet
+
+networks:
+  localnet:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local

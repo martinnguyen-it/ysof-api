@@ -1,0 +1,8 @@
+{
+    "logger": {
+      "level": "info",
+      "rotation": "2 days",
+      "retention": "7 days",
+      "format": "<level>{level: <8}</level> <green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> - <cyan>{name}</cyan>:<cyan>{function}</cyan> - <level>{message}</level>"
+    }
+}

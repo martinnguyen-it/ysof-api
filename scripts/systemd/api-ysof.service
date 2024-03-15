@@ -1,0 +1,13 @@
+[Unit]
+Description=YSOF Api
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/opt/ysof/ysofapi
+EnvironmentFile=/opt/ysof/ysofapi/.env
+ExecStart=/opt/ysof/ysofapi/.venv/bin/uvicorn app.main:app --workers 1 --port ${API_PORT}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

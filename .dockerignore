@@ -1,0 +1,16 @@
+.git
+.ipynb_checkpoints/*
+/tests/*
+Dockerfile
+.DS_Store
+.gitignore
+README.md
+.venv
+/devops/*
+.pytest_cache/*
+# To prevent storing dev/temporary container data
+*.html
+*.csv
+/tmp/*
+.ruff_cache/*
+scripts/*
