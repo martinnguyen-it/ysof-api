@@ -16,7 +16,8 @@ router = APIRouter()
 @response_decorator()
 def upload_file(
         file: UploadFile = File(...),
-        google_drive_service: GoogleDriveApiService = Depends(GoogleDriveApiService)
+        google_drive_service: GoogleDriveApiService = Depends(
+            GoogleDriveApiService)
 ):
     response = google_drive_service.create(file=file)
     return response
@@ -43,7 +44,8 @@ def upload_image(
 @response_decorator()
 def upload_image(
         file_id: str = Path(..., title="File id"),
-        google_drive_service: GoogleDriveApiService = Depends(GoogleDriveApiService)
+        google_drive_service: GoogleDriveApiService = Depends(
+            GoogleDriveApiService)
 ):
     google_drive_service.delete(file_id=file_id)
     return {"message": "Success"}

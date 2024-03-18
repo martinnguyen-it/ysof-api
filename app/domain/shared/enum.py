@@ -19,4 +19,4 @@ class AdminRole(str, ExtendedEnum):
 
 class Sort(str, ExtendedEnum):
     ASCE = "asce"
-    DESC = "desc"
+    DESC = "description"

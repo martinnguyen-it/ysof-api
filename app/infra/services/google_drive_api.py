@@ -1,3 +1,5 @@
+from typing import Optional
+
 import google.auth
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -34,10 +36,10 @@ class GoogleDriveApiService:
             )
         return creds
 
-    def create(self, file: UploadFile) -> GoogleDriveAPIRes:
+    def create(self, file: UploadFile, name: Optional[str] = None) -> GoogleDriveAPIRes:
         try:
             # Creating file metadata
-            file_metadata = {"name": file.filename,
+            file_metadata = {"name": name if name else file.filename,
                              "parents": [settings.FOLDER_GCLOUD_ID]}
 
             # Creating media upload object
@@ -47,7 +49,7 @@ class GoogleDriveApiService:
             # Uploading the file
             res = (self.service.files()
                    .create(body=file_metadata, media_body=media,
-                           fields="id,mimeType,name,thumbnailLink,webViewLink")
+                           fields="id,mimeType,name,thumbnailLink")
                    .execute())
             return GoogleDriveAPIRes.model_validate(res)
 

@@ -65,7 +65,6 @@ class TestUserApi(unittest.TestCase):
                     "mimeType": "application/pdf",
                     "name": "test.pdf",
                     "thumbnailLink": "null",
-                    "webViewLink": "https://drive.google.com/file/d/1_YHlcIIE7b6tftTgknPB_freQRJfiOmy/view?usp=drivesdk"
                 })
 
             files = {"file": open("tests/mocks/sample.pdf", "rb")}
@@ -101,7 +100,6 @@ class TestUserApi(unittest.TestCase):
                     "mimeType": "application/pdf",
                     "name": "test.pdf",
                     "thumbnailLink": "null",
-                    "webViewLink": "https://drive.google.com/file/d/1_YHlcIIE7b6tftTgknPB_freQRJfiOmy/view?usp=drivesdk"
                 })
 
             file1 = {"image": open("tests/mocks/sample.pdf", "rb")}

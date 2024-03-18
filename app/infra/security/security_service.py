@@ -14,6 +14,7 @@ from app.domain.auth.entity import TokenData
 from app.domain.shared.enum import AdminRole
 from app.infra.admin.admin_repository import AdminRepository
 from app.models.admin import AdminModel
+from app.shared.common_exception import forbidden_exception
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(
@@ -23,11 +24,6 @@ credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Không thể xác thực thông tin đăng nhập",
     headers={"WWW-Authenticate": "Bearer"},
-)
-
-forbidden_exception = HTTPException(
-    status_code=status.HTTP_403_FORBIDDEN,
-    detail="Bạn không có quyền truy cập",
 )
 
 
