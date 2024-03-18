@@ -52,6 +52,10 @@ class Settings(BaseSettings):
 
     CURRENT_SEASON: int = 1
 
+    FOLDER_GCLOUD_ID: str
+    KEY_PATH_GCLOUD: str = "google-credentials/gcloud-service-credentials-staging.json"
+    PREFIX_IMAGE_GCLOUD: str = "https://lh3.googleusercontent.com/d/"
+
 
 # init settings instance
 settings = Settings()

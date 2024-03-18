@@ -73,7 +73,7 @@ def get_list_admins(
         list_admins_use_case: ListAdminsUseCase = Depends(ListAdminsUseCase),
         page_index: Annotated[int, Query(title="Page Index")] = 1,
         page_size: Annotated[int, Query(title="Page size")] = 100,
-        search: Optional[str] = Query(Optional[str], title="Search"),
+        search: Optional[str] = Query(None, title="Search"),
         sort: Optional[Sort] = Sort.DESC,
         sort_by: Optional[str] = 'id'
 ):

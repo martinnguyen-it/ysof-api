@@ -96,4 +96,6 @@ logs/
 static/
 celerybeat-schedule.db
 .vscode/
-.*.env
+.env*
+
+*google-credentials*

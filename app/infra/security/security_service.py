@@ -16,17 +16,18 @@ from app.infra.admin.admin_repository import AdminRepository
 from app.models.admin import AdminModel
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/admin/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl=f"{settings.API_V1_STR}/admin/auth/login")
 
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="Could not validate credentials",
+    detail="Không thể xác thực thông tin đăng nhập",
     headers={"WWW-Authenticate": "Bearer"},
 )
 
 forbidden_exception = HTTPException(
     status_code=status.HTTP_403_FORBIDDEN,
-    detail="Do not have permission",
+    detail="Bạn không có quyền truy cập",
 )
 
 
@@ -36,7 +37,8 @@ def verify_password(plain_password, hashed_password):
 
 def verify_token(token: str) -> Optional[TokenData]:
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY,
+                             algorithms=[settings.ALGORITHM])
         email: str = payload.get("email")
         if email is None:
             raise credentials_exception
@@ -66,7 +68,9 @@ def get_current_active_admin(
 ) -> AdminModel:
     current_user = AdminInDB.model_validate(admin)
     if current_user.disabled():
-        raise HTTPException(status_code=400, detail="Invalid user")
+        raise HTTPException(
+            status_code=400, detail="Tài khoản của bạn đã bị khóa"
+        )
     return admin
 
 
@@ -79,7 +83,8 @@ def create_access_token(data: TokenData, expires_delta: timedelta = None) -> str
         expire = datetime.utcnow() + timedelta(days=settings.ACCESS_TOKEN_EXPIRE)
     to_encode.update({"exp": expire})
 
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    encoded_jwt = jwt.encode(
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
     if isinstance(encoded_jwt, str):
         return encoded_jwt
@@ -88,6 +93,15 @@ def create_access_token(data: TokenData, expires_delta: timedelta = None) -> str
 
 
 def authorization(admin: AdminInDB, roles: list[AdminRole]):
+    """_summary_
+
+    Args:
+        admin (AdminInDB): current user from token
+        roles (list[AdminRole]): accept roles
+
+    Raises:
+        forbidden_exception: _description_
+    """
     check = False
     for role in admin.roles:
         if role in roles:
@@ -97,7 +111,15 @@ def authorization(admin: AdminInDB, roles: list[AdminRole]):
         raise forbidden_exception
 
 
-def generate_random_password(length: int = 20):
+def generate_random_password(length: int = 20) -> str:
+    """_summary_
+
+    Args:
+        length (int, optional): length password defaults to 20.
+
+    Returns:
+        password: str
+    """
     punctuation = "!@#$%^&*"
     alphabet = ascii_letters + digits + punctuation
     requirements = [

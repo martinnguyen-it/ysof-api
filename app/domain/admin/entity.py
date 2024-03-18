@@ -43,7 +43,7 @@ class AdminInDB(IDModelMixin, DateTimeModelMixin, AdminBase):
         Check user validity
         :return:
         """
-        return (self.status is AccountStatus.INACTIVE
+        return (self.status is AccountStatus.INACTIVE.value
                 or self.status is AccountStatus.DELETED.value
                 or self.current_season != settings.CURRENT_SEASON)
 

@@ -17,6 +17,12 @@ pip install -r requirements.txt
 pip install -r requirements.txt
 ```
 
+### Update requirements file:
+
+```
+pip freeze > requirements.txt
+```
+
 ## Copy environment
 ```
 cp .env-example .env
