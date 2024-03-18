@@ -3,7 +3,7 @@ from mongoengine import Document, StringField, EmailField, DateTimeField, DictFi
 
 
 class UserModel(Document):
-    numerical_order = IntField(required=True)
+    numerical_order = IntField(required=True, unique=True)
     group = IntField(required=True)
     holy_name = StringField(required=True)
     full_name = StringField(required=True)
@@ -12,12 +12,19 @@ class UserModel(Document):
     address = DictField()
     phone_number = StringField()
 
-    email = EmailField(required=True, unique=True)
+    email = EmailField(required=True)
     password = StringField()
     avatar = StringField()
 
+    education = StringField()
+    job = StringField()
+
+    note = StringField()
+
+    current_season = StringField()
+
     status = StringField(required=True)
-    created_at = DateTimeField(required=True)
+    created_at = DateTimeField()
     updated_at = DateTimeField()
 
     @classmethod
