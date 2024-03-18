@@ -32,14 +32,21 @@ class LoginUseCase(use_case.UseCase):
         self.admin_repository = admin_repository
 
     def process_request(self, req_object: LoginRequestObject):
-        admin: AdminModel = self.admin_repository.get_by_email(req_object.login_payload.email)
+        admin: AdminModel = self.admin_repository.get_by_email(
+            req_object.login_payload.email)
         checker = False
         if admin:
-            checker = verify_password(req_object.login_payload.password, admin.password)
+            checker = verify_password(
+                req_object.login_payload.password, admin.password)
         if not admin or not checker:
-            return response_object.ResponseFailure.build_parameters_error(message="Incorrect email or password")
+            return response_object.ResponseFailure.build_parameters_error(message="Sai email hoặc mật khẩu")
+
+        admin_in_db = AdminInDB.model_validate(admin)
+        if admin_in_db.disabled():
+            return response_object.ResponseFailure.build_parameters_error(message="Tài khoản của bạn đã bị khóa")
+
         access_token = create_access_token(
             data=TokenData(email=admin.email, id=str(admin.id))
         )
         return AuthAdminInfoInResponse(access_token=access_token,
-                                       user=Admin(**AdminInDB.model_validate(admin).model_dump()))
+                                       user=Admin(**admin_in_db.model_dump()))
