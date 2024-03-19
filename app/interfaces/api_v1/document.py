@@ -8,7 +8,7 @@ from app.domain.shared.enum import Sort, AdminRole
 from app.infra.security.security_service import authorization, get_current_active_admin
 from app.infra.services.google_drive_api import GoogleDriveApiService
 from app.shared.decorator import response_decorator
-# from app.use_cases.document.list import ListDocumentsUseCase, ListDocumentsRequestObject
+from app.use_cases.document.list import ListDocumentsUseCase, ListDocumentsRequestObject
 # from app.use_cases.document.update import UpdateDocumentUseCase, UpdateDocumentRequestObject
 # from app.use_cases.document.get import (
 #     GetDocumentRequestObject,
@@ -18,13 +18,14 @@ from app.use_cases.document.create import (
     CreateDocumentRequestObject,
     CreateDocumentUseCase,
 )
+from app.models.admin import AdminModel
 
 router = APIRouter()
 
 
 # @router.get(
 #     "/{document_id}",
-#     dependencies=[Depends(get_current_active_document)],  # auth route
+#     dependencies=[Depends(get_current_active_admin)],  # auth route
 #     response_model=Document,
 # )
 # @response_decorator()
@@ -66,32 +67,39 @@ def create_document(
     response = create_document_use_case.execute(request_object=req_object)
     return response
 
-# @router.get(
-#     "",
-#     response_model=ManyDocumentsInResponse,
-#     dependencies=[Depends(get_current_active_document)],
-# )
-# @response_decorator()
-# def get_list_documents(
-#         list_documents_use_case: ListDocumentsUseCase = Depends(ListDocumentsUseCase),
-#         page_index: Annotated[int, Query(title="Page Index")] = 1,
-#         page_size: Annotated[int, Query(title="Page size")] = 100,
-#         search: Optional[str] = Query(None, title="Search"),
-#         sort: Optional[Sort] = Sort.DESC,
-#         sort_by: Optional[str] = 'id'
-# ):
-#     annotations = {}
-#     for base in reversed(Document.__mro__):
-#         annotations.update(getattr(base, '__annotations__', {}))
-#     if sort_by not in annotations:
-#         raise HTTPException(
-#             status_code=400, detail=f"Invalid sort_by: {sort_by}")
-#     sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
 
-#     req_object = ListDocumentsRequestObject.builder(page_index=page_index, page_size=page_size, search=search,
-#                                                  sort=sort_query)
-#     response = list_documents_use_case.execute(request_object=req_object)
-#     return response
+@router.get(
+    "",
+    response_model=ManyDocumentsInResponse,
+)
+@response_decorator()
+def get_list_documents(
+        list_documents_use_case: ListDocumentsUseCase = Depends(
+            ListDocumentsUseCase),
+        page_index: Annotated[int, Query(title="Page Index")] = 1,
+        page_size: Annotated[int, Query(title="Page size")] = 100,
+        search: Optional[str] = Query(None, title="Search"),
+        label: Optional[list[str]] = Query(None, title="Search"),
+        sort: Optional[Sort] = Sort.DESC,
+        sort_by: Optional[str] = 'id',
+        current_admin: AdminModel = Depends(get_current_active_admin)
+):
+    annotations = {}
+    for base in reversed(Document.__mro__):
+        annotations.update(getattr(base, '__annotations__', {}))
+    if sort_by not in annotations:
+        raise HTTPException(
+            status_code=400, detail=f"Invalid sort_by: {sort_by}")
+    sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
+
+    req_object = ListDocumentsRequestObject.builder(author=current_admin,
+                                                    page_index=page_index,
+                                                    page_size=page_size,
+                                                    search=search,
+                                                    label=label,
+                                                    sort=sort_query)
+    response = list_documents_use_case.execute(request_object=req_object)
+    return response
 
 
 # @router.put(
@@ -104,7 +112,7 @@ def create_document(
 #         payload: DocumentInUpdate = Body(..., title="Document updated payload"),
 #         update_document_use_case: UpdateDocumentUseCase = Depends(
 #             UpdateDocumentUseCase),
-#         current_document: DocumentInDB = Depends(get_current_active_document),
+#         current_document: DocumentInDB = Depends(get_current_active_admin),
 # ):
 #     if not str(current_document.id) == id:
 #         authorization(current_document, [DocumentRole.ADMIN, DocumentRole.BDH])
