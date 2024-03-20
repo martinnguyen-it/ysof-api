@@ -9,34 +9,37 @@ from app.infra.security.security_service import authorization, get_current_activ
 from app.infra.services.google_drive_api import GoogleDriveApiService
 from app.shared.decorator import response_decorator
 from app.use_cases.document.list import ListDocumentsUseCase, ListDocumentsRequestObject
-# from app.use_cases.document.update import UpdateDocumentUseCase, UpdateDocumentRequestObject
-# from app.use_cases.document.get import (
-#     GetDocumentRequestObject,
-#     GetDocumentCase,
-# )
+from app.use_cases.document.update import UpdateDocumentUseCase, UpdateDocumentRequestObject
+from app.use_cases.document.get import (
+    GetDocumentRequestObject,
+    GetDocumentCase,
+)
 from app.use_cases.document.create import (
     CreateDocumentRequestObject,
     CreateDocumentUseCase,
 )
 from app.models.admin import AdminModel
+from app.shared.constant import SUPER_ADMIN
+from app.use_cases.document.delete import DeleteDocumentRequestObject, DeleteDocumentUseCase
 
 router = APIRouter()
 
 
-# @router.get(
-#     "/{document_id}",
-#     dependencies=[Depends(get_current_active_admin)],  # auth route
-#     response_model=Document,
-# )
-# @response_decorator()
-# def get_document_by_id(
-#         document_id: str = Path(..., title="Document id"),
-#         get_document_use_case: GetDocumentCase = Depends(GetDocumentCase),
-# ):
-#     get_document_request_object = GetDocumentRequestObject.builder(document_id=document_id)
-#     response = get_document_use_case.execute(
-#         request_object=get_document_request_object)
-#     return response
+@router.get(
+    "/{document_id}",
+    dependencies=[Depends(get_current_active_admin)],
+    response_model=Document,
+)
+@response_decorator()
+def get_document_by_id(
+        document_id: str = Path(..., title="Document id"),
+        get_document_use_case: GetDocumentCase = Depends(GetDocumentCase),
+):
+    get_document_request_object = GetDocumentRequestObject.builder(
+        document_id=document_id)
+    response = get_document_use_case.execute(
+        request_object=get_document_request_object)
+    return response
 
 
 @router.post(
@@ -55,7 +58,7 @@ def create_document(
             GoogleDriveApiService)
 ):
     if payload.role not in current_admin.roles:
-        authorization(current_admin, [AdminRole.ADMIN, AdminRole.BDH])
+        authorization(current_admin, SUPER_ADMIN)
 
     info_file = google_drive_service.create(file=file, name=payload.name)
     new_payload = DocumentInCreate(
@@ -102,21 +105,37 @@ def get_list_documents(
     return response
 
 
-# @router.put(
-#     "/{id}",
-#     response_model=Document,
-# )
-# @response_decorator()
-# def update_document(
-#         id: str = Path(..., title="Document Id"),
-#         payload: DocumentInUpdate = Body(..., title="Document updated payload"),
-#         update_document_use_case: UpdateDocumentUseCase = Depends(
-#             UpdateDocumentUseCase),
-#         current_document: DocumentInDB = Depends(get_current_active_admin),
-# ):
-#     if not str(current_document.id) == id:
-#         authorization(current_document, [DocumentRole.ADMIN, DocumentRole.BDH])
+@router.put(
+    "/{id}",
+    response_model=Document,
+)
+@response_decorator()
+def update_document(
+        id: str = Path(..., title="Document Id"),
+        payload: DocumentInUpdate = Body(...,
+                                         title="Document updated payload"),
+        update_document_use_case: UpdateDocumentUseCase = Depends(
+            UpdateDocumentUseCase),
+        current_admin: AdminModel = Depends(get_current_active_admin),
+):
+    if payload.role and payload.role not in current_admin.roles:
+        authorization(current_admin, SUPER_ADMIN)
 
-#     req_object = UpdateDocumentRequestObject.builder(id=id, payload=payload)
-#     response = update_document_use_case.execute(request_object=req_object)
-#     return response
+    req_object = UpdateDocumentRequestObject.builder(
+        id=id, payload=payload, admin_roles=current_admin.roles)
+    response = update_document_use_case.execute(request_object=req_object)
+    return response
+
+
+@router.delete("/{id}")
+@response_decorator()
+def update_document(
+        id: str = Path(..., title="Document Id"),
+        delete_document_use_case: DeleteDocumentUseCase = Depends(
+            DeleteDocumentUseCase),
+        current_admin: AdminModel = Depends(get_current_active_admin),
+):
+    req_object = DeleteDocumentRequestObject.builder(
+        id=id, admin_roles=current_admin.roles)
+    response = delete_document_use_case.execute(request_object=req_object)
+    return response

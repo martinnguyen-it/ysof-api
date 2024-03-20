@@ -37,9 +37,8 @@ class TestAuthAdminApi(unittest.TestCase):
     def tearDownClass(cls):
         disconnect()
 
-    def test_user_login(self):
+    def test_admin_login(self):
         r = self.client.post(
             "/api/v1/admin/auth/login", json={"email": "user@example.com", "password": "local@local"})
         assert r.status_code == 200
-        print(r.json())
         assert r.json().get("access_token")

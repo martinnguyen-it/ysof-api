@@ -89,3 +89,10 @@ class DocumentRepository:
             return list(docs)[0]['document_count']
         except Exception:
             return 0
+
+    def delete(self, id: ObjectId) -> bool:
+        try:
+            DocumentModel.objects(id=id).delete()
+            return True
+        except Exception:
+            return False

@@ -12,6 +12,7 @@ from app.models.admin import AdminModel
 from app.domain.document.enum import DocumentType
 from app.domain.admin.entity import AdminInDB
 from app.domain.shared.enum import AdminRole
+from app.shared.constant import SUPER_ADMIN
 
 
 class ListDocumentsRequestObject(request_object.ValidRequestObject):
@@ -39,7 +40,7 @@ class ListDocumentsUseCase(use_case.UseCase):
     def process_request(self, req_object: ListDocumentsRequestObject):
         is_super_admin = False
         for role in req_object.author.roles:
-            if role in [AdminRole.ADMIN, AdminRole.BDH]:
+            if role in SUPER_ADMIN:
                 is_super_admin = True
                 break
 

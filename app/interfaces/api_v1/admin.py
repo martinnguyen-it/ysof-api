@@ -14,6 +14,7 @@ from app.use_cases.admin.create import (
     CreateAdminRequestObject,
     CreateAdminUseCase,
 )
+from app.shared.constant import SUPER_ADMIN
 
 router = APIRouter()
 
@@ -57,7 +58,7 @@ def create_admin(
             CreateAdminUseCase),
         current_admin: AdminInDB = Depends(get_current_active_admin),
 ):
-    authorization(current_admin, [AdminRole.ADMIN, AdminRole.BDH])
+    authorization(current_admin, SUPER_ADMIN)
     req_object = CreateAdminRequestObject.builder(payload=payload)
     response = create_admin_use_case.execute(request_object=req_object)
     return response
@@ -104,7 +105,7 @@ def update_admin(
         current_admin: AdminInDB = Depends(get_current_active_admin),
 ):
     if not str(current_admin.id) == id:
-        authorization(current_admin, [AdminRole.ADMIN, AdminRole.BDH])
+        authorization(current_admin, SUPER_ADMIN)
 
     req_object = UpdateAdminRequestObject.builder(id=id, payload=payload)
     response = update_admin_use_case.execute(request_object=req_object)

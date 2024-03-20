@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List
-from pydantic import ConfigDict
+from pydantic import ConfigDict, validator
 
 from app.domain.admin.field import PydanticAdminType
 from app.domain.document.enum import DocumentType
@@ -58,6 +58,11 @@ class Document(DocumentBase):
     session: int
     created_at: datetime
     updated_at: datetime
+    webViewLink: Optional[str] = None
+
+    @validator("webViewLink", pre=True, always=True)
+    def create_web_link(cls, v, values):
+        return f"https://drive.google.com/file/d/{values['file_id']}/view?usp=drivesdk"
 
 
 class ManyDocumentsInResponse(BaseEntity):
@@ -65,7 +70,7 @@ class ManyDocumentsInResponse(BaseEntity):
     data: Optional[List[Document]] = None
 
 
-class DocumentInUpdate(BaseEntity, PayloadWithFile):
+class DocumentInUpdate(BaseEntity):
     name: Optional[str] = None
     type: Optional[DocumentType] = None
     description: Optional[str] = None

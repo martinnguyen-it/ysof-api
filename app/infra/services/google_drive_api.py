@@ -66,13 +66,32 @@ class GoogleDriveApiService:
 
     def delete(self, file_id: str):
         try:
-            # Uploading the file
             self.service.files().delete(fileId=file_id).execute()
 
         except HttpError as error:
             if "File not found" in str(error):
                 logger.error(
-                    f"Parent folder with ID {settings.FOLDER_GCLOUD_ID} not found.")
+                    f"Parent folder with ID {settings.FOLDER_GCLOUD_ID} not found. >> {error}")
+                raise HTTPException(
+                    status_code=400, detail="Không tìm thấy file."
+                )
+            else:
+                logger.error(
+                    f"An error occurred when deleting the file: {error}")
+                raise HTTPException(
+                    status_code=400, detail="Hệ thống Cloud bị lỗi."
+                )
+
+    def update(self, file_id: str, new_name: str):
+        try:
+            # Replace "New_File_Name" with the desired new name
+            updated_file_metadata = {"name": new_name}
+            self.service.files().update(fileId=file_id, body=updated_file_metadata).execute()
+
+        except HttpError as error:
+            if "File not found" in str(error):
+                logger.error(
+                    f"Parent folder with ID {settings.FOLDER_GCLOUD_ID} not found. >> {error}")
                 raise HTTPException(
                     status_code=400, detail="Không tìm thấy file."
                 )

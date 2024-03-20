@@ -16,7 +16,7 @@ class UpdateAdminRequestObject(request_object.ValidRequestObject):
     def builder(cls, id: str, payload: Optional[AdminInUpdate]) -> request_object.RequestObject:
         invalid_req = request_object.InvalidRequestObject()
         if id is None:
-            invalid_req.add_error("id", "Invalid client id")
+            invalid_req.add_error("id", "Id không hợp lệ")
 
         if payload is None:
             invalid_req.add_error("payload", "Invalid payload")
@@ -32,9 +32,10 @@ class UpdateAdminUseCase(use_case.UseCase):
         self.admin_repository = admin_repository
 
     def process_request(self, req_object: UpdateAdminRequestObject):
-        admin: Optional[AdminModel] = self.admin_repository.get_by_id(req_object.id)
+        admin: Optional[AdminModel] = self.admin_repository.get_by_id(
+            req_object.id)
         if not admin:
-            return response_object.ResponseFailure.build_not_found_error("Admin does not exist")
+            return response_object.ResponseFailure.build_not_found_error("Admin không tồn tại")
 
         self.admin_repository.update(id=admin.id, data=req_object.obj_in)
         admin.reload()

@@ -1,6 +1,6 @@
 import json
 import unittest
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 
 from google.oauth2.credentials import Credentials
 from mongoengine import connect, disconnect
@@ -41,6 +41,32 @@ class TestUserApi(unittest.TestCase):
             email="user@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
+        ).save()
+        cls.document = DocumentModel(
+            file_id="1hXt8WI3g6p8YUtN2gR35yA-gO_fE2vD3",
+            mimeType="image/jpeg",
+            name="Tài liệu học",
+            thumbnailLink="https://lh3.googleusercontent.com/drive-storage/AJQWtBPQ0cDHLtK8eFG3nyGUQ02897KWOM87NIeoCu6OSyOoehPiZrY7__MpTVFAxsSM3UBsJz-4yDVoB-yio8LMQsaqQpNsgewuzf3F2VCI=s220",
+            role="bhv",
+            type="common",
+            label=[
+                "string"
+            ],
+            session=3,
+            author=cls.user
+        ).save()
+        cls.document2 = DocumentModel(
+            file_id="1hXt8WI3g6p8YUtN2gR35yA-gO_fE2vD3",
+            mimeType="image/jpeg",
+            name="Tài liệu học",
+            thumbnailLink="https://lh3.googleusercontent.com/drive-storage/AJQWtBPQ0cDHLtK8eFG3nyGUQ02897KWOM87NIeoCu6OSyOoehPiZrY7__MpTVFAxsSM3UBsJz-4yDVoB-yio8LMQsaqQpNsgewuzf3F2VCI=s220",
+            role="bhv",
+            type="common",
+            label=[
+                "string"
+            ],
+            session=3,
+            author=cls.user
         ).save()
 
     @classmethod
@@ -106,4 +132,93 @@ class TestUserApi(unittest.TestCase):
             )
             assert r.status_code == 200
             resp = r.json()
-            assert resp["pagination"]["total"] == 1
+            assert resp["pagination"]["total"] == 2
+
+    def test_get_document_by_id(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.get(
+                f"/api/v1/documents/{self.document.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            doc: DocumentModel = DocumentModel.objects(
+                id=r.json().get("id")).get()
+            assert doc.name == self.document.name
+            assert doc.role
+
+    def test_update_document_by_id(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token, \
+                patch("app.infra.services.google_drive_api.GoogleDriveApiService.update") as mock_update_file_drive, \
+                patch(
+                    "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token") as mock_get_oauth_token:
+            mock_token.return_value = TokenData(email=self.user.email)
+            mock_get_oauth_token.return_value = Credentials(
+                token="<access_token>",
+                refresh_token="<refresh_token>",
+                client_id="<client_id>",
+                client_secret="<client_secret>",
+                token_uri="<token_uri>",
+                scopes=["https://www.googleapis.com/auth/drive"]
+            )
+            mock_update_file_drive.return_value = GoogleDriveAPIRes.model_validate(
+                {
+                    "id": "1_YHlcIIE7b6tftTgknPB_freQRJfiOmy",
+                    "mimeType": "application/pdf",
+                    "name": "Updated",
+                    "thumbnailLink": "null",
+                })
+
+            r = self.client.put(
+                f"/api/v1/documents/{self.document.id}",
+                json={
+                    "name": "Updated"
+                },
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            doc: DocumentModel = DocumentModel.objects(
+                id=r.json().get("id")).get()
+            assert doc.name == "Updated"
+
+    def test_delele_document_by_id(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token, \
+                patch("app.infra.services.google_drive_api.GoogleDriveApiService.delete") as mock_delete_file_drive, \
+                patch(
+                    "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token") as mock_get_oauth_token:
+            mock_token.return_value = TokenData(email=self.user.email)
+            mock_get_oauth_token.return_value = Credentials(
+                token="<access_token>",
+                refresh_token="<refresh_token>",
+                client_id="<client_id>",
+                client_secret="<client_secret>",
+                token_uri="<token_uri>",
+                scopes=["https://www.googleapis.com/auth/drive"]
+            )
+            mock_delete_file_drive.return_value = GoogleDriveAPIRes.model_validate(
+                {
+                    "id": "1_YHlcIIE7b6tftTgknPB_freQRJfiOmy",
+                    "mimeType": "application/pdf",
+                    "name": "Updated",
+                    "thumbnailLink": "null",
+                })
+
+            r = self.client.delete(
+                f"/api/v1/documents/{self.document2.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+
+            r = self.client.get(
+                f"/api/v1/documents/{self.document2.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 404

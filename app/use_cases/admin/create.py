@@ -34,12 +34,13 @@ class CreateAdminUseCase(use_case.UseCase):
 
     def process_request(self, req_object: CreateAdminRequestObject):
         admin_in: AdminInCreate = req_object.admin_in
-        existing_admin: Optional[AdminInDB] = self.admin_repository.get_by_email(email=admin_in.email)
+        existing_admin: Optional[AdminInDB] = self.admin_repository.get_by_email(
+            email=admin_in.email)
         if existing_admin:
-            return response_object.ResponseFailure.build_parameters_error(message="Email is existed.")
+            return response_object.ResponseFailure.build_parameters_error(message="Email đã tồn tại")
 
         obj_in: AdminInDB = AdminInDB(
-            **admin_in.model_dump(exclude={"password"}), 
+            **admin_in.model_dump(exclude={"password"}),
             password=get_password_hash(password="12345678"),
             # password=get_password_hash(password=generate_random_password()),
             current_season=settings.CURRENT_SEASON,
