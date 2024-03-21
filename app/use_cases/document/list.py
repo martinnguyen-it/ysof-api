@@ -17,20 +17,24 @@ from app.shared.constant import SUPER_ADMIN
 
 class ListDocumentsRequestObject(request_object.ValidRequestObject):
     def __init__(self, author: AdminModel, page_index: int, page_size: int, search: Optional[str] = None,
-                 label: Optional[list[str]] = None, sort: Optional[dict[str, int]] = None):
+                 label: Optional[list[str]] = None, sort: Optional[dict[str, int]] = None,
+                 roles: Optional[list[str]] = None
+                 ):
         self.page_index = page_index
         self.page_size = page_size
         self.search = search
         self.sort = sort
         self.label = label
         self.author = author
+        self.roles = roles
 
     @classmethod
     def builder(cls, author: AdminModel, page_index: int, page_size: int, search: Optional[str] = None,
-                label: Optional[list[str]] = None, sort: Optional[dict[str, int]] = None
+                label: Optional[list[str]] = None, sort: Optional[dict[str, int]] = None,
+                roles: Optional[list[str]] = None
                 ):
         return ListDocumentsRequestObject(author=author, page_index=page_index, label=label,
-                                          page_size=page_size, search=search, sort=sort)
+                                          page_size=page_size, search=search, sort=sort, roles=roles)
 
 
 class ListDocumentsUseCase(use_case.UseCase):
@@ -81,6 +85,13 @@ class ListDocumentsUseCase(use_case.UseCase):
             match_pipeline.append({
                 "$match": {
                     "label": {"$in": req_object.label}
+                }
+            })
+
+        if isinstance(req_object.roles, list) and len(req_object.roles) > 0:
+            match_pipeline.append({
+                "$match": {
+                    "role": {"$in": req_object.roles}
                 }
             })
 

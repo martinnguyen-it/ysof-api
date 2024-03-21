@@ -82,7 +82,8 @@ def get_list_documents(
         page_index: Annotated[int, Query(title="Page Index")] = 1,
         page_size: Annotated[int, Query(title="Page size")] = 100,
         search: Optional[str] = Query(None, title="Search"),
-        label: Optional[list[str]] = Query(None, title="Search"),
+        label: Optional[list[str]] = Query(None, title="Labels"),
+        roles: Optional[list[str]] = Query(None, title="Roles"),
         sort: Optional[Sort] = Sort.DESC,
         sort_by: Optional[str] = 'id',
         current_admin: AdminModel = Depends(get_current_active_admin)
@@ -100,6 +101,7 @@ def get_list_documents(
                                                     page_size=page_size,
                                                     search=search,
                                                     label=label,
+                                                    roles=roles,
                                                     sort=sort_query)
     response = list_documents_use_case.execute(request_object=req_object)
     return response
