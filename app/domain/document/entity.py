@@ -76,3 +76,7 @@ class DocumentInUpdate(BaseEntity):
     description: Optional[str] = None
     role: Optional[str] = None
     label: Optional[list[str]] = None
+
+
+class DocumentInUpdateTime(DocumentInUpdate):
+    updated_at: datetime = datetime.now()

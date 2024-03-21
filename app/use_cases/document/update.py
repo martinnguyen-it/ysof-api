@@ -3,7 +3,8 @@ from fastapi import Depends
 from app.models.document import DocumentModel
 from app.shared import request_object, use_case, response_object
 
-from app.domain.document.entity import AdminInDocument, Document, DocumentInDB, DocumentInUpdate
+from app.domain.document.entity import (AdminInDocument, Document, DocumentInDB, DocumentInUpdate,
+                                        DocumentInUpdateTime)
 from app.infra.document.document_repository import DocumentRepository
 from app.domain.shared.enum import AdminRole
 from app.shared.constant import SUPER_ADMIN
@@ -50,14 +51,16 @@ class UpdateDocumentUseCase(use_case.UseCase):
             req_object.id)
         if not document:
             return response_object.ResponseFailure.build_not_found_error("Tài liệu không tồn tại")
-        if document.role not in req_object.admin_roles and not any(role in SUPER_ADMIN for role in req_object.admin_roles):
+        if document.role not in req_object.admin_roles and \
+                not any(role in SUPER_ADMIN for role in req_object.admin_roles):
             return response_object.ResponseFailure.build_not_found_error("Bạn không có quyền sửa")
 
         if isinstance(req_object.obj_in.name, str):
             self.google_drive_api_service.update(
                 document.file_id, req_object.obj_in.name)
 
-        self.document_repository.update(id=document.id, data=req_object.obj_in)
+        self.document_repository.update(id=document.id, data=DocumentInUpdateTime(
+            **req_object.obj_in.model_dump(exclude=({"updated_at"}))))
         document.reload()
 
         author: AdminInDB = AdminInDB.model_validate(document.author)

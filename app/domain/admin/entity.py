@@ -84,3 +84,7 @@ class AdminInUpdate(BaseEntity):
     date_of_birth: Optional[datetime] = None
     facebook: Optional[str] = None
     status: Optional[AccountStatus] = None
+
+
+class AdminInUpdateTime(BaseEntity):
+    updated_at: datetime = datetime.now()

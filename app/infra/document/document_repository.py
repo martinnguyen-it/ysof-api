@@ -4,7 +4,7 @@ from mongoengine import QuerySet, DoesNotExist
 from bson import ObjectId
 
 from app.models.document import DocumentModel
-from app.domain.document.entity import DocumentInDB, DocumentInCreate, DocumentInUpdate
+from app.domain.document.entity import DocumentInDB, DocumentInUpdateTime
 
 
 class DocumentRepository:
@@ -39,10 +39,10 @@ class DocumentRepository:
         except DoesNotExist:
             return None
 
-    def update(self, id: ObjectId, data: Union[DocumentInUpdate, Dict[str, Any]]) -> bool:
+    def update(self, id: ObjectId, data: Union[DocumentInUpdateTime, Dict[str, Any]]) -> bool:
         try:
             data = data.model_dump(exclude_none=True) if isinstance(
-                data, DocumentInUpdate) else data
+                data, DocumentInUpdateTime) else data
             DocumentModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception:
