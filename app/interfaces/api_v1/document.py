@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException, UploadFile, File
-from typing import Annotated, Union, Optional
+from typing import Annotated, Optional
 
 from app.domain.admin.entity import AdminInDB
-from app.domain.document.entity import Document, DocumentInCreate, DocumentInDB, ManyDocumentsInResponse, \
+from app.domain.document.entity import Document, DocumentInCreate, ManyDocumentsInResponse, \
     DocumentInUpdate, DocumentInCreatePayload
-from app.domain.shared.enum import Sort, AdminRole
+from app.domain.shared.enum import Sort
 from app.infra.security.security_service import authorization, get_current_active_admin
 from app.infra.services.google_drive_api import GoogleDriveApiService
 from app.shared.decorator import response_decorator
@@ -131,7 +131,7 @@ def update_document(
 
 @router.delete("/{id}")
 @response_decorator()
-def update_document(
+def delete_document(
         id: str = Path(..., title="Document Id"),
         delete_document_use_case: DeleteDocumentUseCase = Depends(
             DeleteDocumentUseCase),
