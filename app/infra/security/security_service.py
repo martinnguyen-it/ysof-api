@@ -88,7 +88,7 @@ def create_access_token(data: TokenData, expires_delta: timedelta = None) -> str
         return encoded_jwt.decode("utf-8")
 
 
-def authorization(admin: AdminInDB, roles: list[AdminRole]):
+def authorization(admin: AdminModel, roles: list[AdminRole]):
     """_summary_
 
     Args:
@@ -98,12 +98,7 @@ def authorization(admin: AdminInDB, roles: list[AdminRole]):
     Raises:
         forbidden_exception: _description_
     """
-    check = False
-    for role in admin.roles:
-        if role in roles:
-            check = True
-            break
-    if not check:
+    if not any(role in admin.roles for role in roles):
         raise forbidden_exception
 
 
