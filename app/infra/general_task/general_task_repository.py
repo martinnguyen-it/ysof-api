@@ -102,3 +102,10 @@ class GeneralTaskRepository:
             return True
         except Exception:
             return False
+
+    def find_one(self, conditions: Dict[str, Union[str, bool, ObjectId]]) -> Optional[GeneralTaskModel]:
+        try:
+            doc = GeneralTaskModel._get_collection().find_one(conditions)
+            return GeneralTaskModel.from_mongo(doc) if doc else None
+        except Exception:
+            return None

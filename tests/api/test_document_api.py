@@ -16,6 +16,7 @@ from app.infra.security.security_service import (
     get_password_hash,
 )
 from app.models.document import DocumentModel
+from app.models.general_task import GeneralTaskModel
 
 
 class TestUserApi(unittest.TestCase):
@@ -68,6 +69,21 @@ class TestUserApi(unittest.TestCase):
             session=3,
             author=cls.user
         ).save()
+        cls.general_task: GeneralTaskModel = GeneralTaskModel(
+            title="Cong viec dau nam",
+            short_desc="Cong viec",
+            description="Đoạn văn là một đơn vị văn bản nhỏ",
+            start_at="2024-03-22T08:26:54.965000Z",
+            end_at="2024-03-22T08:26:54.965000Z",
+            role="bhv",
+            type="common",
+            label=[
+                "string"
+            ],
+            session=3,
+            author=cls.user,
+            attachments=[cls.document2]
+        ).save()
 
     @classmethod
     def tearDownClass(cls):
@@ -75,9 +91,10 @@ class TestUserApi(unittest.TestCase):
 
     def test_create_document(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token, \
-                patch("app.infra.services.google_drive_api.GoogleDriveApiService.create") as mock_upload_to_drive, \
-                patch(
-                    "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token") as mock_get_oauth_token:
+            patch("app.infra.services.google_drive_api.GoogleDriveApiService.create") as mock_upload_to_drive, \
+            patch(
+            "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token") \
+                as mock_get_oauth_token:
             mock_token.return_value = TokenData(email=self.user.email)
             mock_get_oauth_token.return_value = Credentials(
                 token="<access_token>",
@@ -151,9 +168,10 @@ class TestUserApi(unittest.TestCase):
 
     def test_update_document_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token, \
-                patch("app.infra.services.google_drive_api.GoogleDriveApiService.update") as mock_update_file_drive, \
-                patch(
-                    "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token") as mock_get_oauth_token:
+            patch("app.infra.services.google_drive_api.GoogleDriveApiService.update") as mock_update_file_drive, \
+            patch(
+            "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token") \
+                as mock_get_oauth_token:
             mock_token.return_value = TokenData(email=self.user.email)
             mock_get_oauth_token.return_value = Credentials(
                 token="<access_token>",
@@ -187,9 +205,10 @@ class TestUserApi(unittest.TestCase):
 
     def test_delele_document_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token, \
-                patch("app.infra.services.google_drive_api.GoogleDriveApiService.delete") as mock_delete_file_drive, \
-                patch(
-                    "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token") as mock_get_oauth_token:
+            patch("app.infra.services.google_drive_api.GoogleDriveApiService.delete") as mock_delete_file_drive, \
+            patch(
+            "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token") \
+                as mock_get_oauth_token:
             mock_token.return_value = TokenData(email=self.user.email)
             mock_get_oauth_token.return_value = Credentials(
                 token="<access_token>",
@@ -206,6 +225,17 @@ class TestUserApi(unittest.TestCase):
                     "name": "Updated",
                     "thumbnailLink": "null",
                 })
+
+            r = self.client.delete(
+                f"/api/v1/documents/{self.document2.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 400
+            assert r.json().get("detail") == "Không thể xóa tài liệu có công việc đang đính kèm."
+
+            GeneralTaskModel.objects(id=self.general_task.id).delete()
 
             r = self.client.delete(
                 f"/api/v1/documents/{self.document2.id}",
