@@ -11,7 +11,7 @@ class GeneralTaskRepository:
     def __init__(self):
         pass
 
-    def create(self, general_task: GeneralTaskInDB, attachments: List[str]) -> GeneralTaskModel:
+    def create(self, general_task: GeneralTaskInDB, attachments: Optional[List[str]] = []) -> GeneralTaskModel:
         """
         Create new general_task in db
         :param general_task:
@@ -42,11 +42,16 @@ class GeneralTaskRepository:
 
     def update(self, id: ObjectId, data: Union[GeneralTaskInUpdateTime, Dict[str, Any]]) -> bool:
         try:
-            data = data.model_dump(exclude_none=True) if isinstance(
+            attachments = data.attachments
+            data = data.model_dump(exclude_none=True, exclude={"attachments"}) if isinstance(
                 data, GeneralTaskInUpdateTime) else data
+            if isinstance(attachments, List):
+                data["attachments"] = [ObjectId(id) for id in attachments]
+            print(data)
             GeneralTaskModel.objects(id=id).update_one(**data, upsert=False)
             return True
-        except Exception:
+        except Exception as e:
+            print(e)
             return False
 
     def count(self, conditions: Dict[str, Union[str, bool, ObjectId]] = {}) -> int:

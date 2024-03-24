@@ -36,7 +36,7 @@ class GeneralTaskInDB(IDModelMixin, DateTimeModelMixin, GeneralTaskBase):
 
 
 class GeneralTaskInCreate(GeneralTaskBase):
-    attachments: Optional[List[str]] = []
+    attachments: Optional[List[str]] = None
 
 
 class GeneralTask(GeneralTaskBase, DateTimeModelMixin):
@@ -60,7 +60,7 @@ class GeneralTaskInUpdate(BaseEntity):
     role: Optional[str] = None
     label: Optional[list[str]] = None
     type: Optional[GeneralTaskType] = None
-    attachments: Optional[List[str]] = []
+    attachments: Optional[List[str]] = None
 
 
 class GeneralTaskInUpdateTime(GeneralTaskInUpdate):

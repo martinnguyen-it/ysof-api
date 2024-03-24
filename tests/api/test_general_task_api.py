@@ -24,7 +24,7 @@ class TestUserApi(unittest.TestCase):
         connect("mongoenginetest", host="mongodb://localhost:1234",
                 mongo_client_class=mongomock.MongoClient)
         cls.client = TestClient(app)
-        cls.user = AdminModel(
+        cls.user: AdminModel = AdminModel(
             status="active",
             roles=[
                 "admin",
@@ -41,7 +41,7 @@ class TestUserApi(unittest.TestCase):
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
-        cls.document = DocumentModel(
+        cls.document: DocumentModel = DocumentModel(
             file_id="1hXt8WI3g6p8YUtN2gR35yA-gO_fE2vD3",
             mimeType="image/jpeg",
             name="Tài liệu học",
@@ -54,7 +54,22 @@ class TestUserApi(unittest.TestCase):
             session=3,
             author=cls.user
         ).save()
-        cls.general_task = GeneralTaskModel(
+        cls.general_task: GeneralTaskModel = GeneralTaskModel(
+            title="Cong viec dau nam",
+            short_desc="Cong viec",
+            description="Đoạn văn là một đơn vị văn bản nhỏ",
+            start_at="2024-03-22T08:26:54.965000Z",
+            end_at="2024-03-22T08:26:54.965000Z",
+            role="bhv",
+            type="common",
+            label=[
+                "string"
+            ],
+            session=3,
+            author=cls.user,
+            attachments=[cls.document]
+        ).save()
+        cls.general_task2: GeneralTaskModel = GeneralTaskModel(
             title="Cong viec dau nam",
             short_desc="Cong viec",
             description="Đoạn văn là một đơn vị văn bản nhỏ",
@@ -126,3 +141,68 @@ class TestUserApi(unittest.TestCase):
             assert doc.title == "Tai lieu"
             assert doc.role == "bhv"
             assert len(doc.attachments) == 1
+
+    def test_get_general_task_by_id(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.get(
+                f"/api/v1/general-tasks/{self.general_task.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            doc: GeneralTaskModel = GeneralTaskModel.objects(
+                id=r.json().get("id")).get()
+            assert doc.title == self.general_task.title
+            assert doc.role
+            assert doc.description
+
+    def test_get_all_general_tasks(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.get(
+                "/api/v1/general-tasks",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            resp = r.json()
+            assert resp["pagination"]["total"] == 2
+
+    def test_update_general_task_by_id(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.put(
+                f"/api/v1/general-tasks/{self.general_task.id}",
+                json={
+                    "title": "Updated"
+                },
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            doc: GeneralTaskModel = GeneralTaskModel.objects(
+                id=r.json().get("id")).get()
+            assert doc.title == "Updated"
+
+    def test_delete_general_task_by_id(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.delete(
+                f"/api/v1/general-tasks/{self.general_task2.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+
+            r = self.client.get(
+                f"/api/v1/general-tasks/{self.general_task2.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 404
