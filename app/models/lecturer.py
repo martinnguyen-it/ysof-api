@@ -3,8 +3,9 @@ from mongoengine import Document, StringField, DateTimeField, ListField, IntFiel
 
 
 class LecturerModel(Document):
+    title = StringField(required=True)
+    holy_name = StringField()
     full_name = StringField(required=True)
-    holy_name = StringField(required=True)
     avatar = StringField()
     information = StringField()
     contact = StringField()

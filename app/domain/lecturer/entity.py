@@ -6,7 +6,8 @@ from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixi
 
 
 class LecturerBase(BaseEntity):
-    holy_name: str
+    title: str
+    holy_name: Optional[str] = None
     full_name: str
     information: Optional[str] = None
     contact: Optional[str] = None
@@ -35,6 +36,7 @@ class ManyLecturersInResponse(BaseEntity):
 
 
 class LecturerInUpdate(BaseEntity):
+    title: Optional[str] = None
     full_name: Optional[str] = None
     holy_name: Optional[str] = None
     information: Optional[str] = None

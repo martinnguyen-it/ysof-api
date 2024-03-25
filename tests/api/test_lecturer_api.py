@@ -75,12 +75,14 @@ class TestUserApi(unittest.TestCase):
             password=get_password_hash(password="local@local"),
         ).save()
         cls.lecturer: LecturerModel = LecturerModel(
+            title="Cha",
             holy_name="Phanxico",
             full_name="Nguyen Van A",
             information="string",
             contact="string"
         ).save()
         cls.lecturer2: LecturerModel = LecturerModel(
+            title="Nhóm",
             holy_name="Phanxico",
             full_name="Nguyen Van A",
             information="string",
@@ -97,6 +99,7 @@ class TestUserApi(unittest.TestCase):
             r = self.client.post(
                 "/api/v1/lecturers",
                 json={
+                    "title": "Sơ",
                     "holy_name": "string",
                     "full_name": "string",
                     "information": "string",
@@ -114,6 +117,7 @@ class TestUserApi(unittest.TestCase):
             r = self.client.post(
                 "/api/v1/lecturers",
                 json={
+                    "title": "Cha",
                     "holy_name": "Jose",
                     "full_name": "Tim",
                     "information": "string",
@@ -127,6 +131,7 @@ class TestUserApi(unittest.TestCase):
             assert r.status_code == 200
             doc: LecturerModel = LecturerModel.objects(
                 id=r.json().get("id")).get()
+            assert doc.title == "Cha"
             assert doc.holy_name == "Jose"
             assert doc.full_name == "Tim"
 
