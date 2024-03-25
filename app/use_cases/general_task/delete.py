@@ -40,7 +40,7 @@ class DeleteGeneralTaskUseCase(use_case.UseCase):
             return response_object.ResponseFailure.build_not_found_error("Tài liệu không tồn tại")
         if general_task.role not in req_object.admin_roles and \
                 not any(role in SUPER_ADMIN for role in req_object.admin_roles):
-            return response_object.ResponseFailure.build_not_found_error("Bạn không có quyền sửa")
+            return response_object.ResponseFailure.build_not_found_error("Bạn không có quyền")
 
         try:
             self.general_task_repository.delete(id=general_task.id)

@@ -26,7 +26,7 @@ class TestUserApi(unittest.TestCase):
         cls.user: AdminModel = AdminModel(
             status="active",
             roles=[
-                "bhv",
+                "admin",
             ],
             holy_name="Martin",
             phone_number=[
@@ -37,6 +37,23 @@ class TestUserApi(unittest.TestCase):
                 3
             ],
             email="user@example.com",
+            full_name="Nguyen Thanh Tam",
+            password=get_password_hash(password="local@local"),
+        ).save()
+        cls.user1: AdminModel = AdminModel(
+            status="active",
+            roles=[
+                "bhv",
+            ],
+            holy_name="Martin",
+            phone_number=[
+                "0123456789"
+            ],
+            current_season=3,
+            seasons=[
+                3
+            ],
+            email="user1@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
@@ -63,12 +80,18 @@ class TestUserApi(unittest.TestCase):
             information="string",
             contact="string"
         ).save()
+        cls.lecturer2: LecturerModel = LecturerModel(
+            holy_name="Phanxico",
+            full_name="Nguyen Van A",
+            information="string",
+            contact="string"
+        ).save()
 
     @classmethod
     def tearDownClass(cls):
         disconnect()
 
-    def test_create_general_task(self):
+    def test_create_lecturer(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user2.email)
             r = self.client.post(
@@ -87,7 +110,7 @@ class TestUserApi(unittest.TestCase):
             assert r.status_code == 403
             assert r.json().get("detail") == "Bạn không có quyền"
 
-            mock_token.return_value = TokenData(email=self.user.email)
+            mock_token.return_value = TokenData(email=self.user1.email)
             r = self.client.post(
                 "/api/v1/lecturers",
                 json={
@@ -109,7 +132,7 @@ class TestUserApi(unittest.TestCase):
 
     def test_get_all_lecturers(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
-            mock_token.return_value = TokenData(email=self.user.email)
+            mock_token.return_value = TokenData(email=self.user2.email)
             r = self.client.get(
                 "/api/v1/lecturers",
                 headers={
@@ -119,3 +142,63 @@ class TestUserApi(unittest.TestCase):
             assert r.status_code == 200
             resp = r.json()
             assert resp["pagination"]["total"] == 2
+
+    def test_get_lecturer_by_id(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user2.email)
+            r = self.client.get(
+                f"/api/v1/lecturers/{self.lecturer.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            doc: LecturerModel = LecturerModel.objects(
+                id=r.json().get("id")).get()
+            assert doc.holy_name == self.lecturer.holy_name
+            assert doc.full_name == self.lecturer.full_name
+
+    def test_update_lecturer_by_id(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user1.email)
+            r = self.client.put(
+                f"/api/v1/lecturers/{self.lecturer.id}",
+                json={
+                    "full_name": "Updated"
+                },
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            doc: LecturerModel = LecturerModel.objects(
+                id=r.json().get("id")).get()
+            assert doc.full_name == "Updated"
+
+    def test_delete_lecturer_by_id(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user1.email)
+            r = self.client.delete(
+                f"/api/v1/lecturers/{self.lecturer2.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 403
+
+            mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.delete(
+                f"/api/v1/lecturers/{self.lecturer2.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+
+            r = self.client.get(
+                f"/api/v1/lecturers/{self.lecturer2.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 404
