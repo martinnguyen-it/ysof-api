@@ -7,7 +7,7 @@ from app.domain.lecturer.entity import (Lecturer, LecturerInCreate, ManyLecturer
 from app.domain.shared.enum import AdminRole, Sort
 from app.infra.security.security_service import authorization, get_current_active_admin
 from app.shared.decorator import response_decorator
-# from app.use_cases.lecturer.list import ListLecturersUseCase, ListLecturersRequestObject
+from app.use_cases.lecturer.list import ListLecturersUseCase, ListLecturersRequestObject
 # from app.use_cases.lecturer.update import UpdateLecturerUseCase, UpdateLecturerRequestObject
 # from app.use_cases.lecturer.get import (
 #     GetLecturerRequestObject,
@@ -61,40 +61,34 @@ def create_lecturer(
     return response
 
 
-# @router.get(
-#     "",
-#     response_model=ManyLecturersInResponse,
-# )
-# @response_decorator()
-# def get_list_lecturers(
-#         list_lecturers_use_case: ListLecturersUseCase = Depends(
-#             ListLecturersUseCase),
-#         page_index: Annotated[int, Query(title="Page Index")] = 1,
-#         page_size: Annotated[int, Query(title="Page size")] = 100,
-#         search: Optional[str] = Query(None, title="Search"),
-#         label: Optional[list[str]] = Query(None, title="Labels"),
-#         roles: Optional[list[str]] = Query(None, title="Roles"),
-#         sort: Optional[Sort] = Sort.DESC,
-#         sort_by: Optional[str] = 'id',
-#         current_admin: AdminModel = Depends(get_current_active_admin)
-# ):
-#     annotations = {}
-#     for base in reversed(Lecturer.__mro__):
-#         annotations.update(getattr(base, '__annotations__', {}))
-#     if sort_by not in annotations:
-#         raise HTTPException(
-#             status_code=400, detail=f"Invalid sort_by: {sort_by}")
-#     sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
+@router.get(
+    "",
+    response_model=ManyLecturersInResponse,
+)
+@response_decorator()
+def get_list_lecturers(
+        list_lecturers_use_case: ListLecturersUseCase = Depends(
+            ListLecturersUseCase),
+        page_index: Annotated[int, Query(title="Page Index")] = 1,
+        page_size: Annotated[int, Query(title="Page size")] = 100,
+        search: Optional[str] = Query(None, title="Search"),
+        sort: Optional[Sort] = Sort.DESC,
+        sort_by: Optional[str] = 'id',
+):
+    annotations = {}
+    for base in reversed(Lecturer.__mro__):
+        annotations.update(getattr(base, '__annotations__', {}))
+    if sort_by not in annotations:
+        raise HTTPException(
+            status_code=400, detail=f"Invalid sort_by: {sort_by}")
+    sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
 
-#     req_object = ListLecturersRequestObject.builder(author=current_admin,
-#                                                        page_index=page_index,
-#                                                        page_size=page_size,
-#                                                        search=search,
-#                                                        label=label,
-#                                                        roles=roles,
-#                                                        sort=sort_query)
-#     response = list_lecturers_use_case.execute(request_object=req_object)
-#     return response
+    req_object = ListLecturersRequestObject.builder(page_index=page_index,
+                                                    page_size=page_size,
+                                                    search=search,
+                                                    sort=sort_query)
+    response = list_lecturers_use_case.execute(request_object=req_object)
+    return response
 
 
 # @router.put(

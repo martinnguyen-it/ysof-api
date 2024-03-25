@@ -62,7 +62,7 @@ class TestUserApi(unittest.TestCase):
             full_name="Nguyen Van A",
             information="string",
             contact="string"
-        )
+        ).save()
 
     @classmethod
     def tearDownClass(cls):
@@ -106,3 +106,16 @@ class TestUserApi(unittest.TestCase):
                 id=r.json().get("id")).get()
             assert doc.holy_name == "Jose"
             assert doc.full_name == "Tim"
+
+    def test_get_all_lecturers(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.get(
+                "/api/v1/lecturers",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            resp = r.json()
+            assert resp["pagination"]["total"] == 2

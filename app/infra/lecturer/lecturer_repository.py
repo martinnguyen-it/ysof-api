@@ -58,7 +58,7 @@ class LecturerRepository:
     def list(self,
              page_index: int = 1,
              page_size: int = 20,
-             match_pipeline: Optional[List[Dict[str, Any]]] = None,
+             match_pipeline: Optional[Dict[str, Any]] = None,
              sort: Optional[Dict[str, int]] = None,
              ) -> List[LecturerModel]:
         pipeline = [
@@ -68,7 +68,7 @@ class LecturerRepository:
         ]
 
         if match_pipeline is not None:
-            pipeline.extend(match_pipeline)
+            pipeline.append(match_pipeline)
 
         try:
             docs = LecturerModel.objects().aggregate(pipeline)
@@ -77,12 +77,12 @@ class LecturerRepository:
             return []
 
     def count_list(self,
-                   match_pipeline: Optional[List[Dict[str, Any]]] = None,
+                   match_pipeline: Optional[Dict[str, Any]] = None,
                    ) -> int:
         pipeline = []
 
         if match_pipeline is not None:
-            pipeline.extend(match_pipeline)
+            pipeline.append(match_pipeline)
         pipeline.append({"$count": "lecturer_count"})
 
         try:
