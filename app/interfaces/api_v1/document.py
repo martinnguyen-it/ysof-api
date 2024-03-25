@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException, UploadFile, File
 from typing import Annotated, Optional
 
-from app.domain.admin.entity import AdminInDB
 from app.domain.document.entity import Document, DocumentInCreate, ManyDocumentsInResponse, \
     DocumentInUpdate, DocumentInCreatePayload
 from app.domain.shared.enum import Sort
@@ -53,7 +52,7 @@ def create_document(
         file: UploadFile = File(...),
         create_document_use_case: CreateDocumentUseCase = Depends(
             CreateDocumentUseCase),
-        current_admin: AdminInDB = Depends(get_current_active_admin),
+        current_admin: AdminModel = Depends(get_current_active_admin),
         google_drive_service: GoogleDriveApiService = Depends(
             GoogleDriveApiService)
 ):

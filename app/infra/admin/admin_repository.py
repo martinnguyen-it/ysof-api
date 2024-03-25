@@ -4,8 +4,7 @@ from mongoengine import QuerySet, DoesNotExist
 from bson import ObjectId
 
 from app.models.admin import AdminModel
-from app.domain.admin.entity import AdminInDB, AdminInCreate, AdminInUpdate
-from app.domain.shared.enum import AdminRole
+from app.domain.admin.entity import AdminInDB, AdminInUpdate
 
 
 class AdminRepository:
@@ -57,7 +56,8 @@ class AdminRepository:
 
     def update(self, id: ObjectId, data: Union[AdminInUpdate, Dict[str, Any]]) -> bool:
         try:
-            data = data.model_dump(exclude_none=True) if isinstance(data, AdminInUpdate) else data
+            data = data.model_dump(exclude_none=True) if isinstance(
+                data, AdminInUpdate) else data
             AdminModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception:

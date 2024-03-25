@@ -47,7 +47,6 @@ class GeneralTaskRepository:
                 data, GeneralTaskInUpdateTime) else data
             if isinstance(attachments, List):
                 data["attachments"] = [ObjectId(id) for id in attachments]
-            print(data)
             GeneralTaskModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception as e:

@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from app.interfaces.api_v1.api import api_router
+from app.interfaces.api import api_router
 from app.config import settings, database
 from app.interfaces.error_handler import (
     ApplicationLevelException,
@@ -28,6 +28,8 @@ app = FastAPI(
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 # app startup handler
+
+
 @app.on_event("startup")
 def startup():
     database.connect()

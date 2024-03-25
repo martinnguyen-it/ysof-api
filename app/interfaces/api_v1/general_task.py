@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException
 from typing import Annotated, Optional
 
-from app.domain.admin.entity import AdminInDB
 from app.domain.general_task.entity import (GeneralTask, GeneralTaskInCreate, ManyGeneralTasksInResponse,
                                             GeneralTaskInUpdate)
 from app.domain.shared.enum import Sort
@@ -52,7 +51,7 @@ def create_general_task(
                                             title="GeneralTask In Create payload"),
         create_general_task_use_case: CreateGeneralTaskUseCase = Depends(
             CreateGeneralTaskUseCase),
-        current_admin: AdminInDB = Depends(get_current_active_admin),
+        current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     if payload.role not in current_admin.roles:
         authorization(current_admin, SUPER_ADMIN)

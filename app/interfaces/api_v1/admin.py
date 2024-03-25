@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException
-from typing import Annotated, Union, Optional
+from typing import Annotated, Optional
 from app.domain.admin.entity import Admin, AdminInCreate, AdminInDB, ManyAdminsInResponse, AdminInUpdate
-from app.domain.shared.enum import AdminRole, Sort
+from app.domain.shared.enum import Sort
 from app.infra.security.security_service import get_current_active_admin, authorization
 from app.shared.decorator import response_decorator
 from app.use_cases.admin.list import ListAdminsUseCase, ListAdminsRequestObject
@@ -15,13 +15,14 @@ from app.use_cases.admin.create import (
     CreateAdminUseCase,
 )
 from app.shared.constant import SUPER_ADMIN
+from app.models.admin import AdminModel
 
 router = APIRouter()
 
 
 @router.get("/me", response_model=Admin)
 async def get_me(
-        current_admin: AdminInDB = Depends(get_current_active_admin),
+        current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     """
     get current admin data
@@ -56,7 +57,7 @@ def create_admin(
         payload: AdminInCreate = Body(..., title="Admin In Create payload"),
         create_admin_use_case: CreateAdminUseCase = Depends(
             CreateAdminUseCase),
-        current_admin: AdminInDB = Depends(get_current_active_admin),
+        current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     authorization(current_admin, SUPER_ADMIN)
     req_object = CreateAdminRequestObject.builder(payload=payload)
@@ -102,7 +103,7 @@ def update_admin(
         payload: AdminInUpdate = Body(..., title="Admin updated payload"),
         update_admin_use_case: UpdateAdminUseCase = Depends(
             UpdateAdminUseCase),
-        current_admin: AdminInDB = Depends(get_current_active_admin),
+        current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     if not str(current_admin.id) == id:
         authorization(current_admin, SUPER_ADMIN)

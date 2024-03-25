@@ -8,7 +8,7 @@ from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixi
 
 
 def transform_email(email: str) -> str:
-    return email.lower()
+    return email.lower().strip()
 
 
 class Address(BaseModel):
@@ -84,6 +84,7 @@ class AdminInUpdate(BaseEntity):
     date_of_birth: Optional[datetime] = None
     facebook: Optional[str] = None
     status: Optional[AccountStatus] = None
+    _extract_email = field_validator("email", mode="before")(transform_email)
 
 
 class AdminInUpdateTime(BaseEntity):
