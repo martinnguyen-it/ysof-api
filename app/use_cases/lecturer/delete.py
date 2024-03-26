@@ -31,7 +31,7 @@ class DeleteLecturerUseCase(use_case.UseCase):
         lecturer: Optional[LecturerModel] = self.lecturer_repository.get_by_id(
             req_object.id)
         if not lecturer:
-            return response_object.ResponseFailure.build_not_found_error("Tài liệu không tồn tại")
+            return response_object.ResponseFailure.build_not_found_error("Giảng viên không tồn tại")
         try:
             self.lecturer_repository.delete(id=lecturer.id)
             return {"success": True}

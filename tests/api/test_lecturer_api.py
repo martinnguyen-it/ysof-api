@@ -1,4 +1,3 @@
-import app.interfaces.api_v1
 import unittest
 from unittest.mock import patch
 
