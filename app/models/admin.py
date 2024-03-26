@@ -1,5 +1,12 @@
 import datetime
-from mongoengine import Document, StringField, EmailField, DateTimeField, ListField, IntField, DictField
+from mongoengine import (Document, StringField, EmailField, DateTimeField, EmbeddedDocumentField,
+                         ListField, IntField, EmbeddedDocument)
+
+
+class Address(EmbeddedDocument):
+    current = StringField()
+    original = StringField()
+    diocese = StringField()
 
 
 class AdminModel(Document):
@@ -10,7 +17,7 @@ class AdminModel(Document):
     holy_name = StringField(required=True)
     phone_number = ListField(StringField())
     password = StringField(required=True)
-    address = DictField()
+    address = EmbeddedDocumentField(Address)
     date_of_birth = DateTimeField()
     facebook = StringField()
     current_season = IntField()

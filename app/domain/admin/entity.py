@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List
-from pydantic import ConfigDict, EmailStr, field_validator, BaseModel
+from pydantic import ConfigDict, EmailStr, field_validator
 
 from app.config import settings
 from app.domain.shared.enum import AdminRole, AccountStatus
@@ -11,10 +11,11 @@ def transform_email(email: str) -> str:
     return email.lower().strip()
 
 
-class Address(BaseModel):
+class Address(BaseEntity):
     current: Optional[str] = None
     original: Optional[str] = None
     diocese: Optional[str] = None
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AdminBase(BaseEntity):
