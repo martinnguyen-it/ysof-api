@@ -1,39 +1,39 @@
 default_language_version:
-  python: python3.9
+  python: python3.10
 
 repos:
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v2.3.0
-  hooks:
-    - id: check-yaml
-    - id: end-of-file-fixer
-    - id: trailing-whitespace
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
 
-- repo: https://github.com/psf/black
-  rev: 20.8b1
-  hooks:
-    - id: black
-      exclude: '.json|.vscode/.*'
-      args: [--target-version, py37]
-      additional_dependencies: ['click==8.0.4']
+  - repo: https://github.com/psf/black
+    rev: 20.8b1
+    hooks:
+      - id: black
+        exclude: ".json|.vscode/.*"
+        args: [--target-version, py37]
+        additional_dependencies: ["click==8.0.4"]
 
-- repo: local
-  hooks:
-    - id: ruff
-      name: ruff
-      entry: ruff check
-      language: system
-      args: [--fix, '--exit-non-zero-on-fix']
-      exclude: 'Dockerfile|.txt|.env-.*|tests/.*|.sh|.json|.yml|.yaml|.*ignore|Pipfile.*|.*.dockerfile|.*.ini|README.md|pylintrc|.*.toml|devops|scripts|.*.xlsx'
-    # -   id: pylint
-    #     name: pylint
-    #     entry: pylint
-    #     language: system
-    #     types: [python]
-    #     args:
-    #       [
-    #         "-rn", # Only display messages
-    #         "-sn", # Don't display the score
-    #         "--rcfile=pylintrc", # Link to your config file
-    #         "--load-plugins=pylint.extensions.docparams", # Load an extension
-    #       ]
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff
+        entry: ruff check
+        language: system
+        args: [--fix, "--exit-non-zero-on-fix"]
+        exclude: "Dockerfile|.txt|.env-.*|tests/.*|.sh|.json|.yml|.yaml|.*ignore|Pipfile.*|.*.dockerfile|.*.ini|README.md|pylintrc|.*.toml|devops|scripts|.*.xlsx"
+      # -   id: pylint
+      #     name: pylint
+      #     entry: pylint
+      #     language: system
+      #     types: [python]
+      #     args:
+      #       [
+      #         "-rn", # Only display messages
+      #         "-sn", # Don't display the score
+      #         "--rcfile=pylintrc", # Link to your config file
+      #         "--load-plugins=pylint.extensions.docparams", # Load an extension
+      #       ]
