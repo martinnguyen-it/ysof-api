@@ -1,3 +1,4 @@
+import app.interfaces.api_v1
 import unittest
 from unittest.mock import patch
 
@@ -81,6 +82,32 @@ class TestUserApi(unittest.TestCase):
             information="Thạc sĩ thần học",
             contact="Phone: 012345657"
         ).save()
+        cls.subject: SubjectModel = SubjectModel(
+            title="Môn học 1",
+            date="2024-03-27T14:40:51.100Z",
+            subdivision="string",
+            code="string",
+            question_url="string",
+            zoom={"meeting_id": 0, "pass_code": "string", "link": "string"},
+            documents_url=[
+                "string"
+            ],
+            lecturer=cls.lecturer,
+            session=3
+        ).save()
+        cls.subject2: SubjectModel = SubjectModel(
+            title="Môn học 2",
+            date="2024-03-27T14:40:51.100Z",
+            subdivision="string",
+            code="string",
+            question_url="string",
+            zoom={"meeting_id": 0, "pass_code": "string", "link": "string"},
+            documents_url=[
+                "string"
+            ],
+            lecturer=cls.lecturer,
+            session=3
+        ).save()
 
     @classmethod
     def tearDownClass(cls):
@@ -144,3 +171,76 @@ class TestUserApi(unittest.TestCase):
                 id=r.json().get("id")).get()
             assert doc.title == "Học hỏi"
             assert doc.lecturer.full_name == self.lecturer.full_name
+
+    def test_get_all_subjects(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.get(
+                "/api/v1/subjects",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            resp = r.json()
+            assert len(resp) == 2
+
+    def test_get_subject_by_id(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user2.email)
+            r = self.client.get(
+                f"/api/v1/subjects/{self.subject.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            doc: SubjectModel = SubjectModel.objects(
+                id=r.json().get("id")).get()
+            assert doc.title == self.subject.title
+            assert doc.code == self.subject.code
+
+    def test_update_subject_by_id(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user1.email)
+            r = self.client.put(
+                f"/api/v1/subjects/{self.subject.id}",
+                json={
+                    "title": "Updated"
+                },
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            doc: SubjectModel = SubjectModel.objects(
+                id=r.json().get("id")).get()
+            assert doc.title == "Updated"
+
+    def test_delete_subject_by_id(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user2.email)
+            r = self.client.delete(
+                f"/api/v1/subjects/{self.subject2.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 403
+
+            mock_token.return_value = TokenData(email=self.user1.email)
+            r = self.client.delete(
+                f"/api/v1/subjects/{self.subject2.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+
+            r = self.client.get(
+                f"/api/v1/subjects/{self.subject2.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 404

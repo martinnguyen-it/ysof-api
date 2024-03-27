@@ -55,19 +55,15 @@ class SubjectRepository:
             return 0
 
     def list(self,
-             page_index: int,
-             page_size: int,
              match_pipeline: Optional[List[Dict[str, Any]]] = None,
              sort: Optional[Dict[str, int]] = None,
              ) -> List[SubjectModel]:
         pipeline = [
             {"$sort": sort if sort else {"created_at": -1}},
-            {"$skip": page_size * (page_index - 1)},
-            {"$limit": page_size}
         ]
 
         if match_pipeline is not None:
-            pipeline.extend(match_pipeline)
+            pipeline.append(match_pipeline)
 
         try:
             docs = SubjectModel.objects().aggregate(pipeline)
@@ -81,7 +77,7 @@ class SubjectRepository:
         pipeline = []
 
         if match_pipeline is not None:
-            pipeline.extend(match_pipeline)
+            pipeline.append(match_pipeline)
         pipeline.append({"$count": "subject_count"})
 
         try:

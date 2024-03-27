@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 from pydantic import ConfigDict
 
-from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin, Pagination
+from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin
 from app.domain.lecturer.field import PydanticLecturerType
 from app.domain.lecturer.entity import Lecturer
 
@@ -41,12 +41,7 @@ class Subject(SubjectBase, DateTimeModelMixin):
     session: int
 
 
-class ManySubjectsInResponse(BaseEntity):
-    pagination: Optional[Pagination] = None
-    data: Optional[List[Subject]] = None
-
-
-class SubjectInUpdate(BaseEntity):
+class SubjectBaseUpdate(BaseEntity):
     title: str | None = None
     date: datetime | None = None
     subdivision: str | None = None
@@ -54,8 +49,12 @@ class SubjectInUpdate(BaseEntity):
     question_url: Optional[str] = None
     zoom: Optional[Zoom] = None
     documents_url: list[str] | None = None
+
+
+class SubjectInUpdate(SubjectBaseUpdate):
     lecturer: str | None = None
 
 
-class SubjectInUpdateTime(BaseEntity):
+class SubjectInUpdateTime(SubjectBaseUpdate):
+    lecturer: PydanticLecturerType | None = None
     updated_at: datetime = datetime.now()
