@@ -1,3 +1,4 @@
+from app.shared import response_object
 from fastapi import APIRouter, Body, Depends,  Query, HTTPException, Path
 from typing import Optional
 
@@ -98,7 +99,14 @@ def update_subject(
             UpdateSubjectUseCase),
         current_admin: AdminModel = Depends(get_current_active_admin),
 ):
-    authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV])
+    authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV, AdminRole.BKT])
+    if AdminRole.BKT in current_admin.roles and AdminRole.BHV not in current_admin.roles:
+        print("11111111111111111")
+        if payload.zoom is None:
+            return response_object.ResponseFailure.build_parameters_error(
+                message="Vui lòng điền thông tin zoom"
+            )
+        payload = SubjectInUpdate(zoom=payload.zoom)
     req_object = UpdateSubjectRequestObject.builder(id=id, payload=payload)
     response = update_subject_use_case.execute(request_object=req_object)
     return response
