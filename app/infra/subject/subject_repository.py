@@ -92,3 +92,10 @@ class SubjectRepository:
             return True
         except Exception:
             return False
+
+    def find_one(self, conditions: Dict[str, Union[str, bool, ObjectId]]) -> Optional[SubjectModel]:
+        try:
+            doc = SubjectModel._get_collection().find_one(conditions)
+            return SubjectModel.from_mongo(doc) if doc else None
+        except Exception:
+            return None

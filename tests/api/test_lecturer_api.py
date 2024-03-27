@@ -13,6 +13,7 @@ from app.infra.security.security_service import (
     get_password_hash,
 )
 from app.models.lecturer import LecturerModel
+from app.models.subject import SubjectModel
 
 
 class TestUserApi(unittest.TestCase):
@@ -86,6 +87,19 @@ class TestUserApi(unittest.TestCase):
             full_name="Nguyen Van A",
             information="string",
             contact="string"
+        ).save()
+        cls.subject: SubjectModel = SubjectModel(
+            title="Môn học 1",
+            date="2024-03-27T14:40:51.100Z",
+            subdivision="string",
+            code="string",
+            question_url="string",
+            zoom={"meeting_id": 0, "pass_code": "string", "link": "string"},
+            documents_url=[
+                "string"
+            ],
+            lecturer=cls.lecturer,
+            session=3
         ).save()
 
     @classmethod
@@ -191,6 +205,15 @@ class TestUserApi(unittest.TestCase):
             assert r.status_code == 403
 
             mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.delete(
+                f"/api/v1/lecturers/{self.lecturer.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 400
+            assert "Không thể xóa" in r.json().get("detail")
+
             r = self.client.delete(
                 f"/api/v1/lecturers/{self.lecturer2.id}",
                 headers={
