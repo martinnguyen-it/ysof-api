@@ -66,7 +66,7 @@ class ListGeneralTasksUseCase(use_case.UseCase):
                                         ]},
                                     ]
                                 },
-                                {"session": settings.CURRENT_SEASON}
+                                {"season": settings.CURRENT_SEASON}
                             ]
                         }
                     ]

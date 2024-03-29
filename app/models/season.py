@@ -4,7 +4,7 @@ from mongoengine import Document, StringField, DateTimeField, BooleanField, IntF
 
 class SeasonModel(Document):
     title = StringField(required=True)
-    session = IntField(required=True, unique=True)
+    season = IntField(required=True, unique=True)
     is_current = BooleanField(required=True)
     description = StringField()
     academic_year = StringField()
@@ -31,7 +31,7 @@ class SeasonModel(Document):
 
     meta = {
         "collection": "Seasons",
-        "indexes": ["session", "is_current"],
+        "indexes": ["season", "is_current"],
         "allow_inheritance": True,
         "index_cls": False,
     }

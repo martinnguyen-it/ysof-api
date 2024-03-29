@@ -44,7 +44,7 @@ class CreateSubjectUseCase(use_case.UseCase):
         obj_in: SubjectInDB = SubjectInDB(
             **subject_in.model_dump(exclude={"lecturer"}),
             lecturer=lecturer,
-            session=settings.CURRENT_SEASON,
+            season=settings.CURRENT_SEASON,
         )
         subject: SubjectModel = self.subject_repository.create(
             subject=obj_in)

@@ -101,7 +101,6 @@ def update_subject(
 ):
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV, AdminRole.BKT])
     if AdminRole.BKT in current_admin.roles and AdminRole.BHV not in current_admin.roles:
-        print("11111111111111111")
         if payload.zoom is None:
             return response_object.ResponseFailure.build_parameters_error(
                 message="Vui lòng điền thông tin zoom"

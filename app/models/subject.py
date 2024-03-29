@@ -19,7 +19,7 @@ class SubjectModel(Document):
     documents_url = ListField(StringField())
     zoom = EmbeddedDocumentField(ZoomInfo)
 
-    session = IntField(required=True)
+    season = IntField(required=True)
     created_at = DateTimeField()
     updated_at = DateTimeField()
 

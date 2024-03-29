@@ -28,7 +28,7 @@ class DocumentBase(BaseEntity):
 class DocumentInDB(IDModelMixin, DateTimeModelMixin, DocumentBase):
     # https://docs.pydantic.dev/2.4/concepts/models/#arbitrary-class-instances
     author: PydanticAdminType
-    session: Optional[int] = None
+    season: Optional[int] = None
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -55,7 +55,7 @@ class Document(DocumentBase):
     """
     id: str
     author: AdminInDocument
-    session: int
+    season: int
     created_at: datetime
     updated_at: datetime
     webViewLink: Optional[str] = None

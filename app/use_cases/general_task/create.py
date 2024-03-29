@@ -52,7 +52,7 @@ class CreateGeneralTaskUseCase(use_case.UseCase):
 
         obj_in: GeneralTaskInDB = GeneralTaskInDB(
             **req_object.general_task_in.model_dump(exclude={"attachments"}),
-            session=settings.CURRENT_SEASON,
+            season=settings.CURRENT_SEASON,
             author=req_object.author
         )
         general_task: GeneralTaskModel = self.general_task_repository.create(

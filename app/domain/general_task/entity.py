@@ -30,7 +30,7 @@ class GeneralTaskBase(BaseEntity):
 class GeneralTaskInDB(IDModelMixin, DateTimeModelMixin, GeneralTaskBase):
     # https://docs.pydantic.dev/2.4/concepts/models/#arbitrary-class-instances
     author: PydanticAdminType
-    session: Optional[int] = None
+    season: Optional[int] = None
     attachments: Optional[List[PydanticDocumentType]] = None
     model_config = ConfigDict(from_attributes=True)
 
@@ -42,7 +42,7 @@ class GeneralTaskInCreate(GeneralTaskBase):
 class GeneralTask(GeneralTaskBase, DateTimeModelMixin):
     id: str
     author: AdminInGeneralTask
-    session: int
+    season: int
     attachments: Optional[List[Document]] = None
 
 

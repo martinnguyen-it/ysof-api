@@ -6,7 +6,7 @@ from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixi
 
 class SeasonBase(BaseEntity):
     title: str
-    session: int
+    season: int
     description: str | None = None
     academic_year: str | None = None
 

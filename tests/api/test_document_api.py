@@ -53,7 +53,7 @@ class TestUserApi(unittest.TestCase):
             label=[
                 "string"
             ],
-            session=3,
+            season=3,
             author=cls.user
         ).save()
         cls.document2 = DocumentModel(
@@ -66,7 +66,7 @@ class TestUserApi(unittest.TestCase):
             label=[
                 "string"
             ],
-            session=3,
+            season=3,
             author=cls.user
         ).save()
         cls.general_task: GeneralTaskModel = GeneralTaskModel(
@@ -80,7 +80,7 @@ class TestUserApi(unittest.TestCase):
             label=[
                 "string"
             ],
-            session=3,
+            season=3,
             author=cls.user,
             attachments=[cls.document2]
         ).save()

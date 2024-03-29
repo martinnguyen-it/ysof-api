@@ -38,7 +38,7 @@ class CreateDocumentUseCase(use_case.UseCase):
         document_in: DocumentInCreate = req_object.document_in
         obj_in: DocumentInDB = DocumentInDB(
             **document_in.model_dump(),
-            session=settings.CURRENT_SEASON,
+            season=settings.CURRENT_SEASON,
         )
         document: DocumentModel = self.document_repository.create(
             document=obj_in)

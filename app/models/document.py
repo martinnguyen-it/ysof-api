@@ -12,7 +12,7 @@ class DocumentModel(Document):
     type = StringField(required=True)
     description = StringField()
     label = ListField(StringField())
-    session = IntField(required=True)
+    season = IntField(required=True)
 
     author = ReferenceField("AdminModel", required=True)
 
@@ -38,7 +38,7 @@ class DocumentModel(Document):
 
     meta = {
         "collection": "Documents",
-        "indexes": ["file_id", "type", "session"],
+        "indexes": ["file_id", "type", "season"],
         "allow_inheritance": True,
         "index_cls": False,
     }

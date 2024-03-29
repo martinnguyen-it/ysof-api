@@ -15,7 +15,7 @@ class LecturerBase(BaseEntity):
 
 class LecturerInDB(IDModelMixin, DateTimeModelMixin, LecturerBase):
     avatar: Optional[str] = None
-    sessions: Optional[List[int]] = None
+    seasons: Optional[List[int]] = None
     # https://docs.pydantic.dev/2.4/concepts/models/#arbitrary-class-instances
     model_config = ConfigDict(from_attributes=True)
 
@@ -27,7 +27,7 @@ class LecturerInCreate(LecturerBase):
 class Lecturer(LecturerBase, DateTimeModelMixin):
     id: str
     avatar: Optional[str] = None
-    sessions: Optional[List[int]] = None
+    seasons: Optional[List[int]] = None
 
 
 class ManyLecturersInResponse(BaseEntity):

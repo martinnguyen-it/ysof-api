@@ -9,7 +9,7 @@ class GeneralTaskModel(Document):
     start_at = DateTimeField(required=True)
     end_at = DateTimeField(required=True)
 
-    session = IntField(required=True)
+    season = IntField(required=True)
     role = StringField(required=True)
     type = StringField(required=True)
     label = ListField(StringField())

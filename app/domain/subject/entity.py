@@ -26,7 +26,7 @@ class SubjectBase(BaseEntity):
 
 class SubjectInDB(IDModelMixin, DateTimeModelMixin, SubjectBase):
     lecturer: PydanticLecturerType
-    session: int
+    season: int
     # https://docs.pydantic.dev/2.4/concepts/models/#arbitrary-class-instances
     model_config = ConfigDict(from_attributes=True)
 
@@ -38,7 +38,7 @@ class SubjectInCreate(SubjectBase):
 class Subject(SubjectBase, DateTimeModelMixin):
     id: str
     lecturer: Lecturer
-    session: int
+    season: int
 
 
 class SubjectBaseUpdate(BaseEntity):

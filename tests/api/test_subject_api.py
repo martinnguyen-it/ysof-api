@@ -93,7 +93,7 @@ class TestUserApi(unittest.TestCase):
                 "string"
             ],
             lecturer=cls.lecturer,
-            session=3
+            season=3
         ).save()
         cls.subject2: SubjectModel = SubjectModel(
             title="Môn học 2",
@@ -106,7 +106,7 @@ class TestUserApi(unittest.TestCase):
                 "string"
             ],
             lecturer=cls.lecturer,
-            session=3
+            season=3
         ).save()
 
     @classmethod

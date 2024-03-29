@@ -9,7 +9,7 @@ class LecturerModel(Document):
     avatar = StringField()
     information = StringField()
     contact = StringField()
-    sessions = ListField(IntField())
+    seasons = ListField(IntField())
 
     created_at = DateTimeField()
     updated_at = DateTimeField()
