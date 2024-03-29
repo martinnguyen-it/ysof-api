@@ -68,7 +68,6 @@ def create_admin(
 @router.get(
     "",
     response_model=ManyAdminsInResponse,
-    dependencies=[Depends(get_current_active_admin)],
 )
 @response_decorator()
 def get_list_admins(
@@ -77,7 +76,9 @@ def get_list_admins(
         page_size: Annotated[int, Query(title="Page size")] = 100,
         search: Optional[str] = Query(None, title="Search"),
         sort: Optional[Sort] = Sort.DESC,
-        sort_by: Optional[str] = 'id'
+        sort_by: Optional[str] = 'id',
+        season: Optional[int] = None,
+        current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     annotations = {}
     for base in reversed(Admin.__mro__):
@@ -87,7 +88,11 @@ def get_list_admins(
             status_code=400, detail=f"Invalid sort_by: {sort_by}")
     sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
 
-    req_object = ListAdminsRequestObject.builder(page_index=page_index, page_size=page_size, search=search,
+    req_object = ListAdminsRequestObject.builder(page_index=page_index,
+                                                 page_size=page_size,
+                                                 search=search,
+                                                 current_admin=current_admin,
+                                                 season=season,
                                                  sort=sort_query)
     response = list_admins_use_case.execute(request_object=req_object)
     return response

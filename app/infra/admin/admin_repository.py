@@ -82,8 +82,10 @@ class AdminRepository:
         ]
 
         if match_pipeline is not None:
-            pipeline.append(match_pipeline)
-
+            pipeline.append({
+                "$match": match_pipeline
+            })
+        print(pipeline)
         try:
             docs = AdminModel.objects().aggregate(pipeline)
             return [AdminModel.from_mongo(doc) for doc in docs] if docs else []
@@ -96,7 +98,9 @@ class AdminRepository:
         pipeline = []
 
         if match_pipeline is not None:
-            pipeline.append(match_pipeline)
+            pipeline.append({
+                "$match": match_pipeline
+            })
         pipeline.append({"$count": "document_count"})
 
         try:
