@@ -65,4 +65,4 @@ class UpdateDocumentUseCase(use_case.UseCase):
 
         author: AdminInDB = AdminInDB.model_validate(document.author)
         return Document(**DocumentInDB.model_validate(document).model_dump(exclude=({"author"})),
-                        author=AdminInDocument(**author.model_dump()), active=not author.disabled())
+                        author=AdminInDocument(**author.model_dump(), active=author.active()))

@@ -63,6 +63,15 @@ def get_current_active_admin(
         admin: AdminModel = Depends(_get_current_admin),
 ) -> AdminModel:
     current_user = AdminInDB.model_validate(admin)
+    if not current_user.active():
+        raise forbidden_exception
+    return admin
+
+
+def get_current_admin(
+        admin: AdminModel = Depends(_get_current_admin),
+) -> AdminModel:
+    current_user = AdminInDB.model_validate(admin)
     if current_user.disabled():
         raise HTTPException(
             status_code=400, detail="Tài khoản của bạn đã bị khóa"

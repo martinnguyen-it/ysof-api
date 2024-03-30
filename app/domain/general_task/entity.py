@@ -13,7 +13,7 @@ class AdminInGeneralTask(BaseEntity):
     id: str
     full_name: str
     avatar: Optional[str] = None
-    active: Optional[bool] = True
+    active: Optional[bool] = False
 
 
 class GeneralTaskBase(BaseEntity):

@@ -1,3 +1,4 @@
+import app.interfaces.api_v1
 import math
 from typing import Optional, List, Dict, Any
 from fastapi import Depends
@@ -60,7 +61,7 @@ class ListAdminsUseCase(use_case.UseCase):
 
         is_super_admin = any(
             role in req_object.current_admin.roles for role in SUPER_ADMIN)
-        current_season: SeasonModel = self.season_repository.get_current_season()
+
         if req_object.season is not None:
             if ((is_super_admin and req_object.season != 0) or
                req_object.season in req_object.current_admin.seasons):
@@ -76,7 +77,7 @@ class ListAdminsUseCase(use_case.UseCase):
                 )
         else:
             match_pipeline = {**match_pipeline,
-                              "seasons": current_season.season}
+                              "seasons": req_object.current_admin.current_season}
 
         admins: List[AdminModel] = self.admin_repository.list(page_size=req_object.page_size,
                                                               page_index=req_object.page_index,

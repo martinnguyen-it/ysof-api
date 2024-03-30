@@ -61,7 +61,7 @@ class TestUserApi(unittest.TestCase):
             title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
             academic_year="2023-2024",
             season=2,
-            is_current=False
+            is_current=True
         ).save()
         cls.season2: SeasonModel = SeasonModel(
             title="Truong hoc",

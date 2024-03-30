@@ -14,6 +14,7 @@ from app.infra.security.security_service import (
 )
 from app.models.lecturer import LecturerModel
 from app.models.subject import SubjectModel
+from app.models.season import SeasonModel
 
 
 class TestUserApi(unittest.TestCase):
@@ -23,6 +24,12 @@ class TestUserApi(unittest.TestCase):
         connect("mongoenginetest", host="mongodb://localhost:1234",
                 mongo_client_class=mongomock.MongoClient)
         cls.client = TestClient(app)
+        cls.season: SeasonModel = SeasonModel(
+            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
+            academic_year="2023-2024",
+            season=3,
+            is_current=True
+        ).save()
         cls.user: AdminModel = AdminModel(
             status="active",
             roles=[

@@ -4,7 +4,8 @@ from typing import Optional
 
 from app.domain.subject.entity import Subject, SubjectInCreate, SubjectInUpdate
 from app.domain.shared.enum import AdminRole, Sort
-from app.infra.security.security_service import authorization, get_current_active_admin
+from app.infra.security.security_service import (authorization, get_current_active_admin,
+                                                 get_current_admin)
 from app.shared.decorator import response_decorator
 from app.use_cases.subject.list import ListSubjectsUseCase, ListSubjectsRequestObject
 from app.use_cases.subject.update import UpdateSubjectUseCase, UpdateSubjectRequestObject
@@ -25,7 +26,7 @@ router = APIRouter()
 
 @router.get(
     "/{subject_id}",
-    dependencies=[Depends(get_current_active_admin)],
+    dependencies=[Depends(get_current_admin)],
     response_model=Subject,
 )
 @response_decorator()
@@ -61,7 +62,7 @@ def create_subject(
 @router.get(
     "",
     response_model=list[Subject],
-    dependencies=[Depends(get_current_active_admin)]
+    dependencies=[Depends(get_current_admin)]
 )
 @response_decorator()
 def get_list_subjects(

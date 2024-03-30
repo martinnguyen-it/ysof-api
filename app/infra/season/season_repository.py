@@ -3,6 +3,7 @@ from typing import Optional, Dict, Union, List, Any
 from mongoengine import QuerySet, DoesNotExist
 from bson import ObjectId
 import pymongo
+from fastapi import HTTPException
 
 from app.models.season import SeasonModel
 from app.domain.season.entity import SeasonInDB, SeasonInUpdate, SeasonInUpdateTime
@@ -99,9 +100,15 @@ class SeasonRepository:
     def get_current_season(self) -> Optional[SeasonModel]:
         try:
             doc = SeasonModel._get_collection().find_one({"is_current": True})
-            return SeasonModel.from_mongo(doc) if doc else None
+            if not doc:
+                raise HTTPException(
+                    status_code=400, detail="Admin cần khởi tạo mùa"
+                )
+            return SeasonModel.from_mongo(doc)
         except Exception:
-            return None
+            raise HTTPException(
+                status_code=400, detail="Admin cần khởi tạo mùa"
+            )
 
     def bulk_update(self, data: Union[SeasonInUpdate, Dict[str, Any]], entities: List[SeasonModel]) -> bool:
         try:

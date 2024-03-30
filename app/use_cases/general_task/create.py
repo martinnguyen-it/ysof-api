@@ -61,10 +61,11 @@ class CreateGeneralTaskUseCase(use_case.UseCase):
 
         return GeneralTask(
             **GeneralTaskInDB.model_validate(general_task).model_dump(exclude=({"author", "attachments"})),
-            author=AdminInGeneralTask(**author.model_dump()), active=not author.disabled(),
+            author=AdminInGeneralTask(
+                **author.model_dump(), active=author.active()),
             attachments=[Document(**DocumentInDB.model_validate(doc).model_dump(exclude=({"author"})),
                                   author=AdminInDocument(
-                                      **AdminInDB.model_validate(doc.author).model_dump()),
-                                  active=not author.disabled())
+                                      **AdminInDB.model_validate(doc.author).model_dump(),
+                                  active=author.active()))
                          for doc in general_task.attachments]
         )

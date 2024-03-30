@@ -1,6 +1,6 @@
 from app.config import settings
 import math
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 from fastapi import Depends
 from app.shared import request_object, use_case
 from app.domain.document.entity import (AdminInDocument, Document, DocumentInDB,
@@ -11,7 +11,6 @@ from app.infra.document.document_repository import DocumentRepository
 from app.models.admin import AdminModel
 from app.domain.document.enum import DocumentType
 from app.domain.admin.entity import AdminInDB
-from app.domain.shared.enum import AdminRole
 from app.shared.constant import SUPER_ADMIN
 
 
@@ -111,8 +110,7 @@ class ListDocumentsUseCase(use_case.UseCase):
             author: AdminInDB = AdminInDB.model_validate(
                 doc.author)
             data.append(Document(**DocumentInDB.model_validate(doc).model_dump(exclude=({"author"})),
-                                 author=AdminInDocument(**author.model_dump()),
-                                 active=not author.disabled()))
+                                 author=AdminInDocument(**author.model_dump(), active=author.active())))
 
         return ManyDocumentsInResponse(
             pagination=Pagination(

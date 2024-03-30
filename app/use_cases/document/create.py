@@ -3,9 +3,8 @@ from fastapi import Depends
 
 from app.config import settings
 from app.domain.admin.entity import AdminInDB
-from app.infra.security.security_service import get_password_hash, generate_random_password
 from app.models.document import DocumentModel
-from app.shared import request_object, use_case, response_object
+from app.shared import request_object, use_case
 
 from app.domain.document.entity import Document, DocumentInCreate, DocumentInDB, AdminInDocument
 from app.infra.document.document_repository import DocumentRepository
@@ -45,4 +44,4 @@ class CreateDocumentUseCase(use_case.UseCase):
         author: AdminInDB = AdminInDB.model_validate(document.author)
 
         return Document(**DocumentInDB.model_validate(document).model_dump(exclude=({"author"})),
-                        author=AdminInDocument(**author.model_dump()), active=not author.disabled())
+                        author=AdminInDocument(**author.model_dump(), active=author.active()))

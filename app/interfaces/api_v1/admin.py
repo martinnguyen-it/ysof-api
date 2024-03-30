@@ -2,7 +2,8 @@ from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException
 from typing import Annotated, Optional
 from app.domain.admin.entity import Admin, AdminInCreate, AdminInDB, ManyAdminsInResponse, AdminInUpdate
 from app.domain.shared.enum import Sort
-from app.infra.security.security_service import get_current_active_admin, authorization
+from app.infra.security.security_service import (authorization, get_current_active_admin,
+                                                 get_current_admin)
 from app.shared.decorator import response_decorator
 from app.use_cases.admin.list import ListAdminsUseCase, ListAdminsRequestObject
 from app.use_cases.admin.update import UpdateAdminUseCase, UpdateAdminRequestObject
@@ -22,7 +23,7 @@ router = APIRouter()
 
 @router.get("/me", response_model=Admin)
 async def get_me(
-        current_admin: AdminModel = Depends(get_current_active_admin),
+        current_admin: AdminModel = Depends(get_current_admin),
 ):
     """
     get current admin data
@@ -34,7 +35,7 @@ async def get_me(
 
 @router.get(
     "/{admin_id}",
-    dependencies=[Depends(get_current_active_admin)],  # auth route
+    dependencies=[Depends(get_current_admin)],  # auth route
     response_model=Admin,
 )
 @response_decorator()
@@ -78,7 +79,7 @@ def get_list_admins(
         sort: Optional[Sort] = Sort.DESC,
         sort_by: Optional[str] = 'id',
         season: Optional[int] = None,
-        current_admin: AdminModel = Depends(get_current_active_admin),
+        current_admin: AdminModel = Depends(get_current_admin),
 ):
     annotations = {}
     for base in reversed(Admin.__mro__):
@@ -108,7 +109,7 @@ def update_admin(
         payload: AdminInUpdate = Body(..., title="Admin updated payload"),
         update_admin_use_case: UpdateAdminUseCase = Depends(
             UpdateAdminUseCase),
-        current_admin: AdminModel = Depends(get_current_active_admin),
+        current_admin: AdminModel = Depends(get_current_admin),
 ):
     if not str(current_admin.id) == id:
         authorization(current_admin, SUPER_ADMIN)

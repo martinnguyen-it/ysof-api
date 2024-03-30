@@ -1,10 +1,9 @@
 import unittest
 from mongoengine import connect, disconnect
-from unittest.mock import patch
 from fastapi.testclient import TestClient
 from app.main import app
 import mongomock
-from app.infra.security.security_service import get_password_hash, TokenData
+from app.infra.security.security_service import get_password_hash
 from app.models.admin import AdminModel
 
 

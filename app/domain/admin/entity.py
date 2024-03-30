@@ -2,9 +2,9 @@ from datetime import datetime
 from typing import Optional, List
 from pydantic import ConfigDict, EmailStr, field_validator
 
-from app.config import settings
 from app.domain.shared.enum import AdminRole, AccountStatus
 from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin, Pagination
+from app.infra.season.season_repository import SeasonRepository
 
 
 def transform_email(email: str) -> str:
@@ -46,7 +46,18 @@ class AdminInDB(IDModelMixin, DateTimeModelMixin, AdminBase):
         """
         return (self.status is AccountStatus.INACTIVE
                 or self.status is AccountStatus.DELETED
-                or self.current_season != settings.CURRENT_SEASON)
+                )
+
+    def active(self):
+        """_summary_
+        active when not disabled and is current season
+
+        Returns:
+            _type_: bool
+        """
+        return AdminRole.ADMIN in self.roles or \
+            ((not self.disabled()) and self.current_season ==
+             SeasonRepository().get_current_season().season)
 
 
 class AdminInCreate(BaseEntity):

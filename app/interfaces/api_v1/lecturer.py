@@ -5,7 +5,8 @@ from app.domain.lecturer.entity import (Lecturer, LecturerInCreate, LecturerInUp
                                         ManyLecturersInResponse)
 
 from app.domain.shared.enum import AdminRole, Sort
-from app.infra.security.security_service import authorization, get_current_active_admin
+from app.infra.security.security_service import (authorization, get_current_active_admin,
+                                                 get_current_admin)
 from app.shared.decorator import response_decorator
 from app.use_cases.lecturer.list import ListLecturersUseCase, ListLecturersRequestObject
 from app.use_cases.lecturer.update import UpdateLecturerUseCase, UpdateLecturerRequestObject
@@ -23,7 +24,7 @@ router = APIRouter()
 
 @router.get(
     "/{lecturer_id}",
-    dependencies=[Depends(get_current_active_admin)],
+    dependencies=[Depends(get_current_admin)],
     response_model=Lecturer,
 )
 @response_decorator()
@@ -61,7 +62,7 @@ def create_lecturer(
 @router.get(
     "",
     response_model=ManyLecturersInResponse,
-    dependencies=[Depends(get_current_active_admin)],
+    dependencies=[Depends(get_current_admin)],
 )
 @response_decorator()
 def get_list_lecturers(

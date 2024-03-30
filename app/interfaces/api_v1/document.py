@@ -4,7 +4,8 @@ from typing import Annotated, Optional
 from app.domain.document.entity import Document, DocumentInCreate, ManyDocumentsInResponse, \
     DocumentInUpdate, DocumentInCreatePayload
 from app.domain.shared.enum import Sort
-from app.infra.security.security_service import authorization, get_current_active_admin
+from app.infra.security.security_service import (authorization, get_current_active_admin,
+                                                 get_current_admin)
 from app.infra.services.google_drive_api import GoogleDriveApiService
 from app.shared.decorator import response_decorator
 from app.use_cases.document.list import ListDocumentsUseCase, ListDocumentsRequestObject
@@ -26,7 +27,7 @@ router = APIRouter()
 
 @router.get(
     "/{document_id}",
-    dependencies=[Depends(get_current_active_admin)],
+    dependencies=[Depends(get_current_admin)],
     response_model=Document,
 )
 @response_decorator()
@@ -85,7 +86,7 @@ def get_list_documents(
         roles: Optional[list[str]] = Query(None, title="Roles"),
         sort: Optional[Sort] = Sort.DESC,
         sort_by: Optional[str] = 'id',
-        current_admin: AdminModel = Depends(get_current_active_admin)
+        current_admin: AdminModel = Depends(get_current_admin)
 ):
     annotations = {}
     for base in reversed(Document.__mro__):

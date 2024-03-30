@@ -10,6 +10,7 @@ from app.infra.security.security_service import (
     TokenData,
     get_password_hash,
 )
+from app.models.season import SeasonModel
 
 
 class TestUserApi(unittest.TestCase):
@@ -19,6 +20,12 @@ class TestUserApi(unittest.TestCase):
         connect("mongoenginetest", host="mongodb://localhost:1234",
                 mongo_client_class=mongomock.MongoClient)
         cls.client = TestClient(app)
+        cls.season: SeasonModel = SeasonModel(
+            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
+            academic_year="2023-2024",
+            season=3,
+            is_current=True
+        ).save()
         cls.user = AdminModel(
             status="active",
             roles=[
@@ -84,6 +91,7 @@ class TestUserApi(unittest.TestCase):
                     "Authorization": "Bearer {}".format("xxx"),
                 },
             )
+            print(r.json())
             assert r.status_code == 200
             resp = r.json()
             assert resp.get("email") == "user@example.com"

@@ -4,7 +4,8 @@ from typing import Annotated, Optional
 from app.domain.general_task.entity import (GeneralTask, GeneralTaskInCreate, ManyGeneralTasksInResponse,
                                             GeneralTaskInUpdate)
 from app.domain.shared.enum import Sort
-from app.infra.security.security_service import authorization, get_current_active_admin
+from app.infra.security.security_service import (authorization, get_current_active_admin,
+                                                 get_current_admin)
 from app.shared.decorator import response_decorator
 from app.use_cases.general_task.list import ListGeneralTasksUseCase, ListGeneralTasksRequestObject
 from app.use_cases.general_task.update import UpdateGeneralTaskUseCase, UpdateGeneralTaskRequestObject
@@ -25,7 +26,7 @@ router = APIRouter()
 
 @router.get(
     "/{general_task_id}",
-    dependencies=[Depends(get_current_active_admin)],
+    dependencies=[Depends(get_current_admin)],
     response_model=GeneralTask,
 )
 @response_decorator()
@@ -76,7 +77,7 @@ def get_list_general_tasks(
         roles: Optional[list[str]] = Query(None, title="Roles"),
         sort: Optional[Sort] = Sort.DESC,
         sort_by: Optional[str] = 'id',
-        current_admin: AdminModel = Depends(get_current_active_admin)
+        current_admin: AdminModel = Depends(get_current_admin)
 ):
     annotations = {}
     for base in reversed(GeneralTask.__mro__):
