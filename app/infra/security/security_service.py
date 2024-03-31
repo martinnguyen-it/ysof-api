@@ -97,17 +97,18 @@ def create_access_token(data: TokenData, expires_delta: timedelta = None) -> str
         return encoded_jwt.decode("utf-8")
 
 
-def authorization(admin: AdminModel, roles: list[AdminRole]):
+def authorization(admin: AdminModel, roles: list[AdminRole], require_active: bool | None = False):
     """_summary_
 
     Args:
         admin (AdminInDB): current user from token
         roles (list[AdminRole]): accept roles
-
+        require_active (bool | None, optional): If True, account must be active. Defaults to False.
     Raises:
         forbidden_exception: _description_
     """
-    if not any(role in admin.roles for role in roles):
+    admin_in_db: AdminInDB = AdminInDB.model_validate(admin)
+    if not any(role in admin.roles for role in roles) or (require_active and not admin_in_db.active()):
         raise forbidden_exception
 
 

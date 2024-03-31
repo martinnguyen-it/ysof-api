@@ -35,11 +35,62 @@ class TestUserApi(unittest.TestCase):
             phone_number=[
                 "0123456789"
             ],
+            current_season=2,
+            seasons=[
+                2
+            ],
+            email="user@example.com",
+            full_name="Nguyen Thanh Tam",
+            password=get_password_hash(password="local@local"),
+        ).save()
+        cls.user1 = AdminModel(
+            status="active",
+            roles=[
+                "bdh",
+            ],
+            holy_name="Martin",
+            phone_number=[
+                "0123456789"
+            ],
+            current_season=3,
+            seasons=[
+                1, 2, 3
+            ],
+            email="user1@example.com",
+            full_name="Nguyen Thanh Tam",
+            password=get_password_hash(password="local@local"),
+        ).save()
+        cls.user2 = AdminModel(
+            status="active",
+            roles=[
+                "bdh",
+            ],
+            holy_name="Martin",
+            phone_number=[
+                "0123456789"
+            ],
+            current_season=2,
+            seasons=[
+                2
+            ],
+            email="user2@example.com",
+            full_name="Nguyen Thanh Tam",
+            password=get_password_hash(password="local@local"),
+        ).save()
+        cls.user3 = AdminModel(
+            status="active",
+            roles=[
+                "bhv",
+            ],
+            holy_name="Martin",
+            phone_number=[
+                "0123456789"
+            ],
             current_season=3,
             seasons=[
                 3
             ],
-            email="user@example.com",
+            email="user3@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
@@ -48,7 +99,7 @@ class TestUserApi(unittest.TestCase):
     def tearDownClass(cls):
         disconnect()
 
-    def test_create_user(self):
+    def test_create_admin(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user.email)
             r = self.client.post(
@@ -96,7 +147,7 @@ class TestUserApi(unittest.TestCase):
             resp = r.json()
             assert resp.get("email") == "user@example.com"
 
-    def test_get_user(self):
+    def test_get_admin(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user.email)
             r = self.client.get(
@@ -108,3 +159,45 @@ class TestUserApi(unittest.TestCase):
             assert r.status_code == 200
             resp = r.json()
             assert resp.get("email") == "user@example.com"
+
+    def test_update_admin(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            # test forbidden
+            mock_token.return_value = TokenData(email=self.user2.email)
+            r = self.client.put(
+                f"/api/v1/admins/{str(self.user3.id)}",
+                json={
+                    "full_name": "Updated"
+                },
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 403
+
+            # test success
+            mock_token.return_value = TokenData(email=self.user1.email)
+            r = self.client.put(
+                f"/api/v1/admins/{str(self.user3.id)}",
+                json={
+                    "full_name": "Updated"
+                },
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            resp = r.json()
+            assert resp.get("full_name") == "Updated"
+
+            mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.put(
+                f"/api/v1/admins/{str(self.user3.id)}",
+                json={
+                    "full_name": "Updated"
+                },
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200

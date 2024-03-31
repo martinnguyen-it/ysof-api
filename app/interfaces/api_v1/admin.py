@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException
 from typing import Annotated, Optional
-from app.domain.admin.entity import Admin, AdminInCreate, AdminInDB, ManyAdminsInResponse, AdminInUpdate
+from app.domain.admin.entity import (Admin, AdminInCreate, AdminInDB, AdminInUpdate,
+                                     AdminInUpdateMe, ManyAdminsInResponse)
 from app.domain.shared.enum import Sort
 from app.infra.security.security_service import (authorization, get_current_active_admin,
                                                  get_current_admin)
@@ -100,6 +101,23 @@ def get_list_admins(
 
 
 @router.put(
+    "/me",
+    response_model=Admin,
+)
+@response_decorator()
+def update_me(
+        payload: AdminInUpdateMe = Body(..., title="Admin update me payload"),
+        update_admin_use_case: UpdateAdminUseCase = Depends(
+            UpdateAdminUseCase),
+        current_admin: AdminModel = Depends(get_current_admin),
+):
+    req_object = UpdateAdminRequestObject.builder(
+        id=current_admin.id, payload=payload)
+    response = update_admin_use_case.execute(request_object=req_object)
+    return response
+
+
+@router.put(
     "/{id}",
     response_model=Admin,
 )
@@ -111,8 +129,24 @@ def update_admin(
             UpdateAdminUseCase),
         current_admin: AdminModel = Depends(get_current_admin),
 ):
-    if not str(current_admin.id) == id:
-        authorization(current_admin, SUPER_ADMIN)
+    """_summary_
+
+    Args:
+        id (str, optional): _description_. Defaults to Path(..., title="Admin Id").
+        payload (AdminInUpdate, optional): _description_. Defaults to Body(..., title="Admin updated payload").
+        update_admin_use_case (UpdateAdminUseCase, optional): _description_. Defaults to Depends( UpdateAdminUseCase).
+        current_admin (AdminModel, optional): _description_. Defaults to Depends(get_current_admin).
+
+    Raises:
+        forbidden_exception: 
+            - If not super admin and not update the owner account
+            - If not super admin and update the owner account, but have roles in payload
+            - If role BDH and (not update the owner account or update roles)
+    Returns:
+        _type_: Admin
+    """
+    if not str(current_admin.id) == id or payload.roles is not None:
+        authorization(current_admin, SUPER_ADMIN, True)
 
     req_object = UpdateAdminRequestObject.builder(id=id, payload=payload)
     response = update_admin_use_case.execute(request_object=req_object)

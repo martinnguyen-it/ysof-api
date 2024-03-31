@@ -1,4 +1,3 @@
-import app.interfaces.api_v1
 import math
 from typing import Optional, List, Dict, Any
 from fastapi import Depends
@@ -8,7 +7,6 @@ from app.domain.shared.entity import Pagination
 from app.models.admin import AdminModel
 from app.infra.admin.admin_repository import AdminRepository
 from app.infra.season.season_repository import SeasonRepository
-from app.models.season import SeasonModel
 from app.shared.constant import SUPER_ADMIN
 
 

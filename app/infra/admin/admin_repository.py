@@ -81,11 +81,11 @@ class AdminRepository:
             {"$limit": page_size}
         ]
 
+        match_pipe = {"roles": {"$ne": "admin"}}
         if match_pipeline is not None:
-            pipeline.append({
-                "$match": match_pipeline
-            })
-        print(pipeline)
+            match_pipe = {**match_pipeline, **match_pipe}
+        pipeline.append({"$match": match_pipe})
+
         try:
             docs = AdminModel.objects().aggregate(pipeline)
             return [AdminModel.from_mongo(doc) for doc in docs] if docs else []
@@ -96,11 +96,10 @@ class AdminRepository:
                    match_pipeline: Optional[Dict[str, Any]] = None,
                    ) -> int:
         pipeline = []
-
+        match_pipe = {"roles": {"$ne": "admin"}}
         if match_pipeline is not None:
-            pipeline.append({
-                "$match": match_pipeline
-            })
+            match_pipe = {**match_pipeline, **match_pipe}
+        pipeline.append({"$match": match_pipe})
         pipeline.append({"$count": "document_count"})
 
         try:

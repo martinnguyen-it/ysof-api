@@ -7,8 +7,8 @@ from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixi
 from app.infra.season.season_repository import SeasonRepository
 
 
-def transform_email(email: str) -> str:
-    return email.lower().strip()
+def transform_email(email: str | None = None) -> str | None:
+    return email.lower().strip() if email else email
 
 
 class Address(BaseEntity):
@@ -28,8 +28,8 @@ class AdminBase(BaseEntity):
     address: Optional[Address] = None
     date_of_birth: Optional[datetime] = None
     facebook: Optional[str] = None
-    current_season: int
-    seasons: list[int]
+    current_season: int | None = None
+    seasons: list[int] | None = None
     avatar: Optional[str] = None
 
 
@@ -86,9 +86,8 @@ class ManyAdminsInResponse(BaseEntity):
     data: Optional[List[Admin]] = None
 
 
-class AdminInUpdate(BaseEntity):
+class AdminInUpdateMe(BaseEntity):
     email: Optional[EmailStr] = None
-    roles: Optional[list[AdminRole]] = None
     full_name: Optional[str] = None
     holy_name: Optional[str] = None
     phone_number: Optional[list[str]] = None
@@ -97,6 +96,10 @@ class AdminInUpdate(BaseEntity):
     facebook: Optional[str] = None
     status: Optional[AccountStatus] = None
     _extract_email = field_validator("email", mode="before")(transform_email)
+
+
+class AdminInUpdate(AdminInUpdateMe):
+    roles: Optional[list[AdminRole]] = None
 
 
 class AdminInUpdateTime(BaseEntity):
