@@ -70,12 +70,22 @@ class ManyDocumentsInResponse(BaseEntity):
     data: Optional[List[Document]] = None
 
 
-class DocumentInUpdate(BaseEntity):
+class DocumentInUpdateBase(BaseEntity):
     name: Optional[str] = None
     type: Optional[DocumentType] = None
     description: Optional[str] = None
     role: Optional[str] = None
     label: Optional[list[str]] = None
+
+
+class DocumentInUpdatePayload(DocumentInUpdateBase, PayloadWithFile):
+    pass
+
+
+class DocumentInUpdate(DocumentInUpdateBase):
+    file_id: str | None = None
+    mimeType: Optional[str] = None
+    thumbnailLink: Optional[str] = None
 
 
 class DocumentInUpdateTime(DocumentInUpdate):

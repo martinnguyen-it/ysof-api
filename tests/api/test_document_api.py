@@ -226,8 +226,10 @@ class TestUserApi(unittest.TestCase):
 
             r = self.client.put(
                 f"/api/v1/documents/{self.document.id}",
-                json={
-                    "name": "Updated"
+                data={
+                    "payload": json.dumps({
+                        "name": "Updated",
+                    })
                 },
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),

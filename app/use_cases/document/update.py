@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import Depends
+from fastapi import Depends, BackgroundTasks
 from app.models.document import DocumentModel
 from app.shared import request_object, use_case, response_object
 
@@ -40,11 +40,13 @@ class UpdateDocumentRequestObject(request_object.ValidRequestObject):
 
 class UpdateDocumentUseCase(use_case.UseCase):
     def __init__(self,
+                 background_tasks: BackgroundTasks,
                  google_drive_api_service: GoogleDriveApiService = Depends(
                      GoogleDriveApiService),
                  document_repository: DocumentRepository = Depends(DocumentRepository)):
         self.google_drive_api_service = google_drive_api_service
         self.document_repository = document_repository
+        self.background_tasks = background_tasks
 
     def process_request(self, req_object: UpdateDocumentRequestObject):
         document: Optional[DocumentModel] = self.document_repository.get_by_id(
@@ -55,12 +57,16 @@ class UpdateDocumentUseCase(use_case.UseCase):
                 not any(role in SUPER_ADMIN for role in req_object.admin_roles):
             return response_object.ResponseFailure.build_not_found_error("Bạn không có quyền sửa")
 
-        if isinstance(req_object.obj_in.name, str):
-            self.google_drive_api_service.update(
-                document.file_id, req_object.obj_in.name)
+        if isinstance(req_object.obj_in.name, str) and req_object.obj_in.file_id is None:
+            self.background_tasks.add_task(
+                self.google_drive_api_service.update, document.file_id, req_object.obj_in.name)
+
+        if req_object.obj_in.file_id:
+            self.background_tasks.add_task(
+                self.google_drive_api_service.delete, document.file_id)
 
         self.document_repository.update(id=document.id, data=DocumentInUpdateTime(
-            **req_object.obj_in.model_dump(exclude=({"updated_at"}))))
+            **req_object.obj_in.model_dump()))
         document.reload()
 
         author: AdminInDB = AdminInDB.model_validate(document.author)

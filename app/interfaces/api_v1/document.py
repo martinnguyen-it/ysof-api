@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException, Upload
 from typing import Annotated, Optional
 
 from app.domain.document.entity import Document, DocumentInCreate, ManyDocumentsInResponse, \
-    DocumentInUpdate, DocumentInCreatePayload
+    DocumentInUpdate, DocumentInCreatePayload, DocumentInUpdatePayload
 from app.domain.shared.enum import Sort
 from app.infra.security.security_service import (authorization, get_current_active_admin,
                                                  get_current_admin)
@@ -119,17 +119,31 @@ def get_list_documents(
 @response_decorator()
 def update_document(
         id: str = Path(..., title="Document Id"),
-        payload: DocumentInUpdate = Body(...,
-                                         title="Document updated payload"),
+        payload: DocumentInUpdatePayload = Body(...,
+                                                title="Document updated payload"),
+        file: UploadFile = File(None),
         update_document_use_case: UpdateDocumentUseCase = Depends(
             UpdateDocumentUseCase),
         current_admin: AdminModel = Depends(get_current_active_admin),
-):
+        google_drive_service: GoogleDriveApiService = Depends(
+            GoogleDriveApiService)):
     if payload.role and payload.role not in current_admin.roles:
         authorization(current_admin, SUPER_ADMIN)
 
+    info_file = None
+    if file:
+        info_file = google_drive_service.create(file=file, name=payload.name)
+
+    new_payload = DocumentInUpdate(
+        **payload.model_dump(),
+        **info_file.model_dump(exclude={"name", "id"}),
+        file_id=info_file.id
+    ) if info_file is not None else DocumentInUpdate(
+        **payload.model_dump()
+    )
+
     req_object = UpdateDocumentRequestObject.builder(
-        id=id, payload=payload, admin_roles=current_admin.roles)
+        id=id, payload=new_payload, admin_roles=current_admin.roles)
     response = update_document_use_case.execute(request_object=req_object)
     return response
 
