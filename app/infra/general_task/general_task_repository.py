@@ -49,8 +49,7 @@ class GeneralTaskRepository:
                 data["attachments"] = [ObjectId(id) for id in attachments]
             GeneralTaskModel.objects(id=id).update_one(**data, upsert=False)
             return True
-        except Exception as e:
-            print(e)
+        except Exception:
             return False
 
     def count(self, conditions: Dict[str, Union[str, bool, ObjectId]] = {}) -> int:

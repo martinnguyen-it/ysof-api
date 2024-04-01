@@ -40,10 +40,8 @@ class ListAdminsRequestObject(request_object.ValidRequestObject):
 
 
 class ListAdminsUseCase(use_case.UseCase):
-    def __init__(self, admin_repository: AdminRepository = Depends(AdminRepository),
-                 season_repository: SeasonRepository = Depends(SeasonRepository)):
+    def __init__(self, admin_repository: AdminRepository = Depends(AdminRepository)):
         self.admin_repository = admin_repository
-        self.season_repository = season_repository
 
     def process_request(self, req_object: ListAdminsRequestObject):
         match_pipeline: Optional[Dict[str, Any]] = {}

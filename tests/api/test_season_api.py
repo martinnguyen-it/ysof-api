@@ -67,7 +67,7 @@ class TestUserApi(unittest.TestCase):
             title="Truong hoc",
             academic_year="2022-2023",
             season=1,
-            is_current=True
+            is_current=False
         ).save()
 
     @classmethod
@@ -107,6 +107,7 @@ class TestUserApi(unittest.TestCase):
                 id=r.json().get("id")).get()
             assert doc.title == "CÙNG GIÊSU, NGƯỜI TRẺ DÁM ƯỚC MƠ"
             assert doc.season == 3
+            assert doc.is_current is True
 
     def test_get_all_seasons(self):
         r = self.client.get(

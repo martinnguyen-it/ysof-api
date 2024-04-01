@@ -50,6 +50,23 @@ class TestUserApi(unittest.TestCase):
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
+        cls.user2 = AdminModel(
+            status="active",
+            roles=[
+                "bhv",
+            ],
+            holy_name="Martin",
+            phone_number=[
+                "0123456789"
+            ],
+            current_season=2,
+            seasons=[
+                1, 2
+            ],
+            email="user2@example.com",
+            full_name="Nguyen Thanh Tam",
+            password=get_password_hash(password="local@local"),
+        ).save()
         cls.document = DocumentModel(
             file_id="1hXt8WI3g6p8YUtN2gR35yA-gO_fE2vD3",
             mimeType="image/jpeg",
@@ -157,6 +174,17 @@ class TestUserApi(unittest.TestCase):
             assert r.status_code == 200
             resp = r.json()
             assert resp["pagination"]["total"] == 2
+
+            mock_token.return_value = TokenData(email=self.user2.email)
+            r = self.client.get(
+                "/api/v1/documents",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            resp = r.json()
+            assert resp["pagination"]["total"] == 0
 
     def test_get_document_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:

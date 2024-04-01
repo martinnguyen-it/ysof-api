@@ -142,7 +142,6 @@ class TestUserApi(unittest.TestCase):
                     "Authorization": "Bearer {}".format("xxx"),
                 },
             )
-            print(r.json())
             assert r.status_code == 200
             resp = r.json()
             assert resp.get("email") == "user@example.com"

@@ -21,6 +21,7 @@ from app.use_cases.document.create import (
 from app.models.admin import AdminModel
 from app.shared.constant import SUPER_ADMIN
 from app.use_cases.document.delete import DeleteDocumentRequestObject, DeleteDocumentUseCase
+from app.domain.document.enum import DocumentType
 
 router = APIRouter()
 
@@ -86,6 +87,8 @@ def get_list_documents(
         roles: Optional[list[str]] = Query(None, title="Roles"),
         sort: Optional[Sort] = Sort.DESC,
         sort_by: Optional[str] = 'id',
+        season: Optional[int] = None,
+        type: Optional[DocumentType] = None,
         current_admin: AdminModel = Depends(get_current_admin)
 ):
     annotations = {}
@@ -96,12 +99,14 @@ def get_list_documents(
             status_code=400, detail=f"Invalid sort_by: {sort_by}")
     sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
 
-    req_object = ListDocumentsRequestObject.builder(author=current_admin,
+    req_object = ListDocumentsRequestObject.builder(current_admin=current_admin,
                                                     page_index=page_index,
                                                     page_size=page_size,
                                                     search=search,
                                                     label=label,
                                                     roles=roles,
+                                                    season=season,
+                                                    type=type,
                                                     sort=sort_query)
     response = list_documents_use_case.execute(request_object=req_object)
     return response
