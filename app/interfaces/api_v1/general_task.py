@@ -20,6 +20,7 @@ from app.use_cases.general_task.create import (
 from app.models.admin import AdminModel
 from app.shared.constant import SUPER_ADMIN
 from app.use_cases.general_task.delete import DeleteGeneralTaskRequestObject, DeleteGeneralTaskUseCase
+from app.domain.general_task.enum import GeneralTaskType
 
 router = APIRouter()
 
@@ -77,6 +78,8 @@ def get_list_general_tasks(
         roles: Optional[list[str]] = Query(None, title="Roles"),
         sort: Optional[Sort] = Sort.DESC,
         sort_by: Optional[str] = 'id',
+        season: Optional[int] = None,
+        type: Optional[GeneralTaskType] = None,
         current_admin: AdminModel = Depends(get_current_admin)
 ):
     annotations = {}
@@ -87,11 +90,13 @@ def get_list_general_tasks(
             status_code=400, detail=f"Invalid sort_by: {sort_by}")
     sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
 
-    req_object = ListGeneralTasksRequestObject.builder(author=current_admin,
+    req_object = ListGeneralTasksRequestObject.builder(current_admin=current_admin,
                                                        page_index=page_index,
                                                        page_size=page_size,
                                                        search=search,
                                                        label=label,
+                                                       season=season,
+                                                       type=type,
                                                        roles=roles,
                                                        sort=sort_query)
     response = list_general_tasks_use_case.execute(request_object=req_object)

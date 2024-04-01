@@ -61,7 +61,7 @@ class GeneralTaskRepository:
     def list(self,
              page_index: int = 1,
              page_size: int = 20,
-             match_pipeline: Optional[List[Dict[str, Any]]] = None,
+             match_pipeline: Optional[Dict[str, Any]] = None,
              sort: Optional[Dict[str, int]] = None,
              ) -> List[GeneralTaskModel]:
         pipeline = [
@@ -71,7 +71,9 @@ class GeneralTaskRepository:
         ]
 
         if match_pipeline is not None:
-            pipeline.extend(match_pipeline)
+            pipeline.append({
+                "$match": match_pipeline
+            })
 
         try:
             docs = GeneralTaskModel.objects().aggregate(pipeline)
@@ -80,12 +82,14 @@ class GeneralTaskRepository:
             return []
 
     def count_list(self,
-                   match_pipeline: Optional[List[Dict[str, Any]]] = None,
+                   match_pipeline: Optional[Dict[str, Any]] = None,
                    ) -> int:
         pipeline = []
 
         if match_pipeline is not None:
-            pipeline.extend(match_pipeline)
+            pipeline.append({
+                "$match": match_pipeline
+            })
         pipeline.append({"$count": "general_task_count"})
 
         try:
