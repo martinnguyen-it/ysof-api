@@ -71,7 +71,8 @@ def get_list_subjects(
         search: Optional[str] = Query(None, title="Search"),
         sort: Optional[Sort] = Sort.DESC,
         sort_by: Optional[str] = 'id',
-):
+        subdivision: Optional[str] = None,
+        season: Optional[int] = None):
     annotations = {}
     for base in reversed(Subject.__mro__):
         annotations.update(getattr(base, '__annotations__', {}))
@@ -82,7 +83,10 @@ def get_list_subjects(
 
     req_object = ListSubjectsRequestObject.builder(
         search=search,
-        sort=sort_query)
+        season=season,
+        sort=sort_query,
+        subdivision=subdivision,
+    )
     response = list_subjects_use_case.execute(request_object=req_object)
     return response
 
@@ -107,7 +111,8 @@ def update_subject(
                 message="Vui lòng điền thông tin zoom"
             )
         payload = SubjectInUpdate(zoom=payload.zoom)
-    req_object = UpdateSubjectRequestObject.builder(id=id, payload=payload)
+    req_object = UpdateSubjectRequestObject.builder(
+        id=id, payload=payload, current_admin=current_admin)
     response = update_subject_use_case.execute(request_object=req_object)
     return response
 
@@ -121,6 +126,8 @@ def delete_subject(
         current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV])
-    req_object = DeleteSubjectRequestObject.builder(id=id)
-    response = delete_subject_use_case.execute(request_object=req_object)
+    req_object = DeleteSubjectRequestObject.builder(
+        id=id, current_admin=current_admin)
+    response = delete_subject_use_case.execute(
+        request_object=req_object)
     return response

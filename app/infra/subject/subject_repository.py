@@ -55,7 +55,7 @@ class SubjectRepository:
             return 0
 
     def list(self,
-             match_pipeline: Optional[List[Dict[str, Any]]] = None,
+             match_pipeline: Optional[Dict[str, Any]] = None,
              sort: Optional[Dict[str, int]] = None,
              ) -> List[SubjectModel]:
         pipeline = [
@@ -63,7 +63,9 @@ class SubjectRepository:
         ]
 
         if match_pipeline is not None:
-            pipeline.append(match_pipeline)
+            pipeline.append({
+                "$match": match_pipeline
+            })
 
         try:
             docs = SubjectModel.objects().aggregate(pipeline)
@@ -72,12 +74,14 @@ class SubjectRepository:
             return []
 
     def count_list(self,
-                   match_pipeline: Optional[List[Dict[str, Any]]] = None,
+                   match_pipeline: Optional[Dict[str, Any]] = None,
                    ) -> int:
         pipeline = []
 
         if match_pipeline is not None:
-            pipeline.append(match_pipeline)
+            pipeline.append({
+                "$match": match_pipeline
+            })
         pipeline.append({"$count": "subject_count"})
 
         try:

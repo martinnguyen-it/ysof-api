@@ -14,6 +14,7 @@ from app.shared.constant import SUPER_ADMIN
 from app.domain.document.entity import AdminInDocument, Document, DocumentInDB
 from app.infra.season.season_repository import SeasonRepository
 from app.domain.shared.enum import AdminRole
+from app.models.season import SeasonModel
 
 
 class ListGeneralTasksRequestObject(request_object.ValidRequestObject):
@@ -53,7 +54,7 @@ class ListGeneralTasksUseCase(use_case.UseCase):
     def process_request(self, req_object: ListGeneralTasksRequestObject):
         is_super_admin = any(
             role in SUPER_ADMIN for role in req_object.current_admin.roles)
-        current_season = self.season_repository.get_current_season()
+        current_season: SeasonModel = self.season_repository.get_current_season()
 
         match_pipeline: dict[str, Any] | None = {}
 

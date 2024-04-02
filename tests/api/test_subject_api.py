@@ -115,6 +115,19 @@ class TestUserApi(unittest.TestCase):
             lecturer=cls.lecturer,
             season=3
         ).save()
+        cls.subject3: SubjectModel = SubjectModel(
+            title="Môn học 3",
+            date="2024-03-27T14:40:51.100Z",
+            subdivision="string",
+            code="string",
+            question_url="string",
+            zoom={"meeting_id": 0, "pass_code": "string", "link": "string"},
+            documents_url=[
+                "string"
+            ],
+            lecturer=cls.lecturer,
+            season=2
+        ).save()
 
     @classmethod
     def tearDownClass(cls):
@@ -190,6 +203,11 @@ class TestUserApi(unittest.TestCase):
             )
             assert r.status_code == 200
             resp = r.json()
+            """_summary_
+                len(resp) == 2
+                Because mock 3 subjects, but one subject is season 2, one subject deleted 
+                Default get list subject is current season
+            """
             assert len(resp) == 2
 
     def test_get_subject_by_id(self):
@@ -210,6 +228,17 @@ class TestUserApi(unittest.TestCase):
     def test_update_subject_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user1.email)
+            r = self.client.put(
+                f"/api/v1/subjects/{self.subject3.id}",
+                json={
+                    "title": "Updated"
+                },
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 403
+
             r = self.client.put(
                 f"/api/v1/subjects/{self.subject.id}",
                 json={

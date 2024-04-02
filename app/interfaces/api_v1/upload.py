@@ -42,7 +42,7 @@ def upload_image(
     "/{file_id}",
 )
 @response_decorator()
-def upload_image(
+def delete_image(
         file_id: str = Path(..., title="File id"),
         google_drive_service: GoogleDriveApiService = Depends(
             GoogleDriveApiService)
