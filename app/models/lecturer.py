@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timezone
 from mongoengine import Document, StringField, DateTimeField, ListField, IntField
 
 
@@ -27,8 +27,8 @@ class LecturerModel(Document):
 
     def save(self, *args, **kwargs):
         if not self.created_at:
-            self.created_at = datetime.datetime.utcnow()
-        self.updated_at = datetime.datetime.utcnow()
+            self.created_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(timezone.utc)
         return super(LecturerModel, self).save(*args, **kwargs)
 
     meta = {

@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timezone
 from mongoengine import Document, StringField, EmailField, DateTimeField, DictField, IntField
 
 
@@ -40,8 +40,8 @@ class UserModel(Document):
 
     def save(self, *args, **kwargs):
         if not self.created_at:
-            self.created_at = datetime.datetime.utcnow()
-        self.updated_at = datetime.datetime.utcnow()
+            self.created_at = datetime.now(timezone.utc)
+        self.updated_at = datetime.now(timezone.utc)
         return super(UserModel, self).save(*args, **kwargs)
 
     meta = {

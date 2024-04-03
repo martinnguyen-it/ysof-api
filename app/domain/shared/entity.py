@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from pydantic import BaseModel, field_validator, Field, ConfigDict, model_validator
 from fastapi import Query
 from typing import Optional
@@ -45,7 +45,7 @@ class DateTimeModelMixin(BaseModel):
 
     @field_validator("created_at", "updated_at", mode="after")
     def set_datetime_now(cls, value: datetime) -> datetime:
-        return value or datetime.utcnow()
+        return value or datetime.now(timezone.utc)
 
 
 class IDModelMixin(BaseModel):

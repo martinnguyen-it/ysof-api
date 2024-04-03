@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 from random import sample, choice
 from string import ascii_letters, digits, ascii_uppercase, ascii_lowercase
 from typing import Optional
@@ -83,9 +83,10 @@ def create_access_token(data: TokenData, expires_delta: timedelta = None) -> str
     to_encode = data.model_dump()
 
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(days=settings.ACCESS_TOKEN_EXPIRE)
+        expire = datetime.now(timezone.utc) + \
+            timedelta(days=settings.ACCESS_TOKEN_EXPIRE)
     to_encode.update({"exp": expire})
 
     encoded_jwt = jwt.encode(
