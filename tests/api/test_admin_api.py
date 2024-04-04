@@ -11,6 +11,8 @@ from app.infra.security.security_service import (
     get_password_hash,
 )
 from app.models.season import SeasonModel
+from app.models.audit_log import AuditLogModel
+from app.domain.audit_log.enum import AuditLogType
 
 
 class TestUserApi(unittest.TestCase):
@@ -133,6 +135,12 @@ class TestUserApi(unittest.TestCase):
             assert user.updated_at
             assert user.password
 
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.CREATE})
+            audit_logs = [AuditLogModel.from_mongo(
+                doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 1
+
     def test_get_myself(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user.email)
@@ -200,3 +208,9 @@ class TestUserApi(unittest.TestCase):
                 },
             )
             assert r.status_code == 200
+
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.UPDATE})
+            audit_logs = [AuditLogModel.from_mongo(
+                doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 2

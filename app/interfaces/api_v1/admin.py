@@ -62,7 +62,8 @@ def create_admin(
         current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     authorization(current_admin, SUPER_ADMIN)
-    req_object = CreateAdminRequestObject.builder(payload=payload)
+    req_object = CreateAdminRequestObject.builder(
+        payload=payload, current_admin=current_admin)
     response = create_admin_use_case.execute(request_object=req_object)
     return response
 
@@ -148,6 +149,7 @@ def update_admin(
     if not str(current_admin.id) == id or payload.roles is not None:
         authorization(current_admin, SUPER_ADMIN, True)
 
-    req_object = UpdateAdminRequestObject.builder(id=id, payload=payload)
+    req_object = UpdateAdminRequestObject.builder(
+        id=id, payload=payload, current_admin=current_admin)
     response = update_admin_use_case.execute(request_object=req_object)
     return response
