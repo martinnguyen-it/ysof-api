@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from mongoengine import Document, StringField, DateTimeField, IntField, ReferenceField, ListField
 
 
-class LogModel(Document):
+class AuditLogModel(Document):
     type = StringField(required=True)
     endpoint = StringField(required=True)
     author = ReferenceField("AdminModel")
@@ -27,7 +27,7 @@ class LogModel(Document):
 
     def save(self, *args, **kwargs):
         self.created_at = datetime.now(timezone.utc)
-        return super(LogModel, self).save(*args, **kwargs)
+        return super(AuditLogModel, self).save(*args, **kwargs)
 
     meta = {
         "collection": "Logs",
