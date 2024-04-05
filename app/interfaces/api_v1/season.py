@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, Depends,  Query, HTTPException, Path
 from typing import Annotated, Optional
 
 from app.domain.season.entity import Season, SeasonInCreate, SeasonInUpdate
-from app.domain.shared.enum import Sort
+from app.domain.shared.enum import AdminRole, Sort
 from app.infra.security.security_service import authorization, get_current_active_admin
 from app.shared.decorator import response_decorator
 from app.use_cases.season.create import (
@@ -10,7 +10,6 @@ from app.use_cases.season.create import (
     CreateSeasonUseCase,
 )
 from app.models.admin import AdminModel
-from app.shared.constant import SUPER_ADMIN
 from app.use_cases.season.list import ListSeasonsUseCase, ListSeasonsRequestObject
 from app.use_cases.season.update import UpdateSeasonUseCase, UpdateSeasonRequestObject
 from app.use_cases.season.get import GetSeasonRequestObject, GetSeasonCase
@@ -34,7 +33,7 @@ def create_season(
             CreateSeasonUseCase),
         current_admin: AdminModel = Depends(get_current_active_admin),
 ):
-    authorization(current_admin, SUPER_ADMIN)
+    authorization(current_admin, [AdminRole.ADMIN])
     req_object = CreateSeasonRequestObject.builder(payload=payload)
     response = create_season_use_case.execute(request_object=req_object)
     return response
@@ -109,7 +108,7 @@ def update_season(
             UpdateSeasonUseCase),
         current_admin: AdminModel = Depends(get_current_active_admin),
 ):
-    authorization(current_admin, SUPER_ADMIN)
+    authorization(current_admin, [AdminRole.ADMIN])
     req_object = UpdateSeasonRequestObject.builder(id=id, payload=payload)
     response = update_season_use_case.execute(request_object=req_object)
     return response
@@ -126,7 +125,7 @@ def mark_season_current(
             MarkCurrentSeasonUseCase),
         current_admin: AdminModel = Depends(get_current_active_admin),
 ):
-    authorization(current_admin, SUPER_ADMIN)
+    authorization(current_admin, [AdminRole.ADMIN])
     req_object = MarkCurrentSeasonRequestObject.builder(id=id)
     response = mark_current_season_use_case.execute(request_object=req_object)
     return response
@@ -140,7 +139,7 @@ def delete_season(
             DeleteSeasonUseCase),
         current_admin: AdminModel = Depends(get_current_active_admin),
 ):
-    authorization(current_admin, SUPER_ADMIN)
+    authorization(current_admin, [AdminRole.ADMIN])
     req_object = DeleteSeasonRequestObject.builder(id=id)
     response = delete_season_use_case.execute(request_object=req_object)
     return response
