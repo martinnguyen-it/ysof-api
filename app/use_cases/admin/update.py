@@ -53,6 +53,10 @@ class UpdateAdminUseCase(use_case.UseCase):
         if not admin:
             return response_object.ResponseFailure.build_not_found_error("Admin không tồn tại")
 
+        self.admin_repository.update(id=admin.id, data=AdminInUpdate(
+            **req_object.obj_in.model_dump(exclude=({"updated_at"}))))
+        admin.reload()
+
         self.background_tasks.add_task(self.audit_log_repository.create, AuditLogInDB(
             type=AuditLogType.UPDATE,
             endpoint=Endpoint.ADMIN,
@@ -65,7 +69,4 @@ class UpdateAdminUseCase(use_case.UseCase):
                 req_object.obj_in.model_dump(exclude_none=True), default=str)
         ))
 
-        self.admin_repository.update(id=admin.id, data=AdminInUpdate(
-            **req_object.obj_in.model_dump(exclude=({"updated_at"}))))
-        admin.reload()
         return Admin(**AdminInDB.model_validate(admin).model_dump())

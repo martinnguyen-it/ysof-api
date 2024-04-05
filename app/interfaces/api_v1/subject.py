@@ -54,7 +54,8 @@ def create_subject(
         current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV])
-    req_object = CreateSubjectRequestObject.builder(payload=payload)
+    req_object = CreateSubjectRequestObject.builder(
+        payload=payload, current_admin=current_admin)
     response = create_subject_use_case.execute(request_object=req_object)
     return response
 

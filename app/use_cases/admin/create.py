@@ -2,7 +2,6 @@ import json
 from typing import Optional
 from fastapi import Depends, BackgroundTasks
 
-from app.config import settings
 from app.infra.security.security_service import get_password_hash, generate_random_password
 from app.shared import request_object, use_case, response_object
 
@@ -57,10 +56,21 @@ class CreateAdminUseCase(use_case.UseCase):
         if existing_admin:
             return response_object.ResponseFailure.build_parameters_error(message="Email đã tồn tại")
 
+        current_season: int = self.season_repository.get_current_season().season
+
+        obj_in: AdminInDB = AdminInDB(
+            **admin_in.model_dump(exclude={"password"}),
+            password=get_password_hash(password="12345678"),
+            # password=get_password_hash(password=generate_random_password()),
+            current_season=current_season,
+            seasons=[current_season],
+        )
+        admin_in_db: AdminInDB = self.admin_repository.create(admin=obj_in)
+
         self.background_tasks.add_task(self.audit_log_repository.create, AuditLogInDB(
             type=AuditLogType.CREATE,
             endpoint=Endpoint.ADMIN,
-            season=self.season_repository.get_current_season().season,
+            season=current_season,
             author=req_object.current_admin,
             author_email=req_object.current_admin.email,
             author_name=req_object.current_admin.full_name,
@@ -68,14 +78,5 @@ class CreateAdminUseCase(use_case.UseCase):
             description=json.dumps(
                 req_object.admin_in.model_dump(exclude_none=True), default=str)
         ))
-
-        obj_in: AdminInDB = AdminInDB(
-            **admin_in.model_dump(exclude={"password"}),
-            password=get_password_hash(password="12345678"),
-            # password=get_password_hash(password=generate_random_password()),
-            current_season=settings.CURRENT_SEASON,
-            seasons=[settings.CURRENT_SEASON],
-        )
-        admin_in_db: AdminInDB = self.admin_repository.create(admin=obj_in)
 
         return Admin(**admin_in_db.model_dump())
