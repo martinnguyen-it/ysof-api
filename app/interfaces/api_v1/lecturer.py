@@ -54,7 +54,8 @@ def create_lecturer(
         current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV])
-    req_object = CreateLecturerRequestObject.builder(payload=payload)
+    req_object = CreateLecturerRequestObject.builder(
+        payload=payload, current_admin=current_admin)
     response = create_lecturer_use_case.execute(request_object=req_object)
     return response
 
@@ -105,7 +106,7 @@ def update_lecturer(
 ):
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV])
     req_object = UpdateLecturerRequestObject.builder(
-        id=id, payload=payload)
+        id=id, payload=payload, current_admin=current_admin)
     response = update_lecturer_use_case.execute(request_object=req_object)
     return response
 
@@ -119,6 +120,7 @@ def delete_lecturer(
         current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     authorization(current_admin, SUPER_ADMIN)
-    req_object = DeleteLecturerRequestObject.builder(id=id)
+    req_object = DeleteLecturerRequestObject.builder(
+        id=id, current_admin=current_admin)
     response = delete_lecturer_use_case.execute(request_object=req_object)
     return response
