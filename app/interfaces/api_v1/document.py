@@ -66,8 +66,9 @@ def create_document(
         **payload.model_dump(),
         **info_file.model_dump(exclude={"name", "id"}),
         file_id=info_file.id,
-        author=current_admin)
-    req_object = CreateDocumentRequestObject.builder(payload=new_payload)
+    )
+    req_object = CreateDocumentRequestObject.builder(
+        payload=new_payload, current_admin=current_admin)
     response = create_document_use_case.execute(request_object=req_object)
     return response
 
@@ -143,7 +144,7 @@ def update_document(
     )
 
     req_object = UpdateDocumentRequestObject.builder(
-        id=id, payload=new_payload, admin_roles=current_admin.roles)
+        id=id, payload=new_payload, current_admin=current_admin)
     response = update_document_use_case.execute(request_object=req_object)
     return response
 
@@ -157,6 +158,6 @@ def delete_document(
         current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     req_object = DeleteDocumentRequestObject.builder(
-        id=id, admin_roles=current_admin.roles)
+        id=id, current_admin=current_admin)
     response = delete_document_use_case.execute(request_object=req_object)
     return response

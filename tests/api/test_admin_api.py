@@ -1,3 +1,4 @@
+import time
 import unittest
 from unittest.mock import patch
 from mongoengine import connect, disconnect
@@ -135,6 +136,7 @@ class TestUserApi(unittest.TestCase):
             assert user.updated_at
             assert user.password
 
+            time.sleep(2)
             cursor = AuditLogModel._get_collection().find(
                 {"type": AuditLogType.CREATE})
             audit_logs = [AuditLogModel.from_mongo(
@@ -209,6 +211,7 @@ class TestUserApi(unittest.TestCase):
             )
             assert r.status_code == 200
 
+            time.sleep(2)
             cursor = AuditLogModel._get_collection().find(
                 {"type": AuditLogType.UPDATE})
             audit_logs = [AuditLogModel.from_mongo(

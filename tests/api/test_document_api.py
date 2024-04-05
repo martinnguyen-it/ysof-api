@@ -1,4 +1,5 @@
 import json
+import time
 import unittest
 from unittest.mock import patch
 
@@ -18,6 +19,8 @@ from app.infra.security.security_service import (
 from app.models.document import DocumentModel
 from app.models.general_task import GeneralTaskModel
 from app.models.season import SeasonModel
+from app.models.audit_log import AuditLogModel
+from app.domain.audit_log.enum import AuditLogType
 
 
 class TestUserApi(unittest.TestCase):
@@ -162,6 +165,13 @@ class TestUserApi(unittest.TestCase):
             assert doc.name == "Tài liệu  hàng năm"
             mock_upload_to_drive.assert_called_once()
 
+            time.sleep(2)
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.CREATE})
+            audit_logs = [AuditLogModel.from_mongo(
+                doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 1
+
     def test_get_all_documents(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user.email)
@@ -240,7 +250,14 @@ class TestUserApi(unittest.TestCase):
                 id=r.json().get("id")).get()
             assert doc.name == "Updated"
 
-    def test_delele_document_by_id(self):
+            time.sleep(2)
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.UPDATE})
+            audit_logs = [AuditLogModel.from_mongo(
+                doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 1
+
+    def test_delete_document_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token, \
             patch("app.infra.services.google_drive_api.GoogleDriveApiService.delete") as mock_delete_file_drive, \
             patch(
@@ -289,3 +306,10 @@ class TestUserApi(unittest.TestCase):
                 },
             )
             assert r.status_code == 404
+
+            time.sleep(2)
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.DELETE})
+            audit_logs = [AuditLogModel.from_mongo(
+                doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 1

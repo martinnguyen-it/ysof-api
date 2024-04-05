@@ -46,7 +46,7 @@ class DocumentInCreate(DocumentBase):
     Args:
         DocumentBase (_type_): _description_
     """
-    author: PydanticAdminType
+    pass
 
 
 class Document(DocumentBase):
