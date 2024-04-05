@@ -55,12 +55,12 @@ class ListDocumentsUseCase(use_case.UseCase):
     def process_request(self, req_object: ListDocumentsRequestObject):
         is_super_admin = any(
             role in SUPER_ADMIN for role in req_object.current_admin.roles)
-        current_season = self.season_repository.get_current_season()
+        current_season = self.season_repository.get_current_season().season
 
         match_pipeline: dict[str, Any] | None = {}
 
         if ((is_super_admin and req_object.season != 0) or
-                req_object.season in req_object.current_admin.seasons or
+                (isinstance(req_object.season, int) and req_object.season <= req_object.current_admin.current_season) or
                 req_object.season is None):
             match_pipeline = {**match_pipeline,
                               "$or": [
@@ -70,7 +70,7 @@ class ListDocumentsUseCase(use_case.UseCase):
                                           {"season": {
                                               "$lte": req_object.current_admin.current_season
                                               if AdminRole.ADMIN not in req_object.current_admin.roles
-                                              else current_season.season}}
+                                              else current_season}}
                                       ]
                                   },
                                   {
@@ -87,7 +87,7 @@ class ListDocumentsUseCase(use_case.UseCase):
                                                       {"season": {
                                                           "$lte": req_object.current_admin.current_season
                                                           if AdminRole.ADMIN not in req_object.current_admin.roles
-                                                          else current_season.season}}
+                                                          else current_season}}
                                                   ]},
 
                                               ]

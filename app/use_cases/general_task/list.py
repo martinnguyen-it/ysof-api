@@ -59,7 +59,7 @@ class ListGeneralTasksUseCase(use_case.UseCase):
         match_pipeline: dict[str, Any] | None = {}
 
         if ((is_super_admin and req_object.season != 0) or
-                req_object.season in req_object.current_admin.seasons or
+                (isinstance(req_object.season, int) and req_object.season <= req_object.current_admin.current_season) or
                 req_object.season is None):
             match_pipeline = {**match_pipeline,
                               "$or": [
