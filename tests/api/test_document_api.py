@@ -20,7 +20,7 @@ from app.models.document import DocumentModel
 from app.models.general_task import GeneralTaskModel
 from app.models.season import SeasonModel
 from app.models.audit_log import AuditLogModel
-from app.domain.audit_log.enum import AuditLogType
+from app.domain.audit_log.enum import AuditLogType, Endpoint
 
 
 class TestUserApi(unittest.TestCase):
@@ -165,9 +165,10 @@ class TestUserApi(unittest.TestCase):
             assert doc.name == "Tài liệu  hàng năm"
             mock_upload_to_drive.assert_called_once()
 
-            time.sleep(2)
+            time.sleep(1)
             cursor = AuditLogModel._get_collection().find(
-                {"type": AuditLogType.CREATE})
+                {"type": AuditLogType.CREATE, "endpoint": Endpoint.DOCUMENT}
+            )
             audit_logs = [AuditLogModel.from_mongo(
                 doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
@@ -250,9 +251,10 @@ class TestUserApi(unittest.TestCase):
                 id=r.json().get("id")).get()
             assert doc.name == "Updated"
 
-            time.sleep(2)
+            time.sleep(1)
             cursor = AuditLogModel._get_collection().find(
-                {"type": AuditLogType.UPDATE})
+                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.DOCUMENT}
+            )
             audit_logs = [AuditLogModel.from_mongo(
                 doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
@@ -307,9 +309,10 @@ class TestUserApi(unittest.TestCase):
             )
             assert r.status_code == 404
 
-            time.sleep(2)
+            time.sleep(1)
             cursor = AuditLogModel._get_collection().find(
-                {"type": AuditLogType.DELETE})
+                {"type": AuditLogType.DELETE, "endpoint": Endpoint.DOCUMENT}
+            )
             audit_logs = [AuditLogModel.from_mongo(
                 doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1

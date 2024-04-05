@@ -58,7 +58,7 @@ def create_general_task(
     if payload.role not in current_admin.roles:
         authorization(current_admin, SUPER_ADMIN)
     req_object = CreateGeneralTaskRequestObject.builder(
-        payload=payload, author=current_admin)
+        payload=payload, current_admin=current_admin)
     response = create_general_task_use_case.execute(request_object=req_object)
     return response
 
@@ -120,7 +120,7 @@ def update_general_task(
         authorization(current_admin, SUPER_ADMIN)
 
     req_object = UpdateGeneralTaskRequestObject.builder(
-        id=id, payload=payload, admin_roles=current_admin.roles)
+        id=id, payload=payload, current_admin=current_admin)
     response = update_general_task_use_case.execute(request_object=req_object)
     return response
 
@@ -134,6 +134,6 @@ def delete_general_task(
         current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     req_object = DeleteGeneralTaskRequestObject.builder(
-        id=id, admin_roles=current_admin.roles)
+        id=id, current_admin=current_admin)
     response = delete_general_task_use_case.execute(request_object=req_object)
     return response

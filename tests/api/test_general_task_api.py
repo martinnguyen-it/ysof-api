@@ -1,4 +1,5 @@
 import app.interfaces.api_v1
+import time
 import unittest
 from unittest.mock import patch
 
@@ -16,6 +17,8 @@ from app.infra.security.security_service import (
 from app.models.document import DocumentModel
 from app.models.general_task import GeneralTaskModel
 from app.models.season import SeasonModel
+from app.models.audit_log import AuditLogModel
+from app.domain.audit_log.enum import AuditLogType, Endpoint
 
 
 class TestUserApi(unittest.TestCase):
@@ -149,6 +152,14 @@ class TestUserApi(unittest.TestCase):
             assert doc.role == "bhv"
             assert len(doc.attachments) == 1
 
+            time.sleep(1)
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.CREATE, "endpoint": Endpoint.GENERAL_TASK}
+            )
+            audit_logs = [AuditLogModel.from_mongo(
+                doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 1
+
     def test_get_general_task_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user.email)
@@ -195,6 +206,14 @@ class TestUserApi(unittest.TestCase):
                 id=r.json().get("id")).get()
             assert doc.title == "Updated"
 
+            time.sleep(1)
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.GENERAL_TASK}
+            )
+            audit_logs = [AuditLogModel.from_mongo(
+                doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 1
+
     def test_delete_general_task_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user.email)
@@ -213,3 +232,11 @@ class TestUserApi(unittest.TestCase):
                 },
             )
             assert r.status_code == 404
+
+            time.sleep(1)
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.DELETE, "endpoint": Endpoint.GENERAL_TASK}
+            )
+            audit_logs = [AuditLogModel.from_mongo(
+                doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 1
