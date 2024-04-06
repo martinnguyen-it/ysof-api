@@ -16,3 +16,4 @@ class Endpoint(str, ExtendedEnum):
     SEASON = "season"
     SUBJECT = "subject"
     UPLOAD = "upload"
+    STUDENT = "student"
