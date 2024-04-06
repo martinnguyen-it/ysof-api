@@ -44,9 +44,7 @@ class AdminInDB(IDModelMixin, DateTimeModelMixin, AdminBase):
         Check user validity
         :return:
         """
-        return (self.status is AccountStatus.INACTIVE
-                or self.status is AccountStatus.DELETED
-                )
+        return self.status is AccountStatus.INACTIVE or self.status is AccountStatus.DELETED
 
     def active(self):
         """_summary_
@@ -55,9 +53,9 @@ class AdminInDB(IDModelMixin, DateTimeModelMixin, AdminBase):
         Returns:
             _type_: bool
         """
-        return AdminRole.ADMIN in self.roles or \
-            ((not self.disabled()) and self.current_season ==
-             SeasonRepository().get_current_season().season)
+        return AdminRole.ADMIN in self.roles or (
+            (not self.disabled()) and self.current_season == SeasonRepository().get_current_season().season
+        )
 
 
 class AdminInCreate(BaseEntity):
@@ -76,6 +74,7 @@ class Admin(AdminBase):
     """
     Admin domain entity
     """
+
     id: str
     created_at: datetime
     updated_at: datetime
@@ -94,13 +93,13 @@ class AdminInUpdateMe(BaseEntity):
     address: Optional[Address] = None
     date_of_birth: Optional[datetime] = None
     facebook: Optional[str] = None
-    status: Optional[AccountStatus] = None
     _extract_email = field_validator("email", mode="before")(transform_email)
 
 
 class AdminInUpdate(AdminInUpdateMe):
     roles: Optional[list[AdminRole]] = None
+    status: Optional[AccountStatus] = None
 
 
-class AdminInUpdateTime(BaseEntity):
+class AdminInUpdateTime(AdminInUpdate):
     updated_at: datetime = datetime.now()

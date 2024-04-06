@@ -1,10 +1,11 @@
 """Admin repository module"""
+
 from typing import Optional, Dict, Union, List, Any
 from mongoengine import QuerySet, DoesNotExist
 from bson import ObjectId
 
 from app.models.admin import AdminModel
-from app.domain.admin.entity import AdminInDB, AdminInUpdate
+from app.domain.admin.entity import AdminInDB, AdminInUpdateTime
 
 
 class AdminRepository:
@@ -54,10 +55,9 @@ class AdminRepository:
             return None
         return admin
 
-    def update(self, id: ObjectId, data: Union[AdminInUpdate, Dict[str, Any]]) -> bool:
+    def update(self, id: ObjectId, data: Union[AdminInUpdateTime, Dict[str, Any]]) -> bool:
         try:
-            data = data.model_dump(exclude_none=True) if isinstance(
-                data, AdminInUpdate) else data
+            data = data.model_dump(exclude_none=True) if isinstance(data, AdminInUpdateTime) else data
             AdminModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception:
@@ -69,16 +69,17 @@ class AdminRepository:
         except Exception:
             return 0
 
-    def list(self,
-             page_index: int = 1,
-             page_size: int = 20,
-             match_pipeline: Optional[Dict[str, Any]] = None,
-             sort: Optional[Dict[str, int]] = None,
-             ) -> List[AdminModel]:
+    def list(
+        self,
+        page_index: int = 1,
+        page_size: int = 20,
+        match_pipeline: Optional[Dict[str, Any]] = None,
+        sort: Optional[Dict[str, int]] = None,
+    ) -> List[AdminModel]:
         pipeline = [
             {"$sort": sort if sort else {"created_at": -1}},
             {"$skip": page_size * (page_index - 1)},
-            {"$limit": page_size}
+            {"$limit": page_size},
         ]
 
         match_pipe = {"roles": {"$ne": "admin"}}
@@ -92,9 +93,10 @@ class AdminRepository:
         except Exception:
             return []
 
-    def count_list(self,
-                   match_pipeline: Optional[Dict[str, Any]] = None,
-                   ) -> int:
+    def count_list(
+        self,
+        match_pipeline: Optional[Dict[str, Any]] = None,
+    ) -> int:
         pipeline = []
         match_pipe = {"roles": {"$ne": "admin"}}
         if match_pipeline is not None:
@@ -104,6 +106,6 @@ class AdminRepository:
 
         try:
             docs = AdminModel.objects().aggregate(pipeline)
-            return list(docs)[0]['document_count']
+            return list(docs)[0]["document_count"]
         except Exception:
             return 0

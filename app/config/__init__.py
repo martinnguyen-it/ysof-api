@@ -1,4 +1,4 @@
-from pydantic import ConfigDict, field_validator, validator
+from pydantic import ConfigDict, field_validator
 from pydantic_settings import BaseSettings
 from typing import ClassVar, List, Optional, Union
 from pathlib import Path
