@@ -53,6 +53,7 @@ pytest -x
 ```
 pip install pre-commit
 pip install ruff
+pre-commit install
 ```
 
 ## Run docker-compose

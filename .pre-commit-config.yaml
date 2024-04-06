@@ -3,14 +3,14 @@ default_language_version:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.3.0
+    rev: v4.5.0
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
 
   - repo: https://github.com/psf/black
-    rev: 20.8b1
+    rev: 24.3.0
     hooks:
       - id: black
         exclude: ".json|.vscode/.*"
@@ -25,6 +25,11 @@ repos:
         language: system
         args: [--fix, "--exit-non-zero-on-fix"]
         exclude: "Dockerfile|.txt|.env-.*|tests/.*|.sh|.json|.yml|.yaml|.*ignore|Pipfile.*|.*.dockerfile|.*.ini|README.md|pylintrc|.*.toml|devops|scripts|.*.xlsx"
+      # - id: run-tests
+      #   language: script
+      #   name: Run tests
+      #   entry: ./scripts/run-tests.sh
+      #   stages: [commit]
       # -   id: pylint
       #     name: pylint
       #     entry: pylint
