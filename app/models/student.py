@@ -45,7 +45,7 @@ class StudentModel(Document):
 
     meta = {
         "collection": "Students",
-        "indexes": ["email", "status", "full_name", "holy_name"],
+        "indexes": ["email", "status", "full_name", "holy_name", "numerical_order"],
         "allow_inheritance": True,
         "index_cls": False,
     }

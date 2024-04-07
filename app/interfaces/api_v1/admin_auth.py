@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, Depends
 
 from app.domain.auth.entity import LoginRequest, AuthAdminInfoInResponse
 from app.shared.decorator import response_decorator
-from app.use_cases.auth.login import LoginRequestObject, LoginUseCase
+from app.use_cases.admin_auth.login import LoginRequestObject, LoginUseCase
 
 router = APIRouter()
 

@@ -3,6 +3,7 @@ from pydantic import BaseModel, EmailStr
 
 from app.domain.admin.entity import Admin
 from app.domain.shared.entity import BaseEntity
+from app.domain.student.entity import Student
 
 
 class Token(BaseModel):
@@ -21,3 +22,7 @@ class LoginRequest(BaseModel):
 
 class AuthAdminInfoInResponse(BaseEntity, Token):
     user: Admin
+
+
+class AuthStudentInfoInResponse(BaseEntity, Token):
+    user: Student

@@ -1,10 +1,10 @@
 from fastapi import Depends
 
-from app.domain.auth.entity import LoginRequest, TokenData, AuthAdminInfoInResponse
-from app.domain.admin.entity import Admin, AdminInDB
-from app.models.admin import AdminModel
+from app.domain.auth.entity import LoginRequest, TokenData, AuthStudentInfoInResponse
+from app.domain.student.entity import Student, StudentInDB
+from app.models.student import StudentModel
 from app.infra.security.security_service import verify_password, create_access_token
-from app.infra.admin.admin_repository import AdminRepository
+from app.infra.student.student_repository import StudentRepository
 from app.shared import request_object, use_case, response_object
 
 
@@ -26,27 +26,22 @@ class LoginRequestObject(request_object.ValidRequestObject):
 
 class LoginUseCase(use_case.UseCase):
     def __init__(
-            self,
-            admin_repository: AdminRepository = Depends(AdminRepository),
+        self,
+        student_repository: StudentRepository = Depends(StudentRepository),
     ):
-        self.admin_repository = admin_repository
+        self.student_repository = student_repository
 
     def process_request(self, req_object: LoginRequestObject):
-        admin: AdminModel = self.admin_repository.get_by_email(
-            req_object.login_payload.email)
+        student: StudentModel = self.student_repository.get_by_email(req_object.login_payload.email)
         checker = False
-        if admin:
-            checker = verify_password(
-                req_object.login_payload.password, admin.password)
-        if not admin or not checker:
+        if student:
+            checker = verify_password(req_object.login_payload.password, student.password)
+        if not student or not checker:
             return response_object.ResponseFailure.build_parameters_error(message="Sai email hoặc mật khẩu")
 
-        admin_in_db = AdminInDB.model_validate(admin)
-        if admin_in_db.disabled():
+        student_in_db = StudentInDB.model_validate(student)
+        if student_in_db.disabled():
             return response_object.ResponseFailure.build_parameters_error(message="Tài khoản của bạn đã bị khóa")
 
-        access_token = create_access_token(
-            data=TokenData(email=admin.email, id=str(admin.id))
-        )
-        return AuthAdminInfoInResponse(access_token=access_token,
-                                       user=Admin(**admin_in_db.model_dump()))
+        access_token = create_access_token(data=TokenData(email=student.email, id=str(student.id)))
+        return AuthStudentInfoInResponse(access_token=access_token, user=Student(**student_in_db.model_dump()))

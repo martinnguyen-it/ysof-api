@@ -6,10 +6,7 @@ from app.domain.shared.enum import AccountStatus
 from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin, Pagination
 from app.domain.student.enum import SexEnum
 from app.infra.season.season_repository import SeasonRepository
-
-
-def transform_email(email: str) -> str:
-    return email.lower().strip()
+from app.shared.utils.general import transform_email
 
 
 class StudentBase(BaseEntity):
@@ -90,5 +87,5 @@ class StudentInUpdate(BaseEntity):
     _extract_email = field_validator("email", mode="before")(transform_email)
 
 
-class StudentInUpdateTime(BaseEntity):
+class StudentInUpdateTime(StudentInUpdate):
     updated_at: datetime = datetime.now()

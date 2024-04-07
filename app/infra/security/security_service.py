@@ -15,10 +15,11 @@ from app.domain.shared.enum import AdminRole
 from app.infra.admin.admin_repository import AdminRepository
 from app.models.admin import AdminModel
 from app.shared.common_exception import forbidden_exception
+from app.infra.student.student_repository import StudentRepository
+from app.models.student import StudentModel
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/admin/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/admin/auth/login")
 
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -33,8 +34,7 @@ def verify_password(plain_password, hashed_password):
 
 def verify_token(token: str) -> Optional[TokenData]:
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY,
-                             algorithms=[settings.ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         email: str = payload.get("email")
         if email is None:
             raise credentials_exception
@@ -49,8 +49,8 @@ def get_password_hash(password):
 
 
 def _get_current_admin(
-        token: str = Depends(oauth2_scheme),
-        admin_repository: AdminRepository = Depends(AdminRepository),
+    token: str = Depends(oauth2_scheme),
+    admin_repository: AdminRepository = Depends(AdminRepository),
 ) -> AdminModel:
     token_data = verify_token(token=token)
     admin: AdminModel = admin_repository.get_by_email(email=token_data.email)
@@ -60,7 +60,7 @@ def _get_current_admin(
 
 
 def get_current_active_admin(
-        admin: AdminModel = Depends(_get_current_admin),
+    admin: AdminModel = Depends(_get_current_admin),
 ) -> AdminModel:
     current_user = AdminInDB.model_validate(admin)
     if not current_user.active():
@@ -69,14 +69,41 @@ def get_current_active_admin(
 
 
 def get_current_admin(
-        admin: AdminModel = Depends(_get_current_admin),
+    admin: AdminModel = Depends(_get_current_admin),
 ) -> AdminModel:
     current_user = AdminInDB.model_validate(admin)
     if current_user.disabled():
-        raise HTTPException(
-            status_code=400, detail="Tài khoản của bạn đã bị khóa"
-        )
+        raise HTTPException(status_code=400, detail="Tài khoản của bạn đã bị khóa")
     return admin
+
+
+def _get_current_student(
+    token: str = Depends(oauth2_scheme),
+    student_repository: StudentRepository = Depends(StudentRepository),
+) -> StudentModel:
+    token_data = verify_token(token=token)
+    student: StudentModel = student_repository.get_by_email(email=token_data.email)
+    if student is None:
+        raise credentials_exception
+    return student
+
+
+def get_current_active_student(
+    student: StudentModel = Depends(_get_current_student),
+) -> StudentModel:
+    current_user = AdminInDB.model_validate(student)
+    if not current_user.active():
+        raise forbidden_exception
+    return student
+
+
+def get_current_student(
+    student: StudentModel = Depends(_get_current_student),
+) -> StudentModel:
+    current_user = AdminInDB.model_validate(student)
+    if current_user.disabled():
+        raise HTTPException(status_code=400, detail="Tài khoản của bạn đã bị khóa")
+    return student
 
 
 def create_access_token(data: TokenData, expires_delta: timedelta = None) -> str:
@@ -85,12 +112,10 @@ def create_access_token(data: TokenData, expires_delta: timedelta = None) -> str
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + \
-            timedelta(days=settings.ACCESS_TOKEN_EXPIRE)
+        expire = datetime.now(timezone.utc) + timedelta(days=settings.ACCESS_TOKEN_EXPIRE)
     to_encode.update({"exp": expire})
 
-    encoded_jwt = jwt.encode(
-        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
     if isinstance(encoded_jwt, str):
         return encoded_jwt

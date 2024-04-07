@@ -83,7 +83,7 @@ class StudentRepository:
         ]
 
         if match_pipeline is not None:
-            pipeline.append(match_pipeline)
+            pipeline.append({"$match": match_pipeline})
 
         try:
             docs = StudentModel.objects().aggregate(pipeline)
@@ -98,7 +98,7 @@ class StudentRepository:
         pipeline = []
 
         if match_pipeline is not None:
-            pipeline.append(match_pipeline)
+            pipeline.append({"$match": match_pipeline})
         pipeline.append({"$count": "document_count"})
 
         try:
@@ -106,3 +106,10 @@ class StudentRepository:
             return list(docs)[0]["document_count"]
         except Exception:
             return 0
+
+    def delete(self, id: ObjectId) -> bool:
+        try:
+            StudentModel.objects(id=id).delete()
+            return True
+        except Exception:
+            return False

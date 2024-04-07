@@ -5,10 +5,7 @@ from pydantic import ConfigDict, EmailStr, field_validator
 from app.domain.shared.enum import AdminRole, AccountStatus
 from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin, Pagination
 from app.infra.season.season_repository import SeasonRepository
-
-
-def transform_email(email: str | None = None) -> str | None:
-    return email.lower().strip() if email else email
+from app.shared.utils.general import transform_email
 
 
 class Address(BaseEntity):

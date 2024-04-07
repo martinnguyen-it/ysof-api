@@ -41,10 +41,17 @@ def get_quarter(quarter: int, year: int) -> Tuple[date, date]:
 
 def get_month_list(dates):
     start, end = [datetime.strptime(_, "%Y-%m-%d") for _ in dates]
-    total_months = lambda dt: dt.month + 12 * dt.year
+
+    def total_months(dt):
+        return dt.month + 12 * dt.year
+
     mlist = []
     for tot_m in range(total_months(start) - 1, total_months(end)):
         y, m = divmod(tot_m, 12)
         mlist.append(datetime(y, m + 1, start.day))
         # mlist.append(calendar.monthrange(y, m+1))
     return mlist
+
+
+def transform_email(email: str | None = None) -> str | None:
+    return email.lower().strip() if isinstance(email, str) else email
