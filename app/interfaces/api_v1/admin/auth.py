@@ -10,6 +10,7 @@ router = APIRouter()
 @router.post("/login", response_model=AuthAdminInfoInResponse)
 @response_decorator()
 def login(payload: LoginRequest = Body(...), login_use_case: LoginUseCase = Depends(LoginUseCase)):
+    print(">>>>>>")
     req_object = LoginRequestObject.builder(login_payload=payload)
     response = login_use_case.execute(req_object)
     return response

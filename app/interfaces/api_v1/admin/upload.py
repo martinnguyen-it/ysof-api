@@ -9,29 +9,20 @@ from app.use_cases.upload.create_image import UploadImageRequestObject, UploadIm
 router = APIRouter()
 
 
-@router.post(
-    "",
-    response_model=GoogleDriveAPIRes
-)
+@router.post("", response_model=GoogleDriveAPIRes)
 @response_decorator()
 def upload_file(
-        file: UploadFile = File(...),
-        google_drive_service: GoogleDriveApiService = Depends(
-            GoogleDriveApiService)
+    file: UploadFile = File(...), google_drive_service: GoogleDriveApiService = Depends(GoogleDriveApiService)
 ):
     response = google_drive_service.create(file=file)
     return response
 
 
-@router.post(
-    "/image",
-    response_model=ImageRes
-)
+@router.post("/image", response_model=ImageRes)
 @response_decorator()
 def upload_image(
-        image: UploadFile = File(...),
-        upload_image_use_case: UploadImageUseCase = Depends(
-            UploadImageUseCase),
+    image: UploadFile = File(...),
+    upload_image_use_case: UploadImageUseCase = Depends(UploadImageUseCase),
 ):
     req_object = UploadImageRequestObject.builder(image=image)
     response = upload_image_use_case.execute(request_object=req_object)
@@ -43,9 +34,8 @@ def upload_image(
 )
 @response_decorator()
 def delete_image(
-        file_id: str = Path(..., title="File id"),
-        google_drive_service: GoogleDriveApiService = Depends(
-            GoogleDriveApiService)
+    file_id: str = Path(..., title="File id"),
+    google_drive_service: GoogleDriveApiService = Depends(GoogleDriveApiService),
 ):
     google_drive_service.delete(file_id=file_id)
     return {"message": "Success"}
