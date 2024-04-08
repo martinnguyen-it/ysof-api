@@ -52,12 +52,17 @@ class CreateStudentUseCase(use_case.UseCase):
         self.audit_log_repository = audit_log_repository
 
     def process_request(self, req_object: CreateStudentRequestObject):
-        existing_student: Optional[StudentModel] = self.student_repository.get_by_email(
-            email=req_object.student_in.email
+        existing_student: Optional[StudentModel] = self.student_repository.find_one(
+            {
+                "$or": [
+                    {"email": req_object.student_in.email},
+                    {"numerical_order": req_object.student_in.numerical_order},
+                ]
+            }
         )
 
         if existing_student:
-            return response_object.ResponseFailure.build_parameters_error(message="Email đã tồn tại")
+            return response_object.ResponseFailure.build_parameters_error(message="Email hoặc mshv đã tồn tại")
 
         current_season: int = self.season_repository.get_current_season().season
         obj_in: StudentInDB = StudentInDB(

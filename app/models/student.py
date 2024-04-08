@@ -3,7 +3,7 @@ from mongoengine import Document, StringField, EmailField, DateTimeField, IntFie
 
 
 class StudentModel(Document):
-    numerical_order = IntField(required=True, unique=True)
+    numerical_order = IntField(required=True)
     group = IntField(required=True)
     holy_name = StringField(required=True)
     full_name = StringField(required=True)

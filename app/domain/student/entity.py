@@ -93,3 +93,13 @@ class StudentInUpdate(BaseEntity):
 
 class StudentInUpdateTime(StudentInUpdate):
     updated_at: datetime = datetime.now()
+
+
+class ImportSpreadsheetsPayload(BaseEntity):
+    url: str
+    sheet_name: str | None = "main"
+
+
+class ImportSpreadsheetsInResponse(BaseEntity):
+    inserted_ids: list[str]
+    errors: list

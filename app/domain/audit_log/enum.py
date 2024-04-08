@@ -5,6 +5,7 @@ class AuditLogType(str, ExtendedEnum):
     DELETE = "delete"
     UPDATE = "update"
     CREATE = "create"
+    IMPORT = "import"
 
 
 class Endpoint(str, ExtendedEnum):

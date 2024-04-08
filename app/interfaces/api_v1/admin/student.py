@@ -1,7 +1,14 @@
 from fastapi import APIRouter, Body, Depends, Query, HTTPException, Path
 from typing import Optional, Annotated
 
-from app.domain.student.entity import ManyStudentsInResponse, Student, StudentInCreate, StudentInUpdate
+from app.domain.student.entity import (
+    ImportSpreadsheetsInResponse,
+    ImportSpreadsheetsPayload,
+    ManyStudentsInResponse,
+    Student,
+    StudentInCreate,
+    StudentInUpdate,
+)
 from app.domain.shared.enum import AdminRole, Sort
 from app.infra.security.security_service import authorization, get_current_active_admin
 from app.shared.decorator import response_decorator
@@ -18,6 +25,10 @@ from app.use_cases.student_admin.create import (
 from app.models.admin import AdminModel
 from app.shared.constant import SUPER_ADMIN
 from app.use_cases.student_admin.delete import DeleteStudentRequestObject, DeleteStudentUseCase
+from app.use_cases.student_admin.import_from_spreadsheets import (
+    ImportSpreadsheetsStudentRequestObject,
+    ImportSpreadsheetsStudentUseCase,
+)
 
 router = APIRouter()
 
@@ -113,5 +124,18 @@ def delete_student(
 ):
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BKL])
     req_object = DeleteStudentRequestObject.builder(id=id, current_admin=current_admin)
+    response = delete_student_use_case.execute(request_object=req_object)
+    return response
+
+
+@router.post("/import", response_model=ImportSpreadsheetsInResponse)
+@response_decorator()
+def import_student_from_spreadsheets(
+    payload: ImportSpreadsheetsPayload = Body(..., title="Url spreadsheets"),
+    delete_student_use_case: ImportSpreadsheetsStudentUseCase = Depends(ImportSpreadsheetsStudentUseCase),
+    current_admin: AdminModel = Depends(get_current_active_admin),
+):
+    authorization(current_admin, [*SUPER_ADMIN, AdminRole.BKL])
+    req_object = ImportSpreadsheetsStudentRequestObject.builder(payload=payload, current_admin=current_admin)
     response = delete_student_use_case.execute(request_object=req_object)
     return response

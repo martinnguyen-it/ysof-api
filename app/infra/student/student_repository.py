@@ -113,3 +113,10 @@ class StudentRepository:
             return True
         except Exception:
             return False
+
+    def find_one(self, conditions: Dict[str, Union[str, bool, ObjectId]]) -> Optional[StudentModel]:
+        try:
+            doc = StudentModel._get_collection().find_one(conditions)
+            return StudentModel.from_mongo(doc) if doc else None
+        except Exception:
+            return None

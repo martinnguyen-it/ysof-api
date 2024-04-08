@@ -85,4 +85,4 @@ def extract_id_spreadsheet_from_url(url: str) -> str:
     if m1:
         return m1.group(1)
 
-    raise HTTPException(status_code=400, detail="Spreadsheet hoặc sheet không tồn tại")
+    raise HTTPException(status_code=400, detail="Không thể lấy id spreadsheet từ url đã nhập.")
