@@ -103,3 +103,8 @@ class ImportSpreadsheetsPayload(BaseEntity):
 class ImportSpreadsheetsInResponse(BaseEntity):
     inserted_ids: list[str]
     errors: list
+
+
+class ResetPasswordResponse(BaseEntity):
+    email: str
+    password: str

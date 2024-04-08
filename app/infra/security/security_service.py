@@ -138,7 +138,7 @@ def authorization(admin: AdminModel, roles: list[AdminRole], require_active: boo
         raise forbidden_exception
 
 
-def generate_random_password(length: int = 20) -> str:
+def generate_random_password(length: int = 10) -> str:
     """_summary_
 
     Args:

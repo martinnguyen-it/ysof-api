@@ -5,6 +5,7 @@ from app.domain.student.entity import (
     ImportSpreadsheetsInResponse,
     ImportSpreadsheetsPayload,
     ManyStudentsInResponse,
+    ResetPasswordResponse,
     Student,
     StudentInCreate,
     StudentInUpdate,
@@ -29,6 +30,7 @@ from app.use_cases.student_admin.import_from_spreadsheets import (
     ImportSpreadsheetsStudentRequestObject,
     ImportSpreadsheetsStudentUseCase,
 )
+from app.use_cases.student_admin.reset_password import ResetPasswordStudentRequestObject, ResetPasswordStudentUseCase
 
 router = APIRouter()
 
@@ -74,7 +76,7 @@ def get_list_students(
     page_index: Annotated[int, Query(title="Page Index")] = 1,
     page_size: Annotated[int, Query(title="Page size")] = 300,
     search: Optional[str] = Query(None, title="Search"),
-    sort: Optional[Sort] = Sort.DESC,
+    sort: Optional[Sort] = Sort.ASCE,
     sort_by: Optional[str] = "numerical_order",
     group: Optional[int] = None,
     current_admin: AdminModel = Depends(get_current_active_admin),
@@ -138,4 +140,17 @@ def import_student_from_spreadsheets(
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BKL])
     req_object = ImportSpreadsheetsStudentRequestObject.builder(payload=payload, current_admin=current_admin)
     response = delete_student_use_case.execute(request_object=req_object)
+    return response
+
+
+@router.patch("/reset-password/{id}", response_model=ResetPasswordResponse)
+@response_decorator()
+def reset_password_student(
+    id: str = Path(..., title="Student Id"),
+    current_admin: AdminModel = Depends(get_current_active_admin),
+    reset_password_student_use_case: ResetPasswordStudentUseCase = Depends(ResetPasswordStudentUseCase),
+):
+    authorization(current_admin, [*SUPER_ADMIN, AdminRole.BKL])
+    req_object = ResetPasswordStudentRequestObject.builder(student_id=id, current_admin=current_admin)
+    response = reset_password_student_use_case.execute(request_object=req_object)
     return response

@@ -1,4 +1,5 @@
 import app.interfaces.api_v1
+import app.interfaces.api_v1.admin
 import time
 import unittest
 from unittest.mock import patch
@@ -10,10 +11,7 @@ from google.oauth2.credentials import Credentials
 
 from app.models.student import StudentModel
 from app.models.admin import AdminModel
-from app.infra.security.security_service import (
-    TokenData,
-    get_password_hash,
-)
+from app.infra.security.security_service import get_password_hash, TokenData, verify_password
 from app.models.season import SeasonModel
 from app.models.audit_log import AuditLogModel
 from app.domain.audit_log.enum import AuditLogType, Endpoint
@@ -73,6 +71,17 @@ class TestUserApi(unittest.TestCase):
             phone_number="0123456789",
             current_season=3,
             email="student2@example.com",
+            full_name="Nguyen Thanh Tam",
+            password=get_password_hash(password="local@local"),
+        ).save()
+        cls.student3: StudentModel = StudentModel(
+            numerical_order=3,
+            group=2,
+            status="active",
+            holy_name="Martin",
+            phone_number="0123456789",
+            current_season=3,
+            email="student4@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
@@ -171,7 +180,7 @@ class TestUserApi(unittest.TestCase):
             )
             assert r.status_code == 200
             resp = r.json()
-            assert resp["pagination"]["total"] == 2
+            assert resp["pagination"]["total"] == 3
 
     def test_update_student_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
@@ -190,7 +199,7 @@ class TestUserApi(unittest.TestCase):
             time.sleep(1)
             cursor = AuditLogModel._get_collection().find({"type": AuditLogType.UPDATE, "endpoint": Endpoint.STUDENT})
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
-            assert len(audit_logs) == 1
+            assert len(audit_logs) == 2
 
     def test_delete_student_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
@@ -313,5 +322,38 @@ class TestUserApi(unittest.TestCase):
 
             time.sleep(1)
             cursor = AuditLogModel._get_collection().find({"type": AuditLogType.IMPORT, "endpoint": Endpoint.STUDENT})
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 1
+
+    def test_reset_password_student_by_id(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
+            "app.use_cases.student_admin.reset_password.generate_random_password"
+        ) as mock_generate_random_password:
+            mock_token.return_value = TokenData(email=self.admin.email)
+
+            mock_password = "12345678"
+            mock_generate_random_password.return_value = mock_password
+
+            r = self.client.patch(
+                f"/api/v1/admin/students/reset-password/{self.student3.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+
+            resp = r.json()
+            print(resp)
+            assert r.status_code == 200
+            assert resp["email"] == self.student3.email
+            assert resp["password"] == mock_password
+
+            password = StudentModel.objects(id=self.student3.id).get().password
+
+            assert verify_password(mock_password, password)
+
+            mock_generate_random_password.assert_called_once()
+
+            time.sleep(1)
+            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.UPDATE, "endpoint": Endpoint.STUDENT})
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
