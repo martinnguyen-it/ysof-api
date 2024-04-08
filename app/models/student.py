@@ -1,5 +1,5 @@
 import datetime
-from mongoengine import Document, StringField, EmailField, DateTimeField, IntField
+from mongoengine import Document, StringField, EmailField, DateTimeField, IntField, DateField
 
 
 class StudentModel(Document):
@@ -8,7 +8,7 @@ class StudentModel(Document):
     holy_name = StringField(required=True)
     full_name = StringField(required=True)
     sex = StringField()
-    date_of_birth = DateTimeField()
+    date_of_birth = DateField()
     origin_address = StringField()
     diocese = StringField()
     phone_number = StringField()

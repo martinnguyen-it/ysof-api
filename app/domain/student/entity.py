@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional, List
 from pydantic import ConfigDict, EmailStr, field_validator
 
@@ -6,7 +6,7 @@ from app.domain.shared.enum import AccountStatus
 from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin, Pagination
 from app.domain.student.enum import SexEnum
 from app.infra.season.season_repository import SeasonRepository
-from app.shared.utils.general import transform_email
+from app.shared.utils.general import convert_valid_date, transform_email
 
 
 class StudentBase(BaseEntity):
@@ -16,7 +16,7 @@ class StudentBase(BaseEntity):
     full_name: str
     email: EmailStr
     sex: Optional[SexEnum] = None
-    date_of_birth: Optional[datetime] = None
+    date_of_birth: Optional[date] = None
     origin_address: Optional[str] = None
     diocese: Optional[str] = None
     phone_number: Optional[str] = None
@@ -32,6 +32,8 @@ class StudentInDB(IDModelMixin, DateTimeModelMixin, StudentBase):
     status: AccountStatus = AccountStatus.ACTIVE
     current_season: int
     password: str
+
+    _convert_valid_date = field_validator("date_of_birth", mode="before")(convert_valid_date)
 
     def disabled(self):
         """
@@ -52,6 +54,7 @@ class StudentInDB(IDModelMixin, DateTimeModelMixin, StudentBase):
 
 class StudentInCreate(StudentBase):
     _extract_email = field_validator("email", mode="before")(transform_email)
+    _convert_valid_date = field_validator("date_of_birth", mode="before")(convert_valid_date)
 
 
 class Student(StudentBase, DateTimeModelMixin):
@@ -74,7 +77,7 @@ class StudentInUpdate(BaseEntity):
     holy_name: Optional[str] = None
     full_name: Optional[str] = None
     sex: Optional[SexEnum] = None
-    date_of_birth: Optional[datetime] = None
+    date_of_birth: Optional[date] = None
     origin_address: Optional[str] = None
     diocese: Optional[str] = None
     phone_number: Optional[str] = None
@@ -85,6 +88,7 @@ class StudentInUpdate(BaseEntity):
     note: Optional[str] = None
     status: Optional[AccountStatus] = None
     _extract_email = field_validator("email", mode="before")(transform_email)
+    _convert_valid_date = field_validator("date_of_birth", mode="before")(convert_valid_date)
 
 
 class StudentInUpdateTime(StudentInUpdate):

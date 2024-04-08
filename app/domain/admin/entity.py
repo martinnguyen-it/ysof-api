@@ -1,11 +1,11 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional, List
 from pydantic import ConfigDict, EmailStr, field_validator
 
 from app.domain.shared.enum import AdminRole, AccountStatus
 from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin, Pagination
 from app.infra.season.season_repository import SeasonRepository
-from app.shared.utils.general import transform_email
+from app.shared.utils.general import convert_valid_date, transform_email
 
 
 class Address(BaseEntity):
@@ -23,11 +23,12 @@ class AdminBase(BaseEntity):
     holy_name: str
     phone_number: Optional[list[str]] = None
     address: Optional[Address] = None
-    date_of_birth: Optional[datetime] = None
+    date_of_birth: Optional[date] = None
     facebook: Optional[str] = None
     current_season: int | None = None
     seasons: list[int] | None = None
     avatar: Optional[str] = None
+    _convert_valid_date = field_validator("date_of_birth", mode="before")(convert_valid_date)
 
 
 class AdminInDB(IDModelMixin, DateTimeModelMixin, AdminBase):
@@ -62,19 +63,18 @@ class AdminInCreate(BaseEntity):
     holy_name: str
     phone_number: Optional[list[str]] = None
     address: Optional[Address] = None
-    date_of_birth: Optional[datetime] = None
+    date_of_birth: Optional[date] = None
     facebook: Optional[str] = None
     _extract_email = field_validator("email", mode="before")(transform_email)
+    _convert_valid_date = field_validator("date_of_birth", mode="before")(convert_valid_date)
 
 
-class Admin(AdminBase):
+class Admin(AdminBase, DateTimeModelMixin):
     """
     Admin domain entity
     """
 
     id: str
-    created_at: datetime
-    updated_at: datetime
 
 
 class ManyAdminsInResponse(BaseEntity):
@@ -88,9 +88,10 @@ class AdminInUpdateMe(BaseEntity):
     holy_name: Optional[str] = None
     phone_number: Optional[list[str]] = None
     address: Optional[Address] = None
-    date_of_birth: Optional[datetime] = None
+    date_of_birth: Optional[date] = None
     facebook: Optional[str] = None
     _extract_email = field_validator("email", mode="before")(transform_email)
+    _convert_valid_date = field_validator("date_of_birth", mode="before")(convert_valid_date)
 
 
 class AdminInUpdate(AdminInUpdateMe):

@@ -20,14 +20,10 @@ class TestUserApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
-        connect("mongoenginetest", host="mongodb://localhost:1234",
-                mongo_client_class=mongomock.MongoClient)
+        connect("mongoenginetest", host="mongodb://localhost:1234", mongo_client_class=mongomock.MongoClient)
         cls.client = TestClient(app)
         cls.season: SeasonModel = SeasonModel(
-            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
-            academic_year="2023-2024",
-            season=3,
-            is_current=True
+            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG", academic_year="2023-2024", season=3, is_current=True
         ).save()
         cls.user = AdminModel(
             status="active",
@@ -35,13 +31,9 @@ class TestUserApi(unittest.TestCase):
                 "admin",
             ],
             holy_name="Martin",
-            phone_number=[
-                "0123456789"
-            ],
+            phone_number=["0123456789"],
             current_season=2,
-            seasons=[
-                2
-            ],
+            seasons=[2],
             email="user@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
@@ -52,13 +44,9 @@ class TestUserApi(unittest.TestCase):
                 "bdh",
             ],
             holy_name="Martin",
-            phone_number=[
-                "0123456789"
-            ],
+            phone_number=["0123456789"],
             current_season=3,
-            seasons=[
-                1, 2, 3
-            ],
+            seasons=[1, 2, 3],
             email="user1@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
@@ -69,13 +57,9 @@ class TestUserApi(unittest.TestCase):
                 "bdh",
             ],
             holy_name="Martin",
-            phone_number=[
-                "0123456789"
-            ],
+            phone_number=["0123456789"],
             current_season=2,
-            seasons=[
-                2
-            ],
+            seasons=[2],
             email="user2@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
@@ -86,13 +70,9 @@ class TestUserApi(unittest.TestCase):
                 "bhv",
             ],
             holy_name="Martin",
-            phone_number=[
-                "0123456789"
-            ],
+            phone_number=["0123456789"],
             current_season=3,
-            seasons=[
-                3
-            ],
+            seasons=[3],
             email="user3@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
@@ -109,21 +89,13 @@ class TestUserApi(unittest.TestCase):
                 "/api/v1/admins",
                 json={
                     "email": "test@test.com",
-                    "roles": [
-                        "admin"
-                    ],
+                    "roles": ["admin"],
                     "full_name": "string",
                     "holy_name": "string",
-                    "phone_number": [
-                        "string"
-                    ],
-                    "address": {
-                        "current": "string",
-                        "original": "string",
-                        "diocese": "string"
-                    },
-                    "date_of_birth": "2024-03-15T17:10:57.939Z",
-                    "facebook": "string"
+                    "phone_number": ["string"],
+                    "address": {"current": "string", "original": "string", "diocese": "string"},
+                    "date_of_birth": "2024-03-15",
+                    "facebook": "string",
                 },
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
@@ -137,11 +109,8 @@ class TestUserApi(unittest.TestCase):
             assert user.password
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find(
-                {"type": AuditLogType.CREATE, "endpoint": Endpoint.ADMIN}
-            )
-            audit_logs = [AuditLogModel.from_mongo(
-                doc) for doc in cursor] if cursor else []
+            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.CREATE, "endpoint": Endpoint.ADMIN})
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 
     def test_get_myself(self):
@@ -176,9 +145,7 @@ class TestUserApi(unittest.TestCase):
             mock_token.return_value = TokenData(email=self.user2.email)
             r = self.client.put(
                 f"/api/v1/admins/{str(self.user3.id)}",
-                json={
-                    "full_name": "Updated"
-                },
+                json={"full_name": "Updated"},
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -189,9 +156,7 @@ class TestUserApi(unittest.TestCase):
             mock_token.return_value = TokenData(email=self.user1.email)
             r = self.client.put(
                 f"/api/v1/admins/{str(self.user3.id)}",
-                json={
-                    "full_name": "Updated"
-                },
+                json={"full_name": "Updated"},
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -203,9 +168,7 @@ class TestUserApi(unittest.TestCase):
             mock_token.return_value = TokenData(email=self.user.email)
             r = self.client.put(
                 f"/api/v1/admins/{str(self.user3.id)}",
-                json={
-                    "full_name": "Updated"
-                },
+                json={"full_name": "Updated"},
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -213,9 +176,6 @@ class TestUserApi(unittest.TestCase):
             assert r.status_code == 200
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find(
-                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.ADMIN}
-            )
-            audit_logs = [AuditLogModel.from_mongo(
-                doc) for doc in cursor] if cursor else []
+            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.UPDATE, "endpoint": Endpoint.ADMIN})
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 2

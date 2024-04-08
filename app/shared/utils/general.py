@@ -1,7 +1,9 @@
 from datetime import date, datetime
 from enum import Enum
+from fastapi import HTTPException
 from typing import Optional, Union, Tuple
 import calendar
+import re
 
 
 class ExtendedEnum(Enum):
@@ -12,6 +14,23 @@ class ExtendedEnum(Enum):
     @classmethod
     def list(cls):
         return list(map(lambda c: c.value, cls))
+
+
+def convert_valid_date(my_date: Union[date, datetime, str]) -> Optional[date]:
+    if not my_date:
+        return None
+
+    if isinstance(my_date, date):
+        return my_date
+
+    if isinstance(my_date, datetime):
+        return my_date.date()
+
+    if isinstance(my_date, str):
+        try:
+            return datetime.strptime(my_date, "%d/%m/%Y").date()
+        except ValueError:
+            return None
 
 
 def date2datetime(
@@ -55,3 +74,15 @@ def get_month_list(dates):
 
 def transform_email(email: str | None = None) -> str | None:
     return email.lower().strip() if isinstance(email, str) else email
+
+
+def extract_id_spreadsheet_from_url(url: str) -> str:
+    m2 = re.compile(r"/spreadsheets/d/([a-zA-Z0-9-_]+)").search(url)
+    if m2:
+        return m2.group(1)
+
+    m1 = re.compile(r"key=([^&#]+)").search(url)
+    if m1:
+        return m1.group(1)
+
+    raise HTTPException(status_code=400, detail="Spreadsheet hoặc sheet không tồn tại")

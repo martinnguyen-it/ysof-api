@@ -1,6 +1,15 @@
 from datetime import datetime, timezone
-from mongoengine import (Document, StringField, EmailField, DateTimeField, EmbeddedDocumentField,
-                         ListField, IntField, EmbeddedDocument)
+from mongoengine import (
+    Document,
+    StringField,
+    EmailField,
+    DateTimeField,
+    EmbeddedDocumentField,
+    ListField,
+    IntField,
+    EmbeddedDocument,
+    DateField,
+)
 
 
 class Address(EmbeddedDocument):
@@ -18,7 +27,7 @@ class AdminModel(Document):
     phone_number = ListField(StringField())
     password = StringField(required=True)
     address = EmbeddedDocumentField(Address)
-    date_of_birth = DateTimeField()
+    date_of_birth = DateField()
     facebook = StringField()
     current_season = IntField()
     seasons = ListField(IntField())
@@ -29,11 +38,10 @@ class AdminModel(Document):
 
     @classmethod
     def from_mongo(cls, data: dict, id_str=False):
-        """We must convert _id into "id". """
+        """We must convert _id into "id"."""
         if not data:
             return data
-        id = data.pop("_id", None) if not id_str else str(
-            data.pop("_id", None))
+        id = data.pop("_id", None) if not id_str else str(data.pop("_id", None))
         if "_cls" in data:
             data.pop("_cls", None)
         return cls(**dict(data, id=id))
