@@ -7,10 +7,10 @@ from app.shared import request_object, use_case, response_object
 from app.domain.student.entity import Student, StudentInDB, StudentInUpdate, StudentInUpdateTime
 from app.infra.student.student_repository import StudentRepository
 from app.models.admin import AdminModel
-from app.infra.season.season_repository import SeasonRepository
 from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
+from app.shared.utils.general import get_current_season_value
 
 
 class UpdateStudentRequestObject(request_object.ValidRequestObject):
@@ -41,11 +41,9 @@ class UpdateStudentUseCase(use_case.UseCase):
         self,
         background_tasks: BackgroundTasks,
         student_repository: StudentRepository = Depends(StudentRepository),
-        season_repository: SeasonRepository = Depends(SeasonRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
     ):
         self.student_repository = student_repository
-        self.season_repository = season_repository
         self.background_tasks = background_tasks
         self.audit_log_repository = audit_log_repository
 
@@ -54,7 +52,7 @@ class UpdateStudentUseCase(use_case.UseCase):
         if not student:
             return response_object.ResponseFailure.build_not_found_error("Học viên không tồn tại")
 
-        current_season: int = self.season_repository.get_current_season().season
+        current_season = get_current_season_value()
 
         self.student_repository.update(id=student.id, data=StudentInUpdateTime(**req_object.obj_in.model_dump()))
         student.reload()

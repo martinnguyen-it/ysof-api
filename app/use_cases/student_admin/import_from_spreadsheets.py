@@ -17,7 +17,7 @@ from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.infra.security.security_service import get_password_hash
 from app.infra.services.google_drive_api import GoogleDriveApiService
-from app.shared.utils.general import extract_id_spreadsheet_from_url
+from app.shared.utils.general import extract_id_spreadsheet_from_url, get_current_season_value
 from app.shared.constant import HEADER_IMPORT_STUDENT
 from app.domain.student.enum import FieldStudentEnum
 from app.models.student import StudentModel
@@ -48,14 +48,12 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
         background_tasks: BackgroundTasks,
         student_repository: StudentRepository = Depends(StudentRepository),
         lecturer_repository: LecturerRepository = Depends(LecturerRepository),
-        season_repository: SeasonRepository = Depends(SeasonRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
         google_drive_service: GoogleDriveApiService = Depends(GoogleDriveApiService),
     ):
         self.student_repository = student_repository
         self.lecturer_repository = lecturer_repository
         self.background_tasks = background_tasks
-        self.season_repository = season_repository
         self.audit_log_repository = audit_log_repository
         self.google_drive_service = google_drive_service
 
@@ -98,7 +96,7 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
         inserted_ids: list[str] = []
         errors: list = []
 
-        current_season: int = self.season_repository.get_current_season().season
+        current_season = get_current_season_value()
         for idx, row in enumerate(data_import):
             data = self.convert_value_spreadsheet_to_dict(row)
             try:

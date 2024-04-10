@@ -6,11 +6,11 @@ from app.infra.student.student_repository import StudentRepository
 from app.shared import request_object, response_object, use_case
 from app.models.student import StudentModel
 from app.models.admin import AdminModel
-from app.infra.season.season_repository import SeasonRepository
 from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.domain.student.entity import StudentInDB
+from app.shared.utils.general import get_current_season_value
 
 
 class DeleteStudentRequestObject(request_object.ValidRequestObject):
@@ -35,11 +35,9 @@ class DeleteStudentUseCase(use_case.UseCase):
         self,
         background_tasks: BackgroundTasks,
         student_repository: StudentRepository = Depends(StudentRepository),
-        season_repository: SeasonRepository = Depends(SeasonRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
     ):
         self.student_repository = student_repository
-        self.season_repository = season_repository
         self.background_tasks = background_tasks
         self.audit_log_repository = audit_log_repository
 
@@ -48,7 +46,7 @@ class DeleteStudentUseCase(use_case.UseCase):
         if not student:
             return response_object.ResponseFailure.build_not_found_error("Môn học không tồn tại")
 
-        current_season: int = self.season_repository.get_current_season().season
+        current_season = get_current_season_value()
         try:
             self.student_repository.delete(id=req_object.id)
             self.background_tasks.add_task(

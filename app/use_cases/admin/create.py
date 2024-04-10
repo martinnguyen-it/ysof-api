@@ -11,7 +11,7 @@ from app.models.admin import AdminModel
 from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import Endpoint, AuditLogType
-from app.infra.season.season_repository import SeasonRepository
+from app.shared.utils.general import get_current_season_value
 
 
 class CreateAdminRequestObject(request_object.ValidRequestObject):
@@ -41,19 +41,17 @@ class CreateAdminUseCase(use_case.UseCase):
         self,
         background_tasks: BackgroundTasks,
         admin_repository: AdminRepository = Depends(AdminRepository),
-        season_repository: SeasonRepository = Depends(SeasonRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
     ):
         self.admin_repository = admin_repository
         self.audit_log_repository = audit_log_repository
-        self.season_repository = season_repository
         self.background_tasks = background_tasks
 
     def process_request(self, req_object: CreateAdminRequestObject):
         admin_in: AdminInCreate = req_object.admin_in
         existing_admin: Optional[AdminInDB] = self.admin_repository.get_by_email(email=admin_in.email)
 
-        current_season: int = self.season_repository.get_current_season().season
+        current_season = get_current_season_value()
         if existing_admin:
             seasons = [*existing_admin.seasons, current_season]
             self.admin_repository.update(

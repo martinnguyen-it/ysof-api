@@ -54,7 +54,7 @@ def create_subject(
     return response
 
 
-@router.get("", response_model=list[Subject], dependencies=[Depends(get_current_admin)])
+@router.get("", response_model=list[Subject])
 @response_decorator()
 def get_list_subjects(
     list_subjects_use_case: ListSubjectsUseCase = Depends(ListSubjectsUseCase),
@@ -63,6 +63,7 @@ def get_list_subjects(
     sort_by: Optional[str] = "id",
     subdivision: Optional[str] = None,
     season: Optional[int] = None,
+    current_admin: AdminModel = Depends(get_current_admin),
 ):
     annotations = {}
     for base in reversed(Subject.__mro__):
@@ -72,10 +73,7 @@ def get_list_subjects(
     sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
 
     req_object = ListSubjectsRequestObject.builder(
-        search=search,
-        season=season,
-        sort=sort_query,
-        subdivision=subdivision,
+        search=search, season=season, sort=sort_query, subdivision=subdivision, current_admin=current_admin
     )
     response = list_subjects_use_case.execute(request_object=req_object)
     return response

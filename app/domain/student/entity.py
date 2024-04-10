@@ -5,8 +5,7 @@ from pydantic import ConfigDict, EmailStr, field_validator
 from app.domain.shared.enum import AccountStatus
 from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin, Pagination
 from app.domain.student.enum import SexEnum
-from app.infra.season.season_repository import SeasonRepository
-from app.shared.utils.general import convert_valid_date, transform_email
+from app.shared.utils.general import convert_valid_date, get_current_season_value, transform_email
 
 
 class StudentBase(BaseEntity):
@@ -49,7 +48,7 @@ class StudentInDB(IDModelMixin, DateTimeModelMixin, StudentBase):
         Returns:
             _type_: bool
         """
-        return not self.disabled() and self.current_season == SeasonRepository().get_current_season().season
+        return not self.disabled() and self.current_season == get_current_season_value()
 
 
 class StudentInCreate(StudentBase):

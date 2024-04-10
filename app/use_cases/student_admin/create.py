@@ -10,11 +10,11 @@ from app.domain.student.entity import Student, StudentInCreate, StudentInDB
 from app.infra.student.student_repository import StudentRepository
 from app.infra.lecturer.lecturer_repository import LecturerRepository
 from app.models.admin import AdminModel
-from app.infra.season.season_repository import SeasonRepository
 from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.infra.security.security_service import get_password_hash
+from app.shared.utils.general import get_current_season_value
 
 
 class CreateStudentRequestObject(request_object.ValidRequestObject):
@@ -42,13 +42,11 @@ class CreateStudentUseCase(use_case.UseCase):
         background_tasks: BackgroundTasks,
         student_repository: StudentRepository = Depends(StudentRepository),
         lecturer_repository: LecturerRepository = Depends(LecturerRepository),
-        season_repository: SeasonRepository = Depends(SeasonRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
     ):
         self.student_repository = student_repository
         self.lecturer_repository = lecturer_repository
         self.background_tasks = background_tasks
-        self.season_repository = season_repository
         self.audit_log_repository = audit_log_repository
 
     def process_request(self, req_object: CreateStudentRequestObject):
@@ -64,7 +62,7 @@ class CreateStudentUseCase(use_case.UseCase):
         if existing_student:
             return response_object.ResponseFailure.build_parameters_error(message="Email hoặc mshv đã tồn tại")
 
-        current_season: int = self.season_repository.get_current_season().season
+        current_season = get_current_season_value()
         obj_in: StudentInDB = StudentInDB(
             **req_object.student_in.model_dump(),
             password=get_password_hash(password="12345678"),

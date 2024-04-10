@@ -4,8 +4,7 @@ from pydantic import ConfigDict, EmailStr, field_validator
 
 from app.domain.shared.enum import AdminRole, AccountStatus
 from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin, Pagination
-from app.infra.season.season_repository import SeasonRepository
-from app.shared.utils.general import convert_valid_date, transform_email
+from app.shared.utils.general import convert_valid_date, get_current_season_value, transform_email
 
 
 class Address(BaseEntity):
@@ -52,7 +51,7 @@ class AdminInDB(IDModelMixin, DateTimeModelMixin, AdminBase):
             _type_: bool
         """
         return AdminRole.ADMIN in self.roles or (
-            (not self.disabled()) and self.current_season == SeasonRepository().get_current_season().season
+            (not self.disabled()) and self.current_season == get_current_season_value()
         )
 
 

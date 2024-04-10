@@ -4,6 +4,10 @@ from fastapi import HTTPException
 from typing import Optional, Union, Tuple
 import calendar
 import re
+from app.infra.season.season_repository import SeasonRepository
+from cachetools import TTLCache
+
+cache = TTLCache(maxsize=1, ttl=60 * 60 * 24 * 30)  # Cache 1 item for 30 days
 
 
 class ExtendedEnum(Enum):
@@ -86,3 +90,10 @@ def extract_id_spreadsheet_from_url(url: str) -> str:
         return m1.group(1)
 
     raise HTTPException(status_code=400, detail="Không thể lấy id spreadsheet từ url đã nhập.")
+
+
+def get_current_season_value() -> int:
+    if "season" not in cache:
+        season: int = SeasonRepository().get_current_season().season
+        cache["season"] = season
+    return cache["season"]

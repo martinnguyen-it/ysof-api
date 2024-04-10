@@ -5,12 +5,12 @@ from app.shared import request_object, response_object, use_case
 from app.domain.student.entity import ResetPasswordResponse
 from app.infra.student.student_repository import StudentRepository
 from app.models.student import StudentModel
-from app.infra.season.season_repository import SeasonRepository
 from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.models.admin import AdminModel
 from app.infra.security.security_service import generate_random_password, get_password_hash
+from app.shared.utils.general import get_current_season_value
 
 
 class ResetPasswordStudentRequestObject(request_object.ValidRequestObject):
@@ -35,19 +35,17 @@ class ResetPasswordStudentUseCase(use_case.UseCase):
         self,
         background_tasks: BackgroundTasks,
         student_repository: StudentRepository = Depends(StudentRepository),
-        season_repository: SeasonRepository = Depends(SeasonRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
     ):
         self.student_repository = student_repository
         self.background_tasks = background_tasks
-        self.season_repository = season_repository
         self.audit_log_repository = audit_log_repository
 
     def process_request(self, req_object: ResetPasswordStudentRequestObject):
         student: Optional[StudentModel] = self.student_repository.get_by_id(student_id=req_object.student_id)
         if not student:
             return response_object.ResponseFailure.build_not_found_error(message="Học viên không tồn tại")
-        current_season: int = self.season_repository.get_current_season().season
+        current_season = get_current_season_value()
 
         password = generate_random_password()
         self.student_repository.update(id=student.id, data={"password": get_password_hash(password)})

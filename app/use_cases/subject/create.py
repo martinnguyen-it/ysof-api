@@ -11,10 +11,10 @@ from app.domain.lecturer.entity import Lecturer, LecturerInDB
 from app.infra.lecturer.lecturer_repository import LecturerRepository
 from app.models.lecturer import LecturerModel
 from app.models.admin import AdminModel
-from app.infra.season.season_repository import SeasonRepository
 from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
+from app.shared.utils.general import get_current_season_value
 
 
 class CreateSubjectRequestObject(request_object.ValidRequestObject):
@@ -23,10 +23,9 @@ class CreateSubjectRequestObject(request_object.ValidRequestObject):
         self.current_admin = current_admin
 
     @classmethod
-    def builder(cls,
-                current_admin: AdminModel,
-                payload: Optional[SubjectInCreate] = None
-                ) -> request_object.RequestObject:
+    def builder(
+        cls, current_admin: AdminModel, payload: Optional[SubjectInCreate] = None
+    ) -> request_object.RequestObject:
         invalid_req = request_object.InvalidRequestObject()
         if payload is None:
             invalid_req.add_error("payload", "Invalid payload")
@@ -38,48 +37,47 @@ class CreateSubjectRequestObject(request_object.ValidRequestObject):
 
 
 class CreateSubjectUseCase(use_case.UseCase):
-    def __init__(self,
-                 background_tasks: BackgroundTasks,
-                 subject_repository: SubjectRepository = Depends(
-                     SubjectRepository),
-                 lecturer_repository: LecturerRepository = Depends(
-                     LecturerRepository),
-                 season_repository: SeasonRepository = Depends(
-                     SeasonRepository),
-                 audit_log_repository: AuditLogRepository = Depends(AuditLogRepository)):
+    def __init__(
+        self,
+        background_tasks: BackgroundTasks,
+        subject_repository: SubjectRepository = Depends(SubjectRepository),
+        lecturer_repository: LecturerRepository = Depends(LecturerRepository),
+        audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
+    ):
         self.subject_repository = subject_repository
         self.lecturer_repository = lecturer_repository
         self.background_tasks = background_tasks
-        self.season_repository = season_repository
         self.audit_log_repository = audit_log_repository
 
     def process_request(self, req_object: CreateSubjectRequestObject):
-        lecturer: Optional[LecturerModel] = self.lecturer_repository.get_by_id(
-            req_object.subject_in.lecturer)
+        lecturer: Optional[LecturerModel] = self.lecturer_repository.get_by_id(req_object.subject_in.lecturer)
         if not lecturer:
             return response_object.ResponseFailure.build_not_found_error("Giảng viên không tồn tại")
 
-        current_season: int = self.season_repository.get_current_season().season
+        current_season = get_current_season_value()
 
         obj_in: SubjectInDB = SubjectInDB(
             **req_object.subject_in.model_dump(exclude={"lecturer"}),
             lecturer=lecturer,
             season=current_season,
         )
-        subject: SubjectModel = self.subject_repository.create(
-            subject=obj_in)
+        subject: SubjectModel = self.subject_repository.create(subject=obj_in)
 
-        self.background_tasks.add_task(self.audit_log_repository.create, AuditLogInDB(
-            type=AuditLogType.CREATE,
-            endpoint=Endpoint.SUBJECT,
-            season=current_season,
-            author=req_object.current_admin,
-            author_email=req_object.current_admin.email,
-            author_name=req_object.current_admin.full_name,
-            author_roles=req_object.current_admin.roles,
-            description=json.dumps(
-                req_object.subject_in.model_dump(exclude_none=True), default=str)
-        ))
+        self.background_tasks.add_task(
+            self.audit_log_repository.create,
+            AuditLogInDB(
+                type=AuditLogType.CREATE,
+                endpoint=Endpoint.SUBJECT,
+                season=current_season,
+                author=req_object.current_admin,
+                author_email=req_object.current_admin.email,
+                author_name=req_object.current_admin.full_name,
+                author_roles=req_object.current_admin.roles,
+                description=json.dumps(req_object.subject_in.model_dump(exclude_none=True), default=str),
+            ),
+        )
 
-        return Subject(**SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer"})),
-                       lecturer=Lecturer(**LecturerInDB.model_validate(subject.lecturer).model_dump()))
+        return Subject(
+            **SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer"})),
+            lecturer=Lecturer(**LecturerInDB.model_validate(subject.lecturer).model_dump()),
+        )

@@ -6,10 +6,10 @@ from app.shared import request_object, use_case, response_object
 
 from app.domain.admin.entity import Admin, AdminInDB, AdminInUpdate, AdminInUpdateTime
 from app.infra.admin.admin_repository import AdminRepository
-from app.infra.season.season_repository import SeasonRepository
 from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
+from app.shared.utils.general import get_current_season_value
 
 
 class UpdateAdminRequestObject(request_object.ValidRequestObject):
@@ -40,12 +40,10 @@ class UpdateAdminUseCase(use_case.UseCase):
         self,
         background_tasks: BackgroundTasks,
         admin_repository: AdminRepository = Depends(AdminRepository),
-        season_repository: SeasonRepository = Depends(SeasonRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
     ):
         self.background_tasks = background_tasks
         self.admin_repository = admin_repository
-        self.season_repository = season_repository
         self.audit_log_repository = audit_log_repository
 
     def process_request(self, req_object: UpdateAdminRequestObject):
@@ -56,12 +54,13 @@ class UpdateAdminUseCase(use_case.UseCase):
         self.admin_repository.update(id=admin.id, data=AdminInUpdateTime(**req_object.obj_in.model_dump()))
         admin.reload()
 
+        current_season = get_current_season_value()
         self.background_tasks.add_task(
             self.audit_log_repository.create,
             AuditLogInDB(
                 type=AuditLogType.UPDATE,
                 endpoint=Endpoint.ADMIN,
-                season=self.season_repository.get_current_season().season,
+                season=current_season,
                 author=req_object.current_admin,
                 author_email=req_object.current_admin.email,
                 author_name=req_object.current_admin.full_name,

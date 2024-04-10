@@ -9,23 +9,20 @@ from app.models.document import DocumentModel
 from app.infra.services.google_drive_api import GoogleDriveApiService
 from app.infra.general_task.general_task_repository import GeneralTaskRepository
 from app.models.admin import AdminModel
-from app.infra.season.season_repository import SeasonRepository
 from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.domain.document.entity import DocumentInDB
+from app.shared.utils.general import get_current_season_value
 
 
 class DeleteDocumentRequestObject(request_object.ValidRequestObject):
-    def __init__(self, id: str,
-                 current_admin: AdminModel):
+    def __init__(self, id: str, current_admin: AdminModel):
         self.id = id
         self.current_admin = current_admin
 
     @classmethod
-    def builder(cls, id: str,
-                current_admin: AdminModel
-                ) -> request_object.RequestObject:
+    def builder(cls, id: str, current_admin: AdminModel) -> request_object.RequestObject:
         invalid_req = request_object.InvalidRequestObject()
         if id is None:
             invalid_req.add_error("id", "Invalid client id")
@@ -37,38 +34,31 @@ class DeleteDocumentRequestObject(request_object.ValidRequestObject):
 
 
 class DeleteDocumentUseCase(use_case.UseCase):
-    def __init__(self,
-                 background_tasks: BackgroundTasks,
-                 google_drive_api_service: GoogleDriveApiService = Depends(
-                     GoogleDriveApiService),
-                 document_repository: DocumentRepository = Depends(
-                     DocumentRepository),
-                 general_task_repository: GeneralTaskRepository = Depends(
-                     GeneralTaskRepository),
-                 season_repository: SeasonRepository = Depends(
-                     SeasonRepository),
-                 audit_log_repository: AuditLogRepository = Depends(AuditLogRepository)):
+    def __init__(
+        self,
+        background_tasks: BackgroundTasks,
+        google_drive_api_service: GoogleDriveApiService = Depends(GoogleDriveApiService),
+        document_repository: DocumentRepository = Depends(DocumentRepository),
+        general_task_repository: GeneralTaskRepository = Depends(GeneralTaskRepository),
+        audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
+    ):
         self.google_drive_api_service = google_drive_api_service
         self.document_repository = document_repository
         self.background_tasks = background_tasks
         self.general_task_repository = general_task_repository
-        self.season_repository = season_repository
         self.audit_log_repository = audit_log_repository
 
     def process_request(self, req_object: DeleteDocumentRequestObject):
-        document: Optional[DocumentModel] = self.document_repository.get_by_id(
-            req_object.id)
+        document: Optional[DocumentModel] = self.document_repository.get_by_id(req_object.id)
         if not document:
             return response_object.ResponseFailure.build_not_found_error("Tài liệu không tồn tại")
 
-        if document.role not in req_object.current_admin.roles and \
-                not any(role in SUPER_ADMIN for role in req_object.current_admin.roles):
+        if document.role not in req_object.current_admin.roles and not any(
+            role in SUPER_ADMIN for role in req_object.current_admin.roles
+        ):
             return response_object.ResponseFailure.build_auth_error("Bạn không có quyền sửa")
 
-        general_task = self.general_task_repository.find_one(
-            conditions={"attachments": {
-                "$in": [document.id]}}
-        )
+        general_task = self.general_task_repository.find_one(conditions={"attachments": {"$in": [document.id]}})
 
         if general_task is not None:
             return response_object.ResponseFailure.build_parameters_error(
@@ -77,20 +67,24 @@ class DeleteDocumentUseCase(use_case.UseCase):
 
         try:
             self.document_repository.delete(id=document.id)
+            self.background_tasks.add_task(self.google_drive_api_service.delete, document.file_id)
+
+            current_season = get_current_season_value()
             self.background_tasks.add_task(
-                self.google_drive_api_service.delete, document.file_id)
-            self.background_tasks.add_task(self.audit_log_repository.create, AuditLogInDB(
-                type=AuditLogType.DELETE,
-                endpoint=Endpoint.DOCUMENT,
-                season=self.season_repository.get_current_season().season,
-                author=req_object.current_admin,
-                author_email=req_object.current_admin.email,
-                author_name=req_object.current_admin.full_name,
-                author_roles=req_object.current_admin.roles,
-                description=json.dumps(
-                    DocumentInDB.model_validate(document).model_dump(exclude_none=True), default=str
-                )
-            ))
+                self.audit_log_repository.create,
+                AuditLogInDB(
+                    type=AuditLogType.DELETE,
+                    endpoint=Endpoint.DOCUMENT,
+                    season=current_season,
+                    author=req_object.current_admin,
+                    author_email=req_object.current_admin.email,
+                    author_name=req_object.current_admin.full_name,
+                    author_roles=req_object.current_admin.roles,
+                    description=json.dumps(
+                        DocumentInDB.model_validate(document).model_dump(exclude_none=True), default=str
+                    ),
+                ),
+            )
             return {"success": True}
         except Exception:
             return response_object.ResponseFailure.build_system_error("Something went error.")

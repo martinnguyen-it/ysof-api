@@ -7,7 +7,7 @@ from app.domain.shared.entity import Pagination
 from app.models.student import StudentModel
 from app.infra.student.student_repository import StudentRepository
 from app.models.admin import AdminModel
-from app.infra.season.season_repository import SeasonRepository
+from app.shared.utils.general import get_current_season_value
 
 
 class ListStudentsRequestObject(request_object.ValidRequestObject):
@@ -50,14 +50,12 @@ class ListStudentsRequestObject(request_object.ValidRequestObject):
 class ListStudentsUseCase(use_case.UseCase):
     def __init__(
         self,
-        season_repository: SeasonRepository = Depends(SeasonRepository),
         student_repository: StudentRepository = Depends(StudentRepository),
     ):
         self.student_repository = student_repository
-        self.season_repository = season_repository
 
     def process_request(self, req_object: ListStudentsRequestObject):
-        current_season: int = self.season_repository.get_current_season().season
+        current_season = get_current_season_value()
 
         match_pipeline: Optional[Dict[str, Any]] = {"current_season": current_season}
 
