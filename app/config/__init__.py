@@ -56,6 +56,14 @@ class Settings(BaseSettings):
     KEY_PATH_GCLOUD: str = "google-credentials/gcloud-service-credentials-staging.json"
     PREFIX_IMAGE_GCLOUD: str = "https://lh3.googleusercontent.com/d/"
 
+    BREVO_API_KEY: str
+    YSOF_EMAIL_SENDER: str
+
+    STUDENT_WELCOME_EMAIL_TEMPLATE: int
+    STUDENT_FORGOT_PASSWORD_EMAIL_TEMPLATE: int
+    STUDENT_REGISTER_EMAIL_TEMPLATE: int
+    HOSTING_URL: str
+
 
 # init settings instance
 settings = Settings()

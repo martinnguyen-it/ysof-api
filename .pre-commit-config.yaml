@@ -3,7 +3,7 @@ default_language_version:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
@@ -24,7 +24,7 @@ repos:
         entry: ruff check
         language: system
         args: [--fix, "--exit-non-zero-on-fix"]
-        exclude: "Dockerfile|.txt|.env-.*|tests/.*|.sh|.json|.yml|.yaml|.*ignore|Pipfile.*|.*.dockerfile|.*.ini|README.md|pylintrc|.*.toml|devops|scripts|.*.xlsx"
+        exclude: "Dockerfile|.txt|.env-.*|.example.env|tests/.*|.sh|.json|.yml|.yaml|.*ignore|Pipfile.*|.*.dockerfile|.*.ini|README.md|pylintrc|.*.toml|devops|scripts|.*.xlsx"
       # - id: run-tests
       #   language: script
       #   name: Run tests
