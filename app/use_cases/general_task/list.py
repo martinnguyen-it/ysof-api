@@ -146,8 +146,10 @@ class ListGeneralTasksUseCase(use_case.UseCase):
         if isinstance(req_object.search, str):
             match_pipeline = {
                 **match_pipeline,
-                "title": {"$regex": req_object.search, "$options": "i"},
-                "short_desc": {"$regex": req_object.search, "$options": "i"},
+                "$or": [
+                    {"title": {"$regex": req_object.search, "$options": "i"}},
+                    {"short_desc": {"$regex": req_object.search, "$options": "i"}},
+                ],
             }
         if isinstance(req_object.label, list) and len(req_object.label) > 0:
             match_pipeline = {**match_pipeline, "label": {"$in": req_object.label}}

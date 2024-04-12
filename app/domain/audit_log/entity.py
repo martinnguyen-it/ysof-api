@@ -32,6 +32,6 @@ class AuditLog(AuditLogBase):
     created_at: datetime | None = None
 
 
-class ManyLogsInResponse(BaseEntity):
+class ManyAuditLogsInResponse(BaseEntity):
     pagination: Optional[Pagination] = None
     data: Optional[List[AuditLog]] = None
