@@ -96,7 +96,7 @@ class TestUserApi(unittest.TestCase):
 
             mock_token.return_value = TokenData(email=self.admin2.email)
             r = self.client.post(
-                "/api/v1/admin/students",
+                "/api/v1/students",
                 json={
                     "numerical_order": 10,
                     "group": 10,
@@ -121,7 +121,7 @@ class TestUserApi(unittest.TestCase):
 
             mock_token.return_value = TokenData(email=self.admin.email)
             r = self.client.post(
-                "/api/v1/admin/students",
+                "/api/v1/students",
                 json={
                     "numerical_order": 10,
                     "group": 10,
@@ -159,7 +159,7 @@ class TestUserApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.admin.email)
             r = self.client.get(
-                f"/api/v1/admin/students/{self.student.id}",
+                f"/api/v1/students/{self.student.id}",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -173,7 +173,7 @@ class TestUserApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.admin.email)
             r = self.client.get(
-                "/api/v1/admin/students",
+                "/api/v1/students",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -186,7 +186,7 @@ class TestUserApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.admin.email)
             r = self.client.put(
-                f"/api/v1/admin/students/{self.student.id}",
+                f"/api/v1/students/{self.student.id}",
                 json={"full_name": "Updated"},
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
@@ -205,7 +205,7 @@ class TestUserApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.admin.email)
             r = self.client.delete(
-                f"/api/v1/admin/students/{self.student2.id}",
+                f"/api/v1/students/{self.student2.id}",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -213,7 +213,7 @@ class TestUserApi(unittest.TestCase):
             assert r.status_code == 200
 
             r = self.client.get(
-                f"/api/v1/admin/students/{self.student2.id}",
+                f"/api/v1/students/{self.student2.id}",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -301,7 +301,7 @@ class TestUserApi(unittest.TestCase):
             ]
 
             r = self.client.post(
-                "/api/v1/admin/students/import",
+                "/api/v1/students/import",
                 json={
                     "url": "https://docs.google.com/spreadsheets/d/1CI0A9IUb5AzhJAiRzuFNsMXALTeBu0_BfqeBmKvuTJg/edit#gid=1442976576"
                 },
@@ -335,7 +335,7 @@ class TestUserApi(unittest.TestCase):
             mock_generate_random_password.return_value = mock_password
 
             r = self.client.patch(
-                f"/api/v1/admin/students/reset-password/{self.student3.id}",
+                f"/api/v1/students/reset-password/{self.student3.id}",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
