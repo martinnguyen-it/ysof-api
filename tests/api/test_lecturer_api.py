@@ -24,14 +24,10 @@ class TestUserApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
-        connect("mongoenginetest", host="mongodb://localhost:1234",
-                mongo_client_class=mongomock.MongoClient)
+        connect("mongoenginetest", host="mongodb://localhost:1234", mongo_client_class=mongomock.MongoClient)
         cls.client = TestClient(app)
         cls.season: SeasonModel = SeasonModel(
-            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
-            academic_year="2023-2024",
-            season=3,
-            is_current=True
+            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG", academic_year="2023-2024", season=3, is_current=True
         ).save()
         cls.user: AdminModel = AdminModel(
             status="active",
@@ -39,13 +35,9 @@ class TestUserApi(unittest.TestCase):
                 "admin",
             ],
             holy_name="Martin",
-            phone_number=[
-                "0123456789"
-            ],
+            phone_number=["0123456789"],
             current_season=3,
-            seasons=[
-                3
-            ],
+            seasons=[3],
             email="user@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
@@ -56,13 +48,9 @@ class TestUserApi(unittest.TestCase):
                 "bhv",
             ],
             holy_name="Martin",
-            phone_number=[
-                "0123456789"
-            ],
+            phone_number=["0123456789"],
             current_season=3,
-            seasons=[
-                3
-            ],
+            seasons=[3],
             email="user1@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
@@ -73,43 +61,29 @@ class TestUserApi(unittest.TestCase):
                 "bkt",
             ],
             holy_name="Martin",
-            phone_number=[
-                "0123456789"
-            ],
+            phone_number=["0123456789"],
             current_season=3,
-            seasons=[
-                3
-            ],
+            seasons=[3],
             email="user2@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
         cls.lecturer: LecturerModel = LecturerModel(
-            title="Cha",
-            holy_name="Phanxico",
-            full_name="Nguyen Van A",
-            information="string",
-            contact="string"
+            title="Cha", holy_name="Phanxico", full_name="Nguyen Van A", information="string", contact="string"
         ).save()
         cls.lecturer2: LecturerModel = LecturerModel(
-            title="Nhóm",
-            holy_name="Phanxico",
-            full_name="Nguyen Van A",
-            information="string",
-            contact="string"
+            title="Nhóm", holy_name="Phanxico", full_name="Nguyen Van A", information="string", contact="string"
         ).save()
         cls.subject: SubjectModel = SubjectModel(
             title="Môn học 1",
-            date="2024-03-27T14:40:51.100Z",
+            start_at="2024-03-27",
             subdivision="string",
             code="string",
             question_url="string",
             zoom={"meeting_id": 0, "pass_code": "string", "link": "string"},
-            documents_url=[
-                "string"
-            ],
+            documents_url=["string"],
             lecturer=cls.lecturer,
-            season=3
+            season=3,
         ).save()
 
     @classmethod
@@ -126,7 +100,7 @@ class TestUserApi(unittest.TestCase):
                     "holy_name": "string",
                     "full_name": "string",
                     "information": "string",
-                    "contact": "string"
+                    "contact": "string",
                 },
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
@@ -144,7 +118,7 @@ class TestUserApi(unittest.TestCase):
                     "holy_name": "Jose",
                     "full_name": "Tim",
                     "information": "string",
-                    "contact": "string"
+                    "contact": "string",
                 },
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
@@ -152,18 +126,14 @@ class TestUserApi(unittest.TestCase):
             )
 
             assert r.status_code == 200
-            doc: LecturerModel = LecturerModel.objects(
-                id=r.json().get("id")).get()
+            doc: LecturerModel = LecturerModel.objects(id=r.json().get("id")).get()
             assert doc.title == "Cha"
             assert doc.holy_name == "Jose"
             assert doc.full_name == "Tim"
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find(
-                {"type": AuditLogType.CREATE, "endpoint": Endpoint.LECTURER}
-            )
-            audit_logs = [AuditLogModel.from_mongo(
-                doc) for doc in cursor] if cursor else []
+            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.CREATE, "endpoint": Endpoint.LECTURER})
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 
     def test_get_all_lecturers(self):
@@ -189,8 +159,7 @@ class TestUserApi(unittest.TestCase):
                 },
             )
             assert r.status_code == 200
-            doc: LecturerModel = LecturerModel.objects(
-                id=r.json().get("id")).get()
+            doc: LecturerModel = LecturerModel.objects(id=r.json().get("id")).get()
             assert doc.holy_name == self.lecturer.holy_name
             assert doc.full_name == self.lecturer.full_name
 
@@ -199,24 +168,18 @@ class TestUserApi(unittest.TestCase):
             mock_token.return_value = TokenData(email=self.user1.email)
             r = self.client.put(
                 f"/api/v1/lecturers/{self.lecturer.id}",
-                json={
-                    "full_name": "Updated"
-                },
+                json={"full_name": "Updated"},
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
             )
             assert r.status_code == 200
-            doc: LecturerModel = LecturerModel.objects(
-                id=r.json().get("id")).get()
+            doc: LecturerModel = LecturerModel.objects(id=r.json().get("id")).get()
             assert doc.full_name == "Updated"
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find(
-                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.LECTURER}
-            )
-            audit_logs = [AuditLogModel.from_mongo(
-                doc) for doc in cursor] if cursor else []
+            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.UPDATE, "endpoint": Endpoint.LECTURER})
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 
     def test_delete_lecturer_by_id(self):
@@ -257,9 +220,6 @@ class TestUserApi(unittest.TestCase):
             assert r.status_code == 404
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find(
-                {"type": AuditLogType.DELETE, "endpoint": Endpoint.LECTURER}
-            )
-            audit_logs = [AuditLogModel.from_mongo(
-                doc) for doc in cursor] if cursor else []
+            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.DELETE, "endpoint": Endpoint.LECTURER})
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1

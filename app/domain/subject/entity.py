@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
 from pydantic import ConfigDict
 
@@ -16,7 +16,7 @@ class Zoom(BaseEntity):
 
 class SubjectBase(BaseEntity):
     title: str
-    date: datetime
+    start_at: date
     subdivision: str
     code: str
     question_url: Optional[str] = None
@@ -43,7 +43,7 @@ class Subject(SubjectBase, DateTimeModelMixin):
 
 class SubjectBaseUpdate(BaseEntity):
     title: str | None = None
-    date: datetime | None = None
+    start_at: date | None = None
     subdivision: str | None = None
     code: int | None = None
     question_url: Optional[str] = None
