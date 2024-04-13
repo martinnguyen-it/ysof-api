@@ -17,6 +17,7 @@ from app.models.admin import AdminModel
 from app.shared.common_exception import forbidden_exception
 from app.infra.student.student_repository import StudentRepository
 from app.models.student import StudentModel
+from app.domain.student.entity import StudentInDB
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/admin/auth/login")
@@ -91,7 +92,7 @@ def _get_current_student(
 def get_current_active_student(
     student: StudentModel = Depends(_get_current_student),
 ) -> StudentModel:
-    current_user = AdminInDB.model_validate(student)
+    current_user = StudentInDB.model_validate(student)
     if not current_user.active():
         raise forbidden_exception
     return student
@@ -100,7 +101,7 @@ def get_current_active_student(
 def get_current_student(
     student: StudentModel = Depends(_get_current_student),
 ) -> StudentModel:
-    current_user = AdminInDB.model_validate(student)
+    current_user = StudentInDB.model_validate(student)
     if current_user.disabled():
         raise HTTPException(status_code=400, detail="Tài khoản của bạn đã bị khóa")
     return student

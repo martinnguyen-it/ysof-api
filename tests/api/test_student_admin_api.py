@@ -342,7 +342,6 @@ class TestUserApi(unittest.TestCase):
             )
 
             resp = r.json()
-            print(resp)
             assert r.status_code == 200
             assert resp["email"] == self.student3.email
             assert resp["password"] == mock_password

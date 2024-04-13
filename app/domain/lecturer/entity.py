@@ -30,6 +30,15 @@ class Lecturer(LecturerBase, DateTimeModelMixin):
     seasons: Optional[List[int]] = None
 
 
+class LecturerInStudent(BaseEntity):
+    id: str
+    avatar: Optional[str] = None
+    title: str
+    holy_name: Optional[str] = None
+    full_name: str
+    information: Optional[str] = None
+
+
 class ManyLecturersInResponse(BaseEntity):
     pagination: Optional[Pagination] = None
     data: Optional[List[Lecturer]] = None

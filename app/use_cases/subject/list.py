@@ -60,13 +60,12 @@ class ListSubjectsUseCase(use_case.UseCase):
             match_pipeline = {
                 **match_pipeline,
                 "$or": [
-                    {"lecturer": {"$regex": req_object.search, "$options": "i"}},
+                    {"title": {"$regex": req_object.search, "$options": "i"}},
                     {"code": {"$regex": req_object.search, "$options": "i"}},
                 ],
             }
         if isinstance(req_object.subdivision, str):
             match_pipeline = {**match_pipeline, "subdivision": req_object.subdivision}
-        print(match_pipeline)
 
         subjects: List[SubjectModel] = self.subject_repository.list(sort=req_object.sort, match_pipeline=match_pipeline)
 

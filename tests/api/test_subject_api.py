@@ -1,4 +1,3 @@
-import app.interfaces.api_v1
 import time
 import unittest
 from unittest.mock import patch
@@ -19,6 +18,7 @@ from app.models.subject import SubjectModel
 from app.models.season import SeasonModel
 from app.models.audit_log import AuditLogModel
 from app.domain.audit_log.enum import AuditLogType, Endpoint
+from app.models.student import StudentModel
 
 
 class TestUserApi(unittest.TestCase):
@@ -108,6 +108,17 @@ class TestUserApi(unittest.TestCase):
             documents_url=["string"],
             lecturer=cls.lecturer,
             season=2,
+        ).save()
+        cls.student: StudentModel = StudentModel(
+            numerical_order=1,
+            group=2,
+            status="active",
+            holy_name="Martin",
+            phone_number="0123456789",
+            current_season=3,
+            email="student@example.com",
+            full_name="Nguyen Thanh Tam",
+            password=get_password_hash(password="local@local"),
         ).save()
 
     @classmethod
@@ -257,3 +268,39 @@ class TestUserApi(unittest.TestCase):
             cursor = AuditLogModel._get_collection().find({"type": AuditLogType.DELETE, "endpoint": Endpoint.SUBJECT})
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
+
+    def test_student_get_subject_by_id(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.student.email)
+            r = self.client.get(
+                f"/api/v1/student/subjects/{self.subject.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            resp = r.json()
+            assert "zoom" not in resp
+            assert resp["title"] == self.subject.title
+            assert "contact" not in resp["lecturer"]
+
+            assert resp["lecturer"]["full_name"] == self.subject.lecturer.full_name
+
+    def test_student_get_all_subjects(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.student.email)
+            r = self.client.get(
+                "/api/v1/student/subjects",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            resp = r.json()
+            assert isinstance(resp, list)
+            if len(resp) > 0:
+                assert "zoom" not in resp[0]
+                assert resp[0]["title"] == self.subject.title
+                assert "contact" not in resp[0]["lecturer"]
+
+                assert resp[0]["lecturer"]["full_name"] == self.subject.lecturer.full_name

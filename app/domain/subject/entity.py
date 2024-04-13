@@ -4,7 +4,7 @@ from pydantic import ConfigDict
 
 from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin
 from app.domain.lecturer.field import PydanticLecturerType
-from app.domain.lecturer.entity import Lecturer
+from app.domain.lecturer.entity import Lecturer, LecturerInStudent
 
 
 class Zoom(BaseEntity):
@@ -39,6 +39,18 @@ class Subject(SubjectBase, DateTimeModelMixin):
     id: str
     lecturer: Lecturer
     season: int
+
+
+class SubjectInStudent(BaseEntity):
+    id: str
+    title: str
+    start_at: date
+    subdivision: str
+    code: str
+    season: int
+    question_url: Optional[str] = None
+    documents_url: list[str] | None = None
+    lecturer: LecturerInStudent
 
 
 class SubjectBaseUpdate(BaseEntity):

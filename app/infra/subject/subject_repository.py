@@ -1,4 +1,5 @@
 """Subject repository module"""
+
 from typing import Optional, Dict, Union, List, Any
 from mongoengine import QuerySet, DoesNotExist
 from bson import ObjectId
@@ -41,8 +42,7 @@ class SubjectRepository:
 
     def update(self, id: ObjectId, data: Union[SubjectInUpdateTime, Dict[str, Any]]) -> bool:
         try:
-            data = data.model_dump(exclude_none=True) if isinstance(
-                data, SubjectInUpdateTime) else data
+            data = data.model_dump(exclude_none=True) if isinstance(data, SubjectInUpdateTime) else data
             SubjectModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception:
@@ -54,18 +54,17 @@ class SubjectRepository:
         except Exception:
             return 0
 
-    def list(self,
-             match_pipeline: Optional[Dict[str, Any]] = None,
-             sort: Optional[Dict[str, int]] = None,
-             ) -> List[SubjectModel]:
+    def list(
+        self,
+        match_pipeline: Optional[Dict[str, Any]] = None,
+        sort: Optional[Dict[str, int]] = None,
+    ) -> List[SubjectModel]:
         pipeline = [
             {"$sort": sort if sort else {"created_at": -1}},
         ]
 
         if match_pipeline is not None:
-            pipeline.append({
-                "$match": match_pipeline
-            })
+            pipeline.append({"$match": match_pipeline})
 
         try:
             docs = SubjectModel.objects().aggregate(pipeline)
@@ -73,20 +72,19 @@ class SubjectRepository:
         except Exception:
             return []
 
-    def count_list(self,
-                   match_pipeline: Optional[Dict[str, Any]] = None,
-                   ) -> int:
+    def count_list(
+        self,
+        match_pipeline: Optional[Dict[str, Any]] = None,
+    ) -> int:
         pipeline = []
 
         if match_pipeline is not None:
-            pipeline.append({
-                "$match": match_pipeline
-            })
+            pipeline.append({"$match": match_pipeline})
         pipeline.append({"$count": "subject_count"})
 
         try:
             docs = SubjectModel.objects().aggregate(pipeline)
-            return list(docs)[0]['subject_count']
+            return list(docs)[0]["subject_count"]
         except Exception:
             return 0
 
