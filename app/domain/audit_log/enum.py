@@ -18,3 +18,4 @@ class Endpoint(str, ExtendedEnum):
     SUBJECT = "subject"
     UPLOAD = "upload"
     STUDENT = "student"
+    MANAGE_FORM = "manage_form"

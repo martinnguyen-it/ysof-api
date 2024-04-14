@@ -4,6 +4,7 @@ from app.infra.security.security_service import get_current_active_admin
 from app.interfaces.api_v1.admin import (
     admin,
     auth,
+    manage_form,
     student,
     upload,
     document,
@@ -28,6 +29,7 @@ api_router.include_router(
     upload.router, prefix="/upload", tags=["Upload"], dependencies=[Depends(get_current_active_admin)]
 )
 api_router.include_router(audit_log.router, prefix="/audit-logs", tags=["Audit logs"])
+api_router.include_router(manage_form.router, prefix="/manage-form", tags=["Manage form"])
 
 
 api_router.include_router(api_student.api_router, prefix="/student")
