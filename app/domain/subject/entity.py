@@ -1,10 +1,12 @@
 from datetime import datetime, date
 from typing import Optional
-from pydantic import ConfigDict
+from pydantic import ConfigDict, field_validator
 
 from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin
 from app.domain.lecturer.field import PydanticLecturerType
 from app.domain.lecturer.entity import Lecturer, LecturerInStudent
+from app.domain.student.field import PydanticStudentType
+from app.domain.subject.field import PydanticSubjectType
 
 
 class Zoom(BaseEntity):
@@ -70,3 +72,23 @@ class SubjectInUpdate(SubjectBaseUpdate):
 class SubjectInUpdateTime(SubjectBaseUpdate):
     lecturer: PydanticLecturerType | None = None
     updated_at: datetime = datetime.now()
+
+
+class SubjectRegistrationInDB(IDModelMixin):
+    student: PydanticStudentType
+    subject: PydanticSubjectType
+    # https://docs.pydantic.dev/2.4/concepts/models/#arbitrary-class-instances
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SubjectRegistrationInCreate(BaseEntity):
+    subjects: list[str]
+
+    @field_validator("subjects", mode="after")
+    def remove_duplicate(cls, v):
+        return list(set(v))
+
+
+class SubjectRegistrationInResponse(BaseEntity):
+    student_id: str
+    subjects_registration: list[str]

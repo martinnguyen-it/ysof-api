@@ -82,11 +82,15 @@ class ListAuditLogsUseCase(use_case.UseCase):
 
         data: Optional[list[AuditLog]] = []
         for log in audit_logs:
-            author: AdminInDB | None = AdminInDB.model_validate(log.author) if log.author else None
+            author: AdminInDB | None = None
+            try:
+                author = AdminInDB.model_validate(log.author) if log.author else None
+            except Exception:
+                log.author = None
             data.append(
                 AuditLog(
                     **AuditLogInDB.model_validate(log).model_dump(exclude=({"author"})),
-                    author=Admin(**author.model_dump(), active=author.active()),
+                    author=Admin(**author.model_dump(), active=author.active()) if author else author,
                 )
             )
 

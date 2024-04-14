@@ -1,11 +1,11 @@
 from datetime import datetime, timezone
-from mongoengine import Document, StringField, DateTimeField, IntField, ReferenceField, ListField
+from mongoengine import Document, StringField, DateTimeField, IntField, ReferenceField, ListField, NULLIFY
 
 
 class AuditLogModel(Document):
     type = StringField(required=True)
     endpoint = StringField(required=True)
-    author = ReferenceField("AdminModel")
+    author = ReferenceField("AdminModel", reverse_delete_rule=NULLIFY)
     author_name = StringField(required=True)
     author_email = StringField(required=True)
     author_roles = ListField(StringField(), required=True)
@@ -16,11 +16,10 @@ class AuditLogModel(Document):
 
     @classmethod
     def from_mongo(cls, data: dict, id_str=False):
-        """We must convert _id into "id". """
+        """We must convert _id into "id"."""
         if not data:
             return data
-        id = data.pop("_id", None) if not id_str else str(
-            data.pop("_id", None))
+        id = data.pop("_id", None) if not id_str else str(data.pop("_id", None))
         if "_cls" in data:
             data.pop("_cls", None)
         return cls(**dict(data, id=id))
