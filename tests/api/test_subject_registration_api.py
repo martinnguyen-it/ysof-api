@@ -1,4 +1,4 @@
-import fastapi
+import pytest
 import unittest
 from unittest.mock import patch
 
@@ -88,6 +88,7 @@ class TestUserApi(unittest.TestCase):
     def tearDownClass(cls):
         disconnect()
 
+    @pytest.mark.order(1)
     def test_student_registration(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.student.email)
@@ -113,5 +114,21 @@ class TestUserApi(unittest.TestCase):
             )
             assert r.status_code == 200
             resp = r.json()
+            assert resp["student_id"] == str(self.student.id)
+            assert len(resp["subjects_registration"]) == 2
+
+    @pytest.mark.order(2)
+    def test_get_student_registration_by_self(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.student.email)
+            r = self.client.get(
+                "/api/v1/student/subjects/registration",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            resp = r.json()
+            print(resp)
+            assert r.status_code == 200
             assert resp["student_id"] == str(self.student.id)
             assert len(resp["subjects_registration"]) == 2

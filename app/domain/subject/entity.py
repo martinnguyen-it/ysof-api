@@ -1,6 +1,6 @@
 from datetime import datetime, date
 from typing import Optional
-from pydantic import ConfigDict, field_validator
+from pydantic import ConfigDict, field_validator, ValidationInfo
 
 from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin
 from app.domain.lecturer.field import PydanticLecturerType
@@ -92,3 +92,11 @@ class SubjectRegistrationInCreate(BaseEntity):
 class SubjectRegistrationInResponse(BaseEntity):
     student_id: str
     subjects_registration: list[str]
+
+    @field_validator("student_id", "subjects_registration", mode="before")
+    def convert_to_string(cls, v, info: ValidationInfo):
+        if info.field_name == "student_id":
+            v = str(v)
+        elif info.field_name == "subjects_registration":
+            v = [str(val) for val in v]
+        return v
