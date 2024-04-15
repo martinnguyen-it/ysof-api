@@ -1,6 +1,8 @@
+import app.interfaces.api_v1.admin
 import time
 import unittest
 from unittest.mock import patch
+import pytest
 
 from mongoengine import connect, disconnect
 from fastapi.testclient import TestClient
@@ -19,6 +21,7 @@ from app.models.season import SeasonModel
 from app.models.audit_log import AuditLogModel
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.models.student import StudentModel
+from app.models.subject_registration import SubjectRegistrationModel
 
 
 class TestUserApi(unittest.TestCase):
@@ -119,6 +122,9 @@ class TestUserApi(unittest.TestCase):
             email="student@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
+        ).save()
+        cls.subject_registration: SubjectRegistrationModel = SubjectRegistrationModel(
+            subject=cls.subject.id, student=cls.student.id
         ).save()
 
     @classmethod
@@ -236,6 +242,7 @@ class TestUserApi(unittest.TestCase):
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 
+    @pytest.mark.order("first")
     def test_delete_subject_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user2.email)
@@ -248,6 +255,15 @@ class TestUserApi(unittest.TestCase):
             assert r.status_code == 403
 
             mock_token.return_value = TokenData(email=self.user1.email)
+            r = self.client.delete(
+                f"/api/v1/subjects/{self.subject.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 400
+            assert r.json().get("detail").startswith("Không thể xóa")
+
             r = self.client.delete(
                 f"/api/v1/subjects/{self.subject2.id}",
                 headers={

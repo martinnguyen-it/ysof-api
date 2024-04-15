@@ -13,6 +13,7 @@ from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.domain.subject.entity import SubjectInDB
 from app.shared.utils.general import get_current_season_value
+from app.infra.subject.subject_registration_repository import SubjectRegistrationRepository
 
 
 class DeleteSubjectRequestObject(request_object.ValidRequestObject):
@@ -37,16 +38,24 @@ class DeleteSubjectUseCase(use_case.UseCase):
         self,
         background_tasks: BackgroundTasks,
         subject_repository: SubjectRepository = Depends(SubjectRepository),
+        subject_registration_repository: SubjectRegistrationRepository = Depends(SubjectRegistrationRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
     ):
         self.subject_repository = subject_repository
         self.background_tasks = background_tasks
         self.audit_log_repository = audit_log_repository
+        self.subject_registration_repository = subject_registration_repository
 
     def process_request(self, req_object: DeleteSubjectRequestObject):
         subject: Optional[SubjectModel] = self.subject_repository.get_by_id(req_object.id)
         if not subject:
             return response_object.ResponseFailure.build_not_found_error("Môn học không tồn tại")
+
+        subject_registration = self.subject_registration_repository.find_one({"subject": subject.id})
+        if subject_registration:
+            return response_object.ResponseFailure.build_parameters_error(
+                "Không thể xóa môn học đã có học viên đăng ký"
+            )
 
         current_season = get_current_season_value()
         if subject.season != current_season and not any(role in req_object.current_admin.roles for role in SUPER_ADMIN):
