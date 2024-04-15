@@ -92,17 +92,13 @@ class TestUserApi(unittest.TestCase):
 
     @pytest.mark.order(2)
     def test_get_manage_form_student_registration(self):
-        with patch("app.infra.security.security_service.verify_token") as mock_token:
-            mock_token.return_value = TokenData(email=self.user.email)
+        r = self.client.get(
+            "/api/v1/manage-form/subject-registration",
+            headers={
+                "Authorization": "Bearer {}".format("xxx"),
+            },
+        )
 
-            r = self.client.get(
-                "/api/v1/manage-form/subject-registration",
-                headers={
-                    "Authorization": "Bearer {}".format("xxx"),
-                },
-            )
-
-            assert r.status_code == 200
-            resp = r.json()
-            assert resp["type"] == FormType.SUBJECT_REGISTRATION
-            assert resp["status"] == FormStatus.ACTIVE
+        assert r.status_code == 200
+        resp = r.json()
+        assert resp["status"] == FormStatus.ACTIVE

@@ -25,3 +25,8 @@ class ManageFormInDB(IDModelMixin, DateTimeModelMixin, CommonUpdate):
 
 class FormUpdateWithTime(CommonUpdate):
     updated_at: datetime = datetime.now(timezone.utc)
+
+
+class CommonResponse(BaseEntity):
+    status: FormStatus = FormStatus.INACTIVE
+    model_config = ConfigDict(from_attributes=True)

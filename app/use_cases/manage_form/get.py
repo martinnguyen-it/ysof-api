@@ -1,10 +1,10 @@
 from fastapi import Depends, BackgroundTasks
-from app.shared import request_object, use_case, response_object
-from app.domain.manage_form.entity import ManageFormInDB
+from app.shared import request_object, use_case
+from app.domain.manage_form.entity import CommonResponse
 from app.infra.manage_form.manage_form_repository import ManageFormRepository
 from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.models.manage_form import ManageFormModel
-from app.domain.manage_form.enum import FormType
+from app.domain.manage_form.enum import FormStatus, FormType
 
 
 class GetManageFormCommonRequestObject(request_object.ValidRequestObject):
@@ -38,6 +38,6 @@ class GetManageFormCommonUseCase(use_case.UseCase):
         doc: ManageFormModel | None = self.manage_form_repository.find_one({"type": req_object.type})
 
         if doc:
-            return ManageFormInDB.model_validate(doc)
+            return CommonResponse.model_validate(doc)
         else:
-            return response_object.ResponseFailure.build_not_found_error("Form chưa được tạo")
+            return CommonResponse(status=FormStatus.INACTIVE)
