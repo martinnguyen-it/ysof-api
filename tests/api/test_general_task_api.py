@@ -21,18 +21,14 @@ from app.models.audit_log import AuditLogModel
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 
 
-class TestUserApi(unittest.TestCase):
+class TestGeneralTaskApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
-        connect("mongoenginetest", host="mongodb://localhost:1234",
-                mongo_client_class=mongomock.MongoClient)
+        connect("mongoenginetest", host="mongodb://localhost:1234", mongo_client_class=mongomock.MongoClient)
         cls.client = TestClient(app)
         cls.season: SeasonModel = SeasonModel(
-            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
-            academic_year="2023-2024",
-            season=3,
-            is_current=True
+            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG", academic_year="2023-2024", season=3, is_current=True
         ).save()
         cls.user: AdminModel = AdminModel(
             status="active",
@@ -40,13 +36,9 @@ class TestUserApi(unittest.TestCase):
                 "admin",
             ],
             holy_name="Martin",
-            phone_number=[
-                "0123456789"
-            ],
+            phone_number=["0123456789"],
             current_season=3,
-            seasons=[
-                3
-            ],
+            seasons=[3],
             email="user@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
@@ -58,11 +50,9 @@ class TestUserApi(unittest.TestCase):
             thumbnailLink="https://lh3.googleusercontent.com/drive-storage/AJQWtBPQ0cDHLtK8eFG3nyGUQ02897KWOM87NIeoCu6OSyOoehPiZrY7__MpTVFAxsSM3UBsJz-4yDVoB-yio8LMQsaqQpNsgewuzf3F2VCI=s220",
             role="bhv",
             type="common",
-            label=[
-                "string"
-            ],
+            label=["string"],
             season=3,
-            author=cls.user
+            author=cls.user,
         ).save()
         cls.general_task: GeneralTaskModel = GeneralTaskModel(
             title="Cong viec dau nam",
@@ -72,12 +62,10 @@ class TestUserApi(unittest.TestCase):
             end_at="2024-03-22T08:26:54.965000Z",
             role="bhv",
             type="common",
-            label=[
-                "string"
-            ],
+            label=["string"],
             season=3,
             author=cls.user,
-            attachments=[cls.document]
+            attachments=[cls.document],
         ).save()
         cls.general_task2: GeneralTaskModel = GeneralTaskModel(
             title="Cong viec dau nam",
@@ -87,12 +75,10 @@ class TestUserApi(unittest.TestCase):
             end_at="2024-03-22T08:26:54.965000Z",
             role="bhv",
             type="common",
-            label=[
-                "string"
-            ],
+            label=["string"],
             season=3,
             author=cls.user,
-            attachments=[cls.document]
+            attachments=[cls.document],
         ).save()
 
     @classmethod
@@ -111,11 +97,9 @@ class TestUserApi(unittest.TestCase):
                     "start_at": "2024-03-22T09:37:15.278Z",
                     "end_at": "2024-03-22T09:37:15.278Z",
                     "role": "string",
-                    "label": [
-                            "string"
-                    ],
+                    "label": ["string"],
                     "type": "annual",
-                    "attachments": ["65f867130d52617a8b07002b"]
+                    "attachments": ["65f867130d52617a8b07002b"],
                 },
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
@@ -134,11 +118,9 @@ class TestUserApi(unittest.TestCase):
                     "start_at": "2024-03-22T09:37:15.278Z",
                     "end_at": "2024-03-22T09:37:15.278Z",
                     "role": "bhv",
-                    "label": [
-                            "string"
-                    ],
+                    "label": ["string"],
                     "type": "annual",
-                    "attachments": [str(self.document.id)]
+                    "attachments": [str(self.document.id)],
                 },
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
@@ -146,8 +128,7 @@ class TestUserApi(unittest.TestCase):
             )
 
             assert r.status_code == 200
-            doc: GeneralTaskModel = GeneralTaskModel.objects(
-                id=r.json().get("id")).get()
+            doc: GeneralTaskModel = GeneralTaskModel.objects(id=r.json().get("id")).get()
             assert doc.title == "Tai lieu"
             assert doc.role == "bhv"
             assert len(doc.attachments) == 1
@@ -156,8 +137,7 @@ class TestUserApi(unittest.TestCase):
             cursor = AuditLogModel._get_collection().find(
                 {"type": AuditLogType.CREATE, "endpoint": Endpoint.GENERAL_TASK}
             )
-            audit_logs = [AuditLogModel.from_mongo(
-                doc) for doc in cursor] if cursor else []
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 
     def test_get_general_task_by_id(self):
@@ -170,8 +150,7 @@ class TestUserApi(unittest.TestCase):
                 },
             )
             assert r.status_code == 200
-            doc: GeneralTaskModel = GeneralTaskModel.objects(
-                id=r.json().get("id")).get()
+            doc: GeneralTaskModel = GeneralTaskModel.objects(id=r.json().get("id")).get()
             assert doc.title == self.general_task.title
             assert doc.role
             assert doc.description
@@ -194,24 +173,20 @@ class TestUserApi(unittest.TestCase):
             mock_token.return_value = TokenData(email=self.user.email)
             r = self.client.put(
                 f"/api/v1/general-tasks/{self.general_task.id}",
-                json={
-                    "title": "Updated"
-                },
+                json={"title": "Updated"},
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
             )
             assert r.status_code == 200
-            doc: GeneralTaskModel = GeneralTaskModel.objects(
-                id=r.json().get("id")).get()
+            doc: GeneralTaskModel = GeneralTaskModel.objects(id=r.json().get("id")).get()
             assert doc.title == "Updated"
 
             time.sleep(1)
             cursor = AuditLogModel._get_collection().find(
                 {"type": AuditLogType.UPDATE, "endpoint": Endpoint.GENERAL_TASK}
             )
-            audit_logs = [AuditLogModel.from_mongo(
-                doc) for doc in cursor] if cursor else []
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 
     def test_delete_general_task_by_id(self):
@@ -237,6 +212,5 @@ class TestUserApi(unittest.TestCase):
             cursor = AuditLogModel._get_collection().find(
                 {"type": AuditLogType.DELETE, "endpoint": Endpoint.GENERAL_TASK}
             )
-            audit_logs = [AuditLogModel.from_mongo(
-                doc) for doc in cursor] if cursor else []
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1

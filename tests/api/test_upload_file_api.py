@@ -17,18 +17,14 @@ from app.infra.security.security_service import (
 from app.models.season import SeasonModel
 
 
-class TestUserApi(unittest.TestCase):
+class TestUploadFileApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
-        connect("mongoenginetest", host="mongodb://localhost:1234",
-                mongo_client_class=mongomock.MongoClient)
+        connect("mongoenginetest", host="mongodb://localhost:1234", mongo_client_class=mongomock.MongoClient)
         cls.client = TestClient(app)
         cls.season: SeasonModel = SeasonModel(
-            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
-            academic_year="2023-2024",
-            season=3,
-            is_current=True
+            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG", academic_year="2023-2024", season=3, is_current=True
         ).save()
         cls.user = AdminModel(
             status="active",
@@ -36,13 +32,9 @@ class TestUserApi(unittest.TestCase):
                 "admin",
             ],
             holy_name="Martin",
-            phone_number=[
-                "0123456789"
-            ],
+            phone_number=["0123456789"],
             current_season=3,
-            seasons=[
-                3
-            ],
+            seasons=[3],
             email="user@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
@@ -53,11 +45,11 @@ class TestUserApi(unittest.TestCase):
         disconnect()
 
     def test_upload_file(self):
-        with patch("app.infra.security.security_service.verify_token") as mock_token, \
-            patch("app.infra.services.google_drive_api.GoogleDriveApiService.create") as mock_upload_to_drive, \
-            patch(
-            "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token") \
-                as mock_get_oauth_token:
+        with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
+            "app.infra.services.google_drive_api.GoogleDriveApiService.create"
+        ) as mock_upload_to_drive, patch(
+            "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token"
+        ) as mock_get_oauth_token:
             mock_token.return_value = TokenData(email=self.user.email)
             mock_get_oauth_token.return_value = Credentials(
                 token="<access_token>",
@@ -65,7 +57,7 @@ class TestUserApi(unittest.TestCase):
                 client_id="<client_id>",
                 client_secret="<client_secret>",
                 token_uri="<token_uri>",
-                scopes=["https://www.googleapis.com/auth/drive"]
+                scopes=["https://www.googleapis.com/auth/drive"],
             )
             mock_upload_to_drive.return_value = GoogleDriveAPIRes.model_validate(
                 {
@@ -73,7 +65,8 @@ class TestUserApi(unittest.TestCase):
                     "mimeType": "application/pdf",
                     "name": "test.pdf",
                     "thumbnailLink": "null",
-                })
+                }
+            )
 
             files = {"file": open("tests/mocks/sample.pdf", "rb")}
 
@@ -89,11 +82,11 @@ class TestUserApi(unittest.TestCase):
             mock_upload_to_drive.assert_called_once()
 
     def test_upload_image(self):
-        with patch("app.infra.security.security_service.verify_token") as mock_token, \
-            patch("app.infra.services.google_drive_api.GoogleDriveApiService.create") as mock_upload_to_drive, \
-            patch(
-            "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token") \
-                as mock_get_oauth_token:
+        with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
+            "app.infra.services.google_drive_api.GoogleDriveApiService.create"
+        ) as mock_upload_to_drive, patch(
+            "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token"
+        ) as mock_get_oauth_token:
             mock_token.return_value = TokenData(email=self.user.email)
             mock_get_oauth_token.return_value = Credentials(
                 token="<access_token>",
@@ -101,7 +94,7 @@ class TestUserApi(unittest.TestCase):
                 client_id="<client_id>",
                 client_secret="<client_secret>",
                 token_uri="<token_uri>",
-                scopes=["https://www.googleapis.com/auth/drive"]
+                scopes=["https://www.googleapis.com/auth/drive"],
             )
             mock_upload_to_drive.return_value = GoogleDriveAPIRes.model_validate(
                 {
@@ -109,7 +102,8 @@ class TestUserApi(unittest.TestCase):
                     "mimeType": "application/pdf",
                     "name": "test.pdf",
                     "thumbnailLink": "null",
-                })
+                }
+            )
 
             file1 = {"image": open("tests/mocks/sample.pdf", "rb")}
             file2 = {"image": open("tests/mocks/ysof.jpg", "rb")}
@@ -136,11 +130,9 @@ class TestUserApi(unittest.TestCase):
             mock_upload_to_drive.assert_called_once()
 
     def test_delete_file(self):
-        with patch("app.infra.security.security_service.verify_token") as mock_token, \
-            patch("app.infra.services.google_drive_api.GoogleDriveApiService.delete"), \
-            patch(
-            "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token") \
-                as mock_get_oauth_token:
+        with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
+            "app.infra.services.google_drive_api.GoogleDriveApiService.delete"
+        ), patch("app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token") as mock_get_oauth_token:
             mock_token.return_value = TokenData(email=self.user.email)
             mock_get_oauth_token.return_value = Credentials(
                 token="<access_token>",
@@ -148,7 +140,7 @@ class TestUserApi(unittest.TestCase):
                 client_id="<client_id>",
                 client_secret="<client_secret>",
                 token_uri="<token_uri>",
-                scopes=["https://www.googleapis.com/auth/drive"]
+                scopes=["https://www.googleapis.com/auth/drive"],
             )
 
             r = self.client.delete(

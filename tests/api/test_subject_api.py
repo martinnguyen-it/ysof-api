@@ -24,7 +24,7 @@ from app.models.student import StudentModel
 from app.models.subject_registration import SubjectRegistrationModel
 
 
-class TestUserApi(unittest.TestCase):
+class TestSubjectApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()

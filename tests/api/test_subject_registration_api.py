@@ -21,7 +21,7 @@ from app.models.manage_form import ManageFormModel
 from app.domain.manage_form.enum import FormStatus, FormType
 
 
-class TestUserApi(unittest.TestCase):
+class TestSubjectRegistrationApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()

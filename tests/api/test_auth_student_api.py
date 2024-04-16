@@ -7,7 +7,7 @@ from app.infra.security.security_service import get_password_hash
 from app.models.student import StudentModel
 
 
-class TestAuthAdminApi(unittest.TestCase):
+class TestAuthAdminStudentApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()

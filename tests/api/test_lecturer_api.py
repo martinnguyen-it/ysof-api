@@ -20,7 +20,7 @@ from app.models.audit_log import AuditLogModel
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 
 
-class TestUserApi(unittest.TestCase):
+class TestLecturerApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()

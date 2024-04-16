@@ -20,7 +20,7 @@ from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.domain.manage_form.enum import FormStatus, FormType
 
 
-class TestUserApi(unittest.TestCase):
+class TestManageFormApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
