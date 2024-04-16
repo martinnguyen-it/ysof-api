@@ -16,6 +16,7 @@ class Endpoint(str, ExtendedEnum):
     LECTURER = "lecturer"
     SEASON = "season"
     SUBJECT = "subject"
+    SUBJECT_EVALUATION_QUESTION = "subject_evaluation_questions"
     UPLOAD = "upload"
     STUDENT = "student"
     MANAGE_FORM = "manage_form"
