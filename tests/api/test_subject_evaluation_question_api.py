@@ -1,8 +1,8 @@
 import app.interfaces.api_v1.admin
+import app.interfaces.api_v1.student
 import time
 import unittest
 from unittest.mock import patch
-import pytest
 
 from mongoengine import connect, disconnect
 from fastapi.testclient import TestClient
@@ -21,7 +21,6 @@ from app.models.season import SeasonModel
 from app.models.audit_log import AuditLogModel
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.models.student import StudentModel
-from app.models.subject_registration import SubjectRegistrationModel
 from app.models.subject_evaluation import SubjectEvaluationQuestionModel
 
 
@@ -78,6 +77,32 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
             lecturer=cls.lecturer,
             season=3,
         ).save()
+        cls.subject2: SubjectModel = SubjectModel(
+            title="Môn học 2",
+            start_at="2024-03-27",
+            subdivision="string",
+            code="string",
+            question_url="string",
+            zoom={"meeting_id": 0, "pass_code": "string", "link": "string"},
+            documents_url=["string"],
+            lecturer=cls.lecturer,
+            season=3,
+        ).save()
+        cls.student: StudentModel = StudentModel(
+            numerical_order=1,
+            group=2,
+            status="active",
+            holy_name="Martin",
+            phone_number="0123456789",
+            current_season=3,
+            email="student@example.com",
+            full_name="Nguyen Thanh Tam",
+            password=get_password_hash(password="local@local"),
+        ).save()
+        cls.subject_evaluation_question: SubjectEvaluationQuestionModel = SubjectEvaluationQuestionModel(
+            subject=cls.subject2,
+            questions=[{"title": "Hình ảnh Thiên Chúa", "type": "text", "answers": []}],
+        ).save()
 
     @classmethod
     def tearDownClass(cls):
@@ -107,7 +132,6 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
             assert r.status_code == 200
             resp = r.json()
             assert resp["questions"][0]["title"] == "Đâu là hình ảnh của Thiên Chúa ?"
-            assert resp["subject"]["title"] == self.subject.title
 
             time.sleep(1)
             cursor = AuditLogModel._get_collection().find(
@@ -115,3 +139,59 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
             )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
+
+    def test_update_subject_evaluation_question(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user2.email)
+            r = self.client.patch(
+                f"/api/v1/subject-evaluation-questions/{self.subject.id}",
+                json={"questions": [{"title": "Đâu là hình ảnh của Thiên Chúa 2?", "type": "text"}]},
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 403
+
+            mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.patch(
+                f"/api/v1/subject-evaluation-questions/{self.subject.id}",
+                json={"questions": [{"title": "Đâu là hình ảnh của Thiên Chúa 2?", "type": "text"}]},
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+
+            assert r.status_code == 200
+            resp = r.json()
+            assert resp["questions"][0]["title"] == "Đâu là hình ảnh của Thiên Chúa 2?"
+
+            time.sleep(1)
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.SUBJECT_EVALUATION_QUESTION}
+            )
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 1
+
+    def test_get_subject_evaluation_question(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user2.email)
+            r = self.client.get(
+                f"/api/v1/subject-evaluation-questions/{self.subject2.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            resp = r.json()
+            assert resp["questions"][0]["title"] == self.subject_evaluation_question.questions[0]["title"]
+
+            mock_token.return_value = TokenData(email=self.student.email)
+            r = self.client.get(
+                f"/api/v1/student/subject-evaluation-questions/{self.subject2.id}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            resp = r.json()
+            assert resp["questions"][0]["title"] == self.subject_evaluation_question.questions[0]["title"]

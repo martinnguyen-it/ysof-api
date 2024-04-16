@@ -74,7 +74,7 @@ def get_current_admin(
 ) -> AdminModel:
     current_user = AdminInDB.model_validate(admin)
     if current_user.disabled():
-        raise HTTPException(status_code=400, detail="Tài khoản của bạn đã bị khóa")
+        raise HTTPException(status_code=403, detail="Tài khoản của bạn đã bị khóa")
     return admin
 
 
@@ -103,7 +103,7 @@ def get_current_student(
 ) -> StudentModel:
     current_user = StudentInDB.model_validate(student)
     if current_user.disabled():
-        raise HTTPException(status_code=400, detail="Tài khoản của bạn đã bị khóa")
+        raise HTTPException(status_code=403, detail="Tài khoản của bạn đã bị khóa")
     return student
 
 

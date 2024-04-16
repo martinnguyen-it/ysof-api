@@ -128,7 +128,6 @@ class TestSubjectRegistrationApi(unittest.TestCase):
                 },
             )
             resp = r.json()
-            print(resp)
             assert r.status_code == 200
             assert resp["student_id"] == str(self.student.id)
             assert len(resp["subjects_registration"]) == 2
