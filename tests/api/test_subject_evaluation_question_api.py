@@ -112,7 +112,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user2.email)
             r = self.client.post(
-                f"/api/v1/subject-evaluation-questions/{self.subject.id}",
+                f"/api/v1/subjects/evaluation-questions/{self.subject.id}",
                 json={"questions": [{"title": "Đâu là hình ảnh của Thiên Chúa ?", "type": "text"}]},
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
@@ -122,7 +122,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
 
             mock_token.return_value = TokenData(email=self.user.email)
             r = self.client.post(
-                f"/api/v1/subject-evaluation-questions/{self.subject.id}",
+                f"/api/v1/subjects/evaluation-questions/{self.subject.id}",
                 json={"questions": [{"title": "Đâu là hình ảnh của Thiên Chúa ?", "type": "text"}]},
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
@@ -144,7 +144,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user2.email)
             r = self.client.patch(
-                f"/api/v1/subject-evaluation-questions/{self.subject.id}",
+                f"/api/v1/subjects/evaluation-questions/{self.subject.id}",
                 json={"questions": [{"title": "Đâu là hình ảnh của Thiên Chúa 2?", "type": "text"}]},
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
@@ -154,7 +154,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
 
             mock_token.return_value = TokenData(email=self.user.email)
             r = self.client.patch(
-                f"/api/v1/subject-evaluation-questions/{self.subject.id}",
+                f"/api/v1/subjects/evaluation-questions/{self.subject.id}",
                 json={"questions": [{"title": "Đâu là hình ảnh của Thiên Chúa 2?", "type": "text"}]},
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
@@ -176,7 +176,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user2.email)
             r = self.client.get(
-                f"/api/v1/subject-evaluation-questions/{self.subject2.id}",
+                f"/api/v1/subjects/evaluation-questions/{self.subject2.id}",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -187,7 +187,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
 
             mock_token.return_value = TokenData(email=self.student.email)
             r = self.client.get(
-                f"/api/v1/student/subject-evaluation-questions/{self.subject2.id}",
+                f"/api/v1/student/subjects/evaluation-questions/{self.subject2.id}",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },

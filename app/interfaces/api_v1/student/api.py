@@ -5,9 +5,9 @@ from app.interfaces.api_v1.student import auth, subject, subject_registration, s
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth Student"])
 api_router.include_router(subject_registration.router, prefix="/subjects/registration", tags=["Subject Student"])
-api_router.include_router(subject.router, prefix="/subjects", tags=["Subject Student"])
 api_router.include_router(
     subject_evaluation_question.router,
-    prefix="/subject-evaluation-questions",
-    tags=["Subject evaluation questions student"],
+    prefix="/subjects/evaluation-questions",
+    tags=["Subject Student"],
 )
+api_router.include_router(subject.router, prefix="/subjects", tags=["Subject Student"])
