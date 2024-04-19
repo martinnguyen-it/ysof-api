@@ -3,7 +3,7 @@ from pydantic import ValidationError
 from app.shared import request_object, use_case, response_object
 from app.domain.manage_form.entity import (
     ManageFormBase,
-    ManageFormEvaluationAndAbsentInPayload,
+    ManageFormEvaluationOrAbsentInPayload,
     ManageFormInDB,
     ManageFormUpdateWithTime,
 )
@@ -91,7 +91,7 @@ class UpdateManageFormCommonUseCase(use_case.UseCase):
         else:
             if req_object.payload.type in [FormType.SUBJECT_EVALUATION, FormType.SUBJECT_ABSENT]:
                 try:
-                    _data = ManageFormEvaluationAndAbsentInPayload(
+                    _data = ManageFormEvaluationOrAbsentInPayload(
                         **req_object.payload.model_dump(exclude={"data"}),
                         data=req_object.payload.data if req_object.payload.data is not None else ({}),
                     )

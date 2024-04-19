@@ -100,7 +100,7 @@ class TestSubjectRegistrationApi(unittest.TestCase):
                     "Authorization": "Bearer {}".format("xxx"),
                 },
             )
-            assert r.status_code == 404
+            assert r.status_code == 400
             assert r.json()["detail"].startswith("Form chưa được mở")
 
             ManageFormModel(type=FormType.SUBJECT_REGISTRATION, status=FormStatus.ACTIVE).save()

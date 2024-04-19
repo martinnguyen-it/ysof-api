@@ -45,9 +45,9 @@ class SubjectRegistrationStudentCase(use_case.UseCase):
         )
 
         if not form_subject_registration or form_subject_registration.status == FormStatus.INACTIVE:
-            return response_object.ResponseFailure.build_not_found_error(message="Form chưa được mở.")
+            return response_object.ResponseFailure.build_parameters_error(message="Form chưa được mở.")
         if form_subject_registration.status == FormStatus.CLOSED:
-            return response_object.ResponseFailure.build_not_found_error(message="Form đã được đóng.")
+            return response_object.ResponseFailure.build_parameters_error(message="Form đã được đóng.")
 
         current_season: int = get_current_season_value()
         for subject_id in req_object.subjects:

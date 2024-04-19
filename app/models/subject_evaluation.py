@@ -52,7 +52,7 @@ class SubjectEvaluationModel(Document):
         return super(SubjectEvaluationModel, self).save(*args, **kwargs)
 
     meta = {
-        "collection": "SubjectRegistration",
+        "collection": "SubjectEvaluation",
         "indexes": [{"fields": ["student", "subject"], "unique": True}],
         "allow_inheritance": True,
         "index_cls": False,

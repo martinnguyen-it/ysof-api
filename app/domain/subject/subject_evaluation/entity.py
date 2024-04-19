@@ -6,7 +6,6 @@ from app.domain.student.field import PydanticStudentType
 from app.domain.subject.field import PydanticSubjectType
 from app.domain.subject.subject_evaluation.enum import QualityValueEnum, TypeQuestionEnum
 from app.domain.subject.entity import SubjectInStudent
-from app.domain.student.entity import Student
 
 
 class Quality(BaseEntity):
@@ -42,7 +41,6 @@ class SubjectEvaluationInCreate(SubjectEvaluationBase):
 class SubjectEvaluation(SubjectEvaluationBase, DateTimeModelMixin):
     id: str
     subject: SubjectInStudent
-    student: Student
 
 
 class SubjectEvaluationInUpdate(BaseEntity):

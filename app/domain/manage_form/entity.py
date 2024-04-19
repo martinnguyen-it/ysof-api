@@ -30,7 +30,7 @@ class ManageFormSubjectData(BaseEntity):
     subject_id: str
 
 
-class ManageFormEvaluationAndAbsentInPayload(BaseEntity):
+class ManageFormEvaluationOrAbsentInPayload(BaseEntity):
     """_summary_
 
     Args:
@@ -40,3 +40,7 @@ class ManageFormEvaluationAndAbsentInPayload(BaseEntity):
     type: FormType
     status: FormStatus = FormStatus.INACTIVE
     data: ManageFormSubjectData
+
+
+class ManageFormEvaluationOrAbsent(ManageFormEvaluationOrAbsentInPayload):
+    model_config = ConfigDict(from_attributes=True)

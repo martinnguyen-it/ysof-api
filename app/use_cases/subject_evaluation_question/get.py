@@ -34,7 +34,7 @@ class GetSubjectEvaluationQuestionUseCase(use_case.UseCase):
         )
 
         if not subject_evaluation_question:
-            return response_object.ResponseFailure.build_not_found_error(message="Câu hỏi chưa được thêm.")
+            return response_object.ResponseFailure.build_not_found_error(message="Câu hỏi lượng giá chưa được thêm.")
 
         return SubjectEvaluationQuestion(
             **SubjectEvaluationQuestionInDB.model_validate(subject_evaluation_question).model_dump(
