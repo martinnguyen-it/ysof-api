@@ -1,6 +1,12 @@
-from fastapi import Depends, BackgroundTasks
-from app.shared import request_object, use_case
-from app.domain.manage_form.entity import CommonUpdate, FormUpdateWithTime, ManageFormInDB
+from fastapi import Depends, BackgroundTasks, HTTPException
+from pydantic import ValidationError
+from app.shared import request_object, use_case, response_object
+from app.domain.manage_form.entity import (
+    ManageFormBase,
+    ManageFormEvaluationAndAbsentInPayload,
+    ManageFormInDB,
+    ManageFormUpdateWithTime,
+)
 from app.models.admin import AdminModel
 from app.infra.manage_form.manage_form_repository import ManageFormRepository
 from app.infra.audit_log.audit_log_repository import AuditLogRepository
@@ -9,15 +15,17 @@ from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.shared.utils.general import get_current_season_value
 import json
+from app.domain.manage_form.enum import FormType
+from app.infra.subject.subject_repository import SubjectRepository
 
 
 class UpdateManageFormCommonRequestObject(request_object.ValidRequestObject):
-    def __init__(self, payload: CommonUpdate, current_admin: AdminModel):
+    def __init__(self, payload: ManageFormBase, current_admin: AdminModel):
         self.payload = payload
         self.current_admin = current_admin
 
     @classmethod
-    def builder(cls, payload: CommonUpdate, current_admin: AdminModel) -> request_object.RequestObject:
+    def builder(cls, payload: ManageFormBase, current_admin: AdminModel) -> request_object.RequestObject:
         invalid_req = request_object.InvalidRequestObject()
         if not isinstance(payload.status, str):
             invalid_req.add_error("status", "Invalid")
@@ -34,22 +42,33 @@ class UpdateManageFormCommonUseCase(use_case.UseCase):
     def __init__(
         self,
         background_tasks: BackgroundTasks,
+        subject_repository: SubjectRepository = Depends(SubjectRepository),
         manage_form_repository: ManageFormRepository = Depends(ManageFormRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
     ):
         self.manage_form_repository = manage_form_repository
         self.background_tasks = background_tasks
         self.audit_log_repository = audit_log_repository
+        self.subject_repository = subject_repository
 
     def process_request(self, req_object: UpdateManageFormCommonRequestObject):
         doc: ManageFormModel | None = self.manage_form_repository.find_one({"type": req_object.payload.type})
 
         if doc:
-            if doc.status == req_object.payload.status:
+            if (
+                req_object.payload.type in [FormType.SUBJECT_EVALUATION, FormType.SUBJECT_ABSENT]
+                and req_object.payload.data
+                and "subject_id" in req_object.payload.data
+            ):
+                subject = self.subject_repository.get_by_id(subject_id=req_object.payload.data["subject_id"])
+                if not subject:
+                    return response_object.ResponseFailure.build_not_found_error(message="Môn học không tồn tại")
+
+            if doc.status == req_object.payload.status and doc.data == req_object.payload.data:
                 return ManageFormInDB.model_validate(doc)
 
             res = self.manage_form_repository.update(
-                id=doc.id, data=FormUpdateWithTime(**req_object.payload.model_dump())
+                id=doc.id, data=ManageFormUpdateWithTime(**req_object.payload.model_dump())
             )
             if res:
                 doc.reload()
@@ -70,6 +89,19 @@ class UpdateManageFormCommonUseCase(use_case.UseCase):
             else:
                 return ManageFormInDB.model_validate(doc)
         else:
+            if req_object.payload.type in [FormType.SUBJECT_EVALUATION, FormType.SUBJECT_ABSENT]:
+                try:
+                    _data = ManageFormEvaluationAndAbsentInPayload(
+                        **req_object.payload.model_dump(exclude={"data"}),
+                        data=req_object.payload.data if req_object.payload.data is not None else ({}),
+                    )
+                    subject = self.subject_repository.get_by_id(subject_id=_data.data.subject_id)
+                    if not subject:
+                        return response_object.ResponseFailure.build_not_found_error(message="Môn học không tồn tại")
+                except ValidationError as e:
+                    errs = e.errors()
+                    raise HTTPException(status_code=422, detail=errs)
+
             doc = self.manage_form_repository.create(ManageFormInDB(**req_object.payload.model_dump()))
             self.background_tasks.add_task(
                 self.audit_log_repository.create,

@@ -4,29 +4,39 @@ from datetime import datetime, timezone
 from pydantic import ConfigDict
 
 
-class SubjectRegistrationUpdate(BaseEntity):
-    status: FormStatus
-
-
-class CommonUpdate(BaseEntity):
+class ManageFormBase(BaseEntity):
     status: FormStatus = FormStatus.INACTIVE
     type: FormType
     data: dict | None = None
 
 
-class CommonGet(BaseEntity):
-    type: FormType
-
-
-class ManageFormInDB(IDModelMixin, DateTimeModelMixin, CommonUpdate):
+class ManageFormInDB(IDModelMixin, DateTimeModelMixin, ManageFormBase):
     # https://docs.pydantic.dev/2.4/concepts/models/#arbitrary-class-instances
     model_config = ConfigDict(from_attributes=True)
 
 
-class FormUpdateWithTime(CommonUpdate):
+class ManageFormUpdateWithTime(ManageFormBase):
     updated_at: datetime = datetime.now(timezone.utc)
 
 
 class CommonResponse(BaseEntity):
+    type: FormType
     status: FormStatus = FormStatus.INACTIVE
+    data: dict | None = None
     model_config = ConfigDict(from_attributes=True)
+
+
+class ManageFormSubjectData(BaseEntity):
+    subject_id: str
+
+
+class ManageFormEvaluationAndAbsentInPayload(BaseEntity):
+    """_summary_
+
+    Args:
+        data (str): ID subject
+    """
+
+    type: FormType
+    status: FormStatus = FormStatus.INACTIVE
+    data: ManageFormSubjectData

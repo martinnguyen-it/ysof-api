@@ -1,7 +1,7 @@
 from bson import ObjectId
 from typing import Any
 from app.models.manage_form import ManageFormModel
-from app.domain.manage_form.entity import FormUpdateWithTime, ManageFormInDB
+from app.domain.manage_form.entity import ManageFormUpdateWithTime, ManageFormInDB
 
 
 class ManageFormRepository:
@@ -20,9 +20,9 @@ class ManageFormRepository:
         new_doc.save()
         return new_doc
 
-    def update(self, id: ObjectId, data: FormUpdateWithTime | dict[str, Any]) -> bool:
+    def update(self, id: ObjectId, data: ManageFormUpdateWithTime | dict[str, Any]) -> bool:
         try:
-            data = data.model_dump(exclude_none=True) if isinstance(data, FormUpdateWithTime) else data
+            data = data.model_dump(exclude_none=True) if isinstance(data, ManageFormUpdateWithTime) else data
             ManageFormModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception:

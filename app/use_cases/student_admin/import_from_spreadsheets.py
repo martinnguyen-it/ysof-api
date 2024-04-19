@@ -11,7 +11,6 @@ from app.domain.student.entity import ImportSpreadsheetsInResponse, ImportSpread
 from app.infra.student.student_repository import StudentRepository
 from app.infra.lecturer.lecturer_repository import LecturerRepository
 from app.models.admin import AdminModel
-from app.infra.season.season_repository import SeasonRepository
 from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
