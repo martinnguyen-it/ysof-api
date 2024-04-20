@@ -24,7 +24,7 @@ SCOPES = [
 ]
 
 
-class GoogleDriveApiService:
+class GoogleDriveAPIService:
     def __init__(self):
         self._creds = self._get_oauth_token()
         self.service = build("drive", "v3", credentials=self._creds)

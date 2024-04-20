@@ -7,7 +7,7 @@ from app.shared import request_object, use_case, response_object
 from app.domain.document.entity import AdminInDocument, Document, DocumentInDB, DocumentInUpdate, DocumentInUpdateTime
 from app.infra.document.document_repository import DocumentRepository
 from app.shared.constant import SUPER_ADMIN
-from app.infra.services.google_drive_api import GoogleDriveApiService
+from app.infra.services.google_drive_api import GoogleDriveAPIService
 from app.domain.admin.entity import AdminInDB
 from app.models.admin import AdminModel
 from app.infra.audit_log.audit_log_repository import AuditLogRepository
@@ -44,7 +44,7 @@ class UpdateDocumentUseCase(use_case.UseCase):
     def __init__(
         self,
         background_tasks: BackgroundTasks,
-        google_drive_api_service: GoogleDriveApiService = Depends(GoogleDriveApiService),
+        google_drive_api_service: GoogleDriveAPIService = Depends(GoogleDriveAPIService),
         document_repository: DocumentRepository = Depends(DocumentRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
     ):

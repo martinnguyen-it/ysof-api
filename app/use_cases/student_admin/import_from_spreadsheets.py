@@ -15,7 +15,7 @@ from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.infra.security.security_service import get_password_hash
-from app.infra.services.google_drive_api import GoogleDriveApiService
+from app.infra.services.google_drive_api import GoogleDriveAPIService
 from app.shared.utils.general import extract_id_spreadsheet_from_url, get_current_season_value
 from app.shared.constant import HEADER_IMPORT_STUDENT
 from app.domain.student.enum import FieldStudentEnum
@@ -48,7 +48,7 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
         student_repository: StudentRepository = Depends(StudentRepository),
         lecturer_repository: LecturerRepository = Depends(LecturerRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
-        google_drive_service: GoogleDriveApiService = Depends(GoogleDriveApiService),
+        google_drive_service: GoogleDriveAPIService = Depends(GoogleDriveAPIService),
     ):
         self.student_repository = student_repository
         self.lecturer_repository = lecturer_repository

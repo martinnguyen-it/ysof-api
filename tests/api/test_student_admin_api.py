@@ -229,7 +229,7 @@ class TestStudentAdminApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
             "app.use_cases.student_admin.import_from_spreadsheets.ImportSpreadsheetsStudentUseCase.get_data_from_spreadsheet"
         ) as mock_get_data_spreadsheet, patch(
-            "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token"
+            "app.infra.services.google_drive_api.GoogleDriveAPIService._get_oauth_token"
         ) as mock_get_oauth_token:
             mock_token.return_value = TokenData(email=self.admin.email)
             mock_get_oauth_token.return_value = Credentials(

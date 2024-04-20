@@ -6,7 +6,7 @@ from app.infra.document.document_repository import DocumentRepository
 from app.shared import request_object, response_object, use_case
 from app.shared.constant import SUPER_ADMIN
 from app.models.document import DocumentModel
-from app.infra.services.google_drive_api import GoogleDriveApiService
+from app.infra.services.google_drive_api import GoogleDriveAPIService
 from app.infra.general_task.general_task_repository import GeneralTaskRepository
 from app.models.admin import AdminModel
 from app.infra.audit_log.audit_log_repository import AuditLogRepository
@@ -37,7 +37,7 @@ class DeleteDocumentUseCase(use_case.UseCase):
     def __init__(
         self,
         background_tasks: BackgroundTasks,
-        google_drive_api_service: GoogleDriveApiService = Depends(GoogleDriveApiService),
+        google_drive_api_service: GoogleDriveAPIService = Depends(GoogleDriveAPIService),
         document_repository: DocumentRepository = Depends(DocumentRepository),
         general_task_repository: GeneralTaskRepository = Depends(GeneralTaskRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),

@@ -46,9 +46,9 @@ class TestUploadFileApi(unittest.TestCase):
 
     def test_upload_file(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
-            "app.infra.services.google_drive_api.GoogleDriveApiService.create"
+            "app.infra.services.google_drive_api.GoogleDriveAPIService.create"
         ) as mock_upload_to_drive, patch(
-            "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token"
+            "app.infra.services.google_drive_api.GoogleDriveAPIService._get_oauth_token"
         ) as mock_get_oauth_token:
             mock_token.return_value = TokenData(email=self.user.email)
             mock_get_oauth_token.return_value = Credentials(
@@ -83,9 +83,9 @@ class TestUploadFileApi(unittest.TestCase):
 
     def test_upload_image(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
-            "app.infra.services.google_drive_api.GoogleDriveApiService.create"
+            "app.infra.services.google_drive_api.GoogleDriveAPIService.create"
         ) as mock_upload_to_drive, patch(
-            "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token"
+            "app.infra.services.google_drive_api.GoogleDriveAPIService._get_oauth_token"
         ) as mock_get_oauth_token:
             mock_token.return_value = TokenData(email=self.user.email)
             mock_get_oauth_token.return_value = Credentials(
@@ -131,8 +131,8 @@ class TestUploadFileApi(unittest.TestCase):
 
     def test_delete_file(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
-            "app.infra.services.google_drive_api.GoogleDriveApiService.delete"
-        ), patch("app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token") as mock_get_oauth_token:
+            "app.infra.services.google_drive_api.GoogleDriveAPIService.delete"
+        ), patch("app.infra.services.google_drive_api.GoogleDriveAPIService._get_oauth_token") as mock_get_oauth_token:
             mock_token.return_value = TokenData(email=self.user.email)
             mock_get_oauth_token.return_value = Credentials(
                 token="<access_token>",

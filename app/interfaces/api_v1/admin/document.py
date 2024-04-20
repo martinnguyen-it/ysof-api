@@ -11,7 +11,7 @@ from app.domain.document.entity import (
 )
 from app.domain.shared.enum import Sort
 from app.infra.security.security_service import authorization, get_current_active_admin, get_current_admin
-from app.infra.services.google_drive_api import GoogleDriveApiService
+from app.infra.services.google_drive_api import GoogleDriveAPIService
 from app.shared.decorator import response_decorator
 from app.use_cases.document.list import ListDocumentsUseCase, ListDocumentsRequestObject
 from app.use_cases.document.update import UpdateDocumentUseCase, UpdateDocumentRequestObject
@@ -56,7 +56,7 @@ def create_document(
     file: UploadFile = File(...),
     create_document_use_case: CreateDocumentUseCase = Depends(CreateDocumentUseCase),
     current_admin: AdminModel = Depends(get_current_active_admin),
-    google_drive_service: GoogleDriveApiService = Depends(GoogleDriveApiService),
+    google_drive_service: GoogleDriveAPIService = Depends(GoogleDriveAPIService),
 ):
     if payload.role not in current_admin.roles:
         authorization(current_admin, SUPER_ADMIN)
@@ -123,7 +123,7 @@ def update_document(
     file: UploadFile = File(None),
     update_document_use_case: UpdateDocumentUseCase = Depends(UpdateDocumentUseCase),
     current_admin: AdminModel = Depends(get_current_active_admin),
-    google_drive_service: GoogleDriveApiService = Depends(GoogleDriveApiService),
+    google_drive_service: GoogleDriveAPIService = Depends(GoogleDriveAPIService),
 ):
     if payload.role and payload.role not in current_admin.roles:
         authorization(current_admin, SUPER_ADMIN)

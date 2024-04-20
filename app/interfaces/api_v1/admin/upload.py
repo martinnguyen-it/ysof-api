@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, File, Depends
 from fastapi.params import Path
 
 from app.domain.upload.entity import GoogleDriveAPIRes, ImageRes
-from app.infra.services.google_drive_api import GoogleDriveApiService
+from app.infra.services.google_drive_api import GoogleDriveAPIService
 from app.shared.decorator import response_decorator
 from app.use_cases.upload.create_image import UploadImageRequestObject, UploadImageUseCase
 
@@ -12,7 +12,7 @@ router = APIRouter()
 @router.post("", response_model=GoogleDriveAPIRes)
 @response_decorator()
 def upload_file(
-    file: UploadFile = File(...), google_drive_service: GoogleDriveApiService = Depends(GoogleDriveApiService)
+    file: UploadFile = File(...), google_drive_service: GoogleDriveAPIService = Depends(GoogleDriveAPIService)
 ):
     response = google_drive_service.create(file=file)
     return response
@@ -35,7 +35,7 @@ def upload_image(
 @response_decorator()
 def delete_image(
     file_id: str = Path(..., title="File id"),
-    google_drive_service: GoogleDriveApiService = Depends(GoogleDriveApiService),
+    google_drive_service: GoogleDriveAPIService = Depends(GoogleDriveAPIService),
 ):
     google_drive_service.delete(file_id=file_id)
     return {"message": "Success"}

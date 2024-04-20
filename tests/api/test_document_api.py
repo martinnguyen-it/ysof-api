@@ -100,9 +100,9 @@ class TestDocumentApi(unittest.TestCase):
 
     def test_create_document(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
-            "app.infra.services.google_drive_api.GoogleDriveApiService.create"
+            "app.infra.services.google_drive_api.GoogleDriveAPIService.create"
         ) as mock_upload_to_drive, patch(
-            "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token"
+            "app.infra.services.google_drive_api.GoogleDriveAPIService._get_oauth_token"
         ) as mock_get_oauth_token:
             mock_token.return_value = TokenData(email=self.user.email)
             mock_get_oauth_token.return_value = Credentials(
@@ -193,9 +193,9 @@ class TestDocumentApi(unittest.TestCase):
 
     def test_update_document_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
-            "app.infra.services.google_drive_api.GoogleDriveApiService.update_file_name"
+            "app.infra.services.google_drive_api.GoogleDriveAPIService.update_file_name"
         ) as mock_update_file_drive, patch(
-            "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token"
+            "app.infra.services.google_drive_api.GoogleDriveAPIService._get_oauth_token"
         ) as mock_get_oauth_token:
             mock_token.return_value = TokenData(email=self.user.email)
             mock_get_oauth_token.return_value = Credentials(
@@ -239,9 +239,9 @@ class TestDocumentApi(unittest.TestCase):
 
     def test_delete_document_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
-            "app.infra.services.google_drive_api.GoogleDriveApiService.delete"
+            "app.infra.services.google_drive_api.GoogleDriveAPIService.delete"
         ) as mock_delete_file_drive, patch(
-            "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token"
+            "app.infra.services.google_drive_api.GoogleDriveAPIService._get_oauth_token"
         ) as mock_get_oauth_token:
             mock_token.return_value = TokenData(email=self.user.email)
             mock_get_oauth_token.return_value = Credentials(
