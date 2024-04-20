@@ -64,7 +64,7 @@ class UpdateDocumentUseCase(use_case.UseCase):
 
         if isinstance(req_object.obj_in.name, str) and req_object.obj_in.file_id is None:
             self.background_tasks.add_task(
-                self.google_drive_api_service.update, document.file_id, req_object.obj_in.name
+                self.google_drive_api_service.update_file_name, document.file_id, req_object.obj_in.name
             )
 
         if req_object.obj_in.file_id:

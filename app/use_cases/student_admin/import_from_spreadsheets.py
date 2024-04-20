@@ -62,7 +62,7 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
         sheet_name: str,
     ) -> list[str]:
         id = extract_id_spreadsheet_from_url(url)
-        creds = self.google_drive_service._get_oauth_token()
+        creds = self.google_drive_service._creds
         try:
             service = build("sheets", "v4", credentials=creds)
             data = service.spreadsheets().values().get(spreadsheetId=id, range=sheet_name).execute()

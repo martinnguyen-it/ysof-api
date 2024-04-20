@@ -193,7 +193,7 @@ class TestDocumentApi(unittest.TestCase):
 
     def test_update_document_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
-            "app.infra.services.google_drive_api.GoogleDriveApiService.update"
+            "app.infra.services.google_drive_api.GoogleDriveApiService.update_file_name"
         ) as mock_update_file_drive, patch(
             "app.infra.services.google_drive_api.GoogleDriveApiService._get_oauth_token"
         ) as mock_get_oauth_token:
