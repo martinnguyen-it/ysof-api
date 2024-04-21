@@ -46,6 +46,7 @@ class DocumentInCreate(DocumentBase):
     Args:
         DocumentBase (_type_): _description_
     """
+
     pass
 
 
@@ -53,6 +54,7 @@ class Document(DocumentBase):
     """
     Admin domain entity
     """
+
     id: str
     author: AdminInDocument
     season: int
@@ -62,6 +64,10 @@ class Document(DocumentBase):
 
     @validator("webViewLink", pre=True, always=True)
     def create_web_link(cls, v, values):
+        if values["mimeType"] == "application/vnd.google-apps.spreadsheet":
+            return f"https://docs.google.com/spreadsheets/d/{values['file_id']}"
+        if values["mimeType"] in ["application/vnd.google-apps.document", "application/vnd.google-apps.kix"]:
+            return f"https://docs.google.com/document/d/{values['file_id']}"
         return f"https://drive.google.com/file/d/{values['file_id']}/view?usp=drivesdk"
 
 

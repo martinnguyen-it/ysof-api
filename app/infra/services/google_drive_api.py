@@ -19,6 +19,7 @@ cache = TTLCache(maxsize=1, ttl=60 * 5)  # Cache 1 item for 5 minutes
 
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/documents",
     "https://www.googleapis.com/auth/drive",
     "https://www.googleapis.com/auth/drive.file",
 ]
