@@ -93,7 +93,7 @@ class GoogleDriveAPIService:
 
     def get(self, file_id: str, fields: str = "id,mimeType,name,thumbnailLink"):
         try:
-            res = self.service.files().create(fileId=file_id, fields=fields).execute()
+            res = self.service.files().get(fileId=file_id, fields=fields).execute()
             return res
 
         except HttpError as error:

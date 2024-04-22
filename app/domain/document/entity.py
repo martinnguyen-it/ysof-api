@@ -3,8 +3,9 @@ from typing import Optional, List
 from pydantic import ConfigDict, validator
 
 from app.domain.admin.field import PydanticAdminType
-from app.domain.document.enum import DocumentType
+from app.domain.document.enum import DocumentType, GoogleFileType
 from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin, Pagination, PayloadWithFile
+from app.domain.shared.enum import AdminRole
 
 
 class AdminInDocument(BaseEntity):
@@ -32,12 +33,20 @@ class DocumentInDB(IDModelMixin, DateTimeModelMixin, DocumentBase):
     model_config = ConfigDict(from_attributes=True)
 
 
-class DocumentInCreatePayload(BaseEntity, PayloadWithFile):
+class DocumentInCreatePayloadBase(BaseEntity):
     name: str
     type: DocumentType
     description: Optional[str] = None
-    role: Optional[str] = None
+    role: AdminRole
     label: Optional[list[str]] = None
+
+
+class DocumentFileInCreatePayload(DocumentInCreatePayloadBase, PayloadWithFile):
+    pass
+
+
+class DocumentGoogleInCreatePayload(DocumentInCreatePayloadBase):
+    google_type_file: GoogleFileType
 
 
 class DocumentInCreate(DocumentBase):

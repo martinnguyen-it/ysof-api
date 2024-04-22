@@ -125,7 +125,7 @@ class TestDocumentApi(unittest.TestCase):
             files = {"file": open("tests/mocks/sample.pdf", "rb")}
 
             r = self.client.post(
-                "/api/v1/documents",
+                "/api/v1/documents/file",
                 files=files,
                 data={
                     "payload": json.dumps(

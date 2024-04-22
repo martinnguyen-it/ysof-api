@@ -3,11 +3,12 @@ from typing import Annotated, Optional
 
 from app.domain.document.entity import (
     Document,
+    DocumentFileInCreatePayload,
+    DocumentGoogleInCreatePayload,
     DocumentInCreate,
-    ManyDocumentsInResponse,
     DocumentInUpdate,
-    DocumentInCreatePayload,
     DocumentInUpdatePayload,
+    ManyDocumentsInResponse,
 )
 from app.domain.shared.enum import Sort
 from app.infra.security.security_service import authorization, get_current_active_admin, get_current_admin
@@ -26,7 +27,11 @@ from app.use_cases.document.create import (
 from app.models.admin import AdminModel
 from app.shared.constant import SUPER_ADMIN
 from app.use_cases.document.delete import DeleteDocumentRequestObject, DeleteDocumentUseCase
-from app.domain.document.enum import DocumentType
+from app.domain.document.enum import DocumentType, GoogleFileType
+from app.infra.services.google_sheet_api import GoogleSheetAPIService
+from app.infra.services.google_document_api import GoogleDocumentAPIService
+from app.domain.upload.entity import GoogleDriveAPIRes
+from app.shared import response_object
 
 router = APIRouter()
 
@@ -47,12 +52,12 @@ def get_document_by_id(
 
 
 @router.post(
-    "",
+    "/file",
     response_model=Document,
 )
 @response_decorator()
-def create_document(
-    payload: DocumentInCreatePayload = Body(..., title="Document In Create payload"),
+def create_document_with_file_upload(
+    payload: DocumentFileInCreatePayload = Body(..., title="Document In Create payload"),
     file: UploadFile = File(...),
     create_document_use_case: CreateDocumentUseCase = Depends(CreateDocumentUseCase),
     current_admin: AdminModel = Depends(get_current_active_admin),
@@ -62,6 +67,39 @@ def create_document(
         authorization(current_admin, SUPER_ADMIN)
 
     info_file = google_drive_service.create(file=file, name=payload.name)
+    new_payload = DocumentInCreate(
+        **payload.model_dump(),
+        **info_file.model_dump(exclude={"name", "id"}),
+        file_id=info_file.id,
+    )
+    req_object = CreateDocumentRequestObject.builder(payload=new_payload, current_admin=current_admin)
+    response = create_document_use_case.execute(request_object=req_object)
+    return response
+
+
+@router.post(
+    "/google",
+    response_model=Document,
+)
+@response_decorator()
+def create_document_google(
+    payload: DocumentGoogleInCreatePayload = Body(..., title="Document In Create payload"),
+    create_document_use_case: CreateDocumentUseCase = Depends(CreateDocumentUseCase),
+    current_admin: AdminModel = Depends(get_current_active_admin),
+    google_sheet_api_service: GoogleSheetAPIService = Depends(GoogleSheetAPIService),
+    google_document_api_service: GoogleDocumentAPIService = Depends(GoogleDocumentAPIService),
+):
+    if payload.role not in current_admin.roles:
+        authorization(current_admin, SUPER_ADMIN)
+
+    info_file: GoogleDriveAPIRes
+    if payload.google_type_file == GoogleFileType.SPREAD_SHEET:
+        info_file = google_sheet_api_service.create(email_owner=current_admin.email, name=payload.name)
+    elif payload.google_type_file == GoogleFileType.DOCUMENT:
+        info_file = google_document_api_service.create(email_owner=current_admin.email, name=payload.name)
+    else:
+        return response_object.ResponseFailure.build_parameters_error("This type has not been defined.")
+
     new_payload = DocumentInCreate(
         **payload.model_dump(),
         **info_file.model_dump(exclude={"name", "id"}),

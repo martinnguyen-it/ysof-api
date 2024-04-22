@@ -9,6 +9,12 @@ class DocumentType(str, ExtendedEnum):
         common: Just only each admin in current season can access /
         internal: Just only each admin in current season and belong same department can access
     """
+
     ANNUAL = "annual"
     COMMON = "common"
     INTERNAL = "internal"
+
+
+class GoogleFileType(str, ExtendedEnum):
+    SPREAD_SHEET = "spread_sheet"
+    DOCUMENT = "document"
