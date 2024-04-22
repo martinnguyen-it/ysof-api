@@ -74,76 +74,102 @@ class ListDocumentsUseCase(use_case.UseCase):
 
         match_pipeline: dict[str, Any] | None = {}
 
-        if (
-            (is_super_admin and req_object.season != 0)
-            or (isinstance(req_object.season, int) and req_object.season <= req_object.current_admin.current_season)
-            or req_object.season is None
-        ):
-            match_pipeline = {
-                **match_pipeline,
-                "$or": [
-                    {
-                        "$and": [
-                            {"type": DocumentType.ANNUAL},
-                            {
-                                "season": {
-                                    "$lte": (
-                                        req_object.current_admin.current_season
-                                        if AdminRole.ADMIN not in req_object.current_admin.roles
-                                        else current_season
+        if req_object.type != DocumentType.STUDENT:
+            if (
+                (is_super_admin and req_object.season != 0)
+                or (isinstance(req_object.season, int) and req_object.season <= req_object.current_admin.current_season)
+                or req_object.season is None
+            ):
+                match_pipeline = {
+                    **match_pipeline,
+                    "$or": [
+                        {
+                            "$and": [
+                                {"type": DocumentType.ANNUAL},
+                                {
+                                    "season": {
+                                        "$lte": (
+                                            req_object.current_admin.current_season
+                                            if AdminRole.ADMIN not in req_object.current_admin.roles
+                                            else current_season
+                                        )
+                                    }
+                                },
+                            ]
+                        },
+                        {
+                            "$and": [
+                                {
+                                    "$or": [
+                                        {"type": DocumentType.COMMON},
+                                        (
+                                            {"type": DocumentType.INTERNAL}
+                                            if is_super_admin
+                                            else {
+                                                "$and": [
+                                                    {"type": DocumentType.INTERNAL},
+                                                    {"role": {"$in": req_object.current_admin.roles}},
+                                                    {
+                                                        "season": {
+                                                            "$lte": (
+                                                                req_object.current_admin.current_season
+                                                                if AdminRole.ADMIN not in req_object.current_admin.roles
+                                                                else current_season
+                                                            )
+                                                        }
+                                                    },
+                                                ]
+                                            }
+                                        ),
+                                    ]
+                                },
+                                {
+                                    "season": (
+                                        req_object.season
+                                        if req_object.season
+                                        else req_object.current_admin.current_season
                                     )
-                                }
-                            },
-                        ]
-                    },
-                    {
-                        "$and": [
-                            {
-                                "$or": [
-                                    {"type": DocumentType.COMMON},
-                                    (
-                                        {"type": DocumentType.INTERNAL}
-                                        if is_super_admin
-                                        else {
-                                            "$and": [
-                                                {"type": DocumentType.INTERNAL},
-                                                {"role": {"$in": req_object.current_admin.roles}},
-                                                {
-                                                    "season": {
-                                                        "$lte": (
-                                                            req_object.current_admin.current_season
-                                                            if AdminRole.ADMIN not in req_object.current_admin.roles
-                                                            else current_season
-                                                        )
-                                                    }
-                                                },
-                                            ]
-                                        }
-                                    ),
-                                ]
-                            },
-                            {
-                                "season": (
-                                    req_object.season if req_object.season else req_object.current_admin.current_season
-                                )
-                            },
-                        ]
-                    },
-                ],
-            }
-        elif is_super_admin and req_object.season == 0:
-            pass
+                                },
+                            ]
+                        },
+                    ],
+                }
+            elif is_super_admin and req_object.season == 0:
+                pass
+            else:
+                return response_object.ResponseFailure.build_parameters_error(
+                    "Bạn không có quyền truy cập "
+                    + (f"mùa {req_object.season}" if req_object.season != 0 else "tất cả mùa")
+                )
+
+            if isinstance(req_object.type, str):
+                match_pipeline = {**match_pipeline, "type": req_object.type}
+
         else:
-            return response_object.ResponseFailure.build_parameters_error(
-                "Bạn không có quyền truy cập "
-                + (f"mùa {req_object.season}" if req_object.season != 0 else "tất cả mùa")
-            )
+            match_pipeline = {**match_pipeline, "type": req_object.type}
+            if (
+                (is_super_admin and req_object.season != 0)
+                or (isinstance(req_object.season, int) and req_object.season <= req_object.current_admin.current_season)
+                or req_object.season is None
+            ):
+                match_pipeline = {
+                    **match_pipeline,
+                    "season": (
+                        req_object.current_admin.current_season
+                        if AdminRole.ADMIN not in req_object.current_admin.roles
+                        else current_season
+                    ),
+                }
+            elif is_super_admin and req_object.season == 0:
+                pass
+            else:
+                return response_object.ResponseFailure.build_parameters_error(
+                    "Bạn không có quyền truy cập "
+                    + (f"mùa {req_object.season}" if req_object.season != 0 else "tất cả mùa")
+                )
 
         if isinstance(req_object.search, str):
             match_pipeline = {**match_pipeline, "name": {"$regex": req_object.search, "$options": "i"}}
-
-        if isinstance(req_object.type, str):
-            match_pipeline = {**match_pipeline, "type": req_object.type}
 
         if isinstance(req_object.label, list) and len(req_object.label) > 0:
             match_pipeline = {**match_pipeline, "label": {"$in": req_object.label}}

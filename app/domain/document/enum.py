@@ -7,12 +7,14 @@ class DocumentType(str, ExtendedEnum):
     Args:
         annual: For seasons can access /
         common: Just only each admin in current season can access /
-        internal: Just only each admin in current season and belong same department can access
+        internal: Just only each admin in current season and belong same department can access /
+        student: Document for student
     """
 
     ANNUAL = "annual"
     COMMON = "common"
     INTERNAL = "internal"
+    STUDENT = "student"
 
 
 class GoogleFileType(str, ExtendedEnum):

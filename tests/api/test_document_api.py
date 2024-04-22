@@ -80,6 +80,17 @@ class TestDocumentApi(unittest.TestCase):
             season=3,
             author=cls.user,
         ).save()
+        cls.document3 = DocumentModel(
+            file_id="1hXt8WI3g6p8YUtN2gR35yA-gO_fE2vD3",
+            mimeType="image/jpeg",
+            name="Tài liệu học",
+            thumbnailLink="https://lh3.googleusercontent.com/drive-storage/AJQWtBPQ0cDHLtK8eFG3nyGUQ02897KWOM87NIeoCu6OSyOoehPiZrY7__MpTVFAxsSM3UBsJz-4yDVoB-yio8LMQsaqQpNsgewuzf3F2VCI=s220",
+            role="bhv",
+            type="student",
+            label=["string"],
+            season=3,
+            author=cls.user,
+        ).save()
         cls.general_task: GeneralTaskModel = GeneralTaskModel(
             title="Cong viec dau nam",
             short_desc="Cong viec",
@@ -165,6 +176,19 @@ class TestDocumentApi(unittest.TestCase):
             assert r.status_code == 200
             resp = r.json()
             assert resp["pagination"]["total"] == 2
+
+            r = self.client.get(
+                "/api/v1/documents",
+                params={
+                    "type": "student",
+                },
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            resp = r.json()
+            assert resp["pagination"]["total"] == 1
 
             mock_token.return_value = TokenData(email=self.user2.email)
             r = self.client.get(
