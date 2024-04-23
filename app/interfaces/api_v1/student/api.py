@@ -6,6 +6,7 @@ from app.interfaces.api_v1.student import (
     subject_registration,
     subject_evaluation_question,
     subject_evaluation,
+    absent,
 )
 
 api_router = APIRouter()
@@ -18,3 +19,4 @@ api_router.include_router(
     tags=["Subject Student"],
 )
 api_router.include_router(subject.router, prefix="/subjects", tags=["Subject Student"])
+api_router.include_router(absent.router, prefix="/absent", tags=["Absent Student"])

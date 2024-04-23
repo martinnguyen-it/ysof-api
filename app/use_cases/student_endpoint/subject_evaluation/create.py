@@ -99,8 +99,7 @@ class CreateSubjectEvaluationUseCase(use_case.UseCase):
             )
         except NotUniqueError:
             return response_object.ResponseFailure.build_parameters_error("Lượng giá bị trùng.")
-        except Exception as e:
-            print(e)
+        except Exception:
             return response_object.ResponseFailure.build_system_error("Something went wrong")
 
         return SubjectEvaluation(

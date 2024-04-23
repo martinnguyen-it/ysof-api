@@ -20,3 +20,4 @@ class Endpoint(str, ExtendedEnum):
     UPLOAD = "upload"
     STUDENT = "student"
     MANAGE_FORM = "manage_form"
+    ABSENT = "absent"

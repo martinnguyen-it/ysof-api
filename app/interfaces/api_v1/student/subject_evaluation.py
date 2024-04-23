@@ -49,13 +49,13 @@ def create_subject_evaluation(
 def update_subject_evaluation(
     subject_id: str = Path(..., title="Subject id"),
     payload: SubjectEvaluationInUpdate = Body(..., title="Subject evaluation In update payload"),
-    create_subject_evaluation_use_case: UpdateSubjectEvaluationUseCase = Depends(UpdateSubjectEvaluationUseCase),
+    update_subject_evaluation_use_case: UpdateSubjectEvaluationUseCase = Depends(UpdateSubjectEvaluationUseCase),
     current_student: StudentModel = Depends(get_current_student),
 ):
     req_object = UpdateSubjectEvaluationRequestObject.builder(
         subject_id=subject_id, payload=payload, current_student=current_student
     )
-    response = create_subject_evaluation_use_case.execute(request_object=req_object)
+    response = update_subject_evaluation_use_case.execute(request_object=req_object)
     return response
 
 
