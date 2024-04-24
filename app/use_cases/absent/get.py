@@ -9,6 +9,7 @@ from app.models.absent import AbsentModel
 from app.domain.absent.entity import AbsentInDB, AdminAbsentInResponse, StudentAbsentInResponse
 from app.domain.student.entity import Student, StudentInDB
 from app.infra.subject.subject_repository import SubjectRepository
+from app.infra.student.student_repository import StudentRepository
 
 
 class GetAbsentRequestObject(request_object.ValidRequestObject):
@@ -32,10 +33,12 @@ class GetAbsentUseCase(use_case.UseCase):
     def __init__(
         self,
         subject_repository: SubjectRepository = Depends(SubjectRepository),
+        student_repository: StudentRepository = Depends(StudentRepository),
         absent_repository: AbsentRepository = Depends(AbsentRepository),
     ):
         self.absent_repository = absent_repository
         self.subject_repository = subject_repository
+        self.student_repository = student_repository
 
     def process_request(self, req_object: GetAbsentRequestObject):
         is_student_request = True

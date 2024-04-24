@@ -14,6 +14,7 @@ from app.interfaces.api_v1.admin import (
     season,
     audit_log,
     subject_evaluation_question,
+    absent,
 )
 from app.interfaces.api_v1.student import api as api_student
 
@@ -34,6 +35,7 @@ api_router.include_router(
 )
 api_router.include_router(audit_log.router, prefix="/audit-logs", tags=["Audit logs"])
 api_router.include_router(manage_form.router, prefix="/manage-form", tags=["Manage form"])
+api_router.include_router(absent.router, prefix="/absents", tags=["Absent"])
 
 
 api_router.include_router(api_student.api_router, prefix="/student")
