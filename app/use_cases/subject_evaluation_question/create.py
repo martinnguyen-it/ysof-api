@@ -80,7 +80,9 @@ class CreateSubjectEvaluationQuestionUseCase(use_case.UseCase):
                 author_email=req_object.current_admin.email,
                 author_name=req_object.current_admin.full_name,
                 author_roles=req_object.current_admin.roles,
-                description=json.dumps(req_object.obj_in.model_dump(exclude_none=True), default=str),
+                description=json.dumps(
+                    req_object.obj_in.model_dump(exclude_none=True), default=str, ensure_ascii=False
+                ),
             ),
         )
 

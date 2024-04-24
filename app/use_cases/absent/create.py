@@ -138,6 +138,7 @@ class CreateAbsentUseCase(use_case.UseCase):
                                 "note": req_object.note,
                             },
                             default=str,
+                            ensure_ascii=False,
                         ),
                     ),
                 )

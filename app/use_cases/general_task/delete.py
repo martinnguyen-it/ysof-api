@@ -66,7 +66,9 @@ class DeleteGeneralTaskUseCase(use_case.UseCase):
                     author_name=req_object.current_admin.full_name,
                     author_roles=req_object.current_admin.roles,
                     description=json.dumps(
-                        GeneralTaskInDB.model_validate(general_task).model_dump(exclude_none=True), default=str
+                        GeneralTaskInDB.model_validate(general_task).model_dump(exclude_none=True),
+                        default=str,
+                        ensure_ascii=False,
                     ),
                 ),
             )

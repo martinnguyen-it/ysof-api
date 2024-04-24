@@ -81,7 +81,9 @@ class DeleteDocumentUseCase(use_case.UseCase):
                     author_name=req_object.current_admin.full_name,
                     author_roles=req_object.current_admin.roles,
                     description=json.dumps(
-                        DocumentInDB.model_validate(document).model_dump(exclude_none=True), default=str
+                        DocumentInDB.model_validate(document).model_dump(exclude_none=True),
+                        default=str,
+                        ensure_ascii=False,
                     ),
                 ),
             )

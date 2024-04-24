@@ -138,6 +138,7 @@ class UpdateAbsentUseCase(use_case.UseCase):
                             "subject_id": req_object.subject_id,
                         },
                         default=str,
+                        ensure_ascii=False,
                     ),
                 ),
             )

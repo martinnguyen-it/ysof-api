@@ -60,7 +60,9 @@ class ResetPasswordStudentUseCase(use_case.UseCase):
                 author_email=req_object.current_admin.email,
                 author_name=req_object.current_admin.full_name,
                 author_roles=req_object.current_admin.roles,
-                description=json.dumps({"id": student.id, "message": "Updated password"}, default=str),
+                description=json.dumps(
+                    {"id": student.id, "message": "Updated password"}, default=str, ensure_ascii=False
+                ),
             ),
         )
 

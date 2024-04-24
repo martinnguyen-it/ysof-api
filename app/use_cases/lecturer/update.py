@@ -70,7 +70,7 @@ class UpdateLecturerUseCase(use_case.UseCase):
                 author_name=req_object.current_admin.full_name,
                 author_roles=req_object.current_admin.roles,
                 description=json.dumps(
-                    LecturerInDB.model_validate(lecturer).model_dump(exclude_none=True), default=str
+                    LecturerInDB.model_validate(lecturer).model_dump(exclude_none=True), default=str, ensure_ascii=False
                 ),
             ),
         )
