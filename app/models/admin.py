@@ -19,7 +19,7 @@ class Address(EmbeddedDocument):
 
 
 class AdminModel(Document):
-    email = EmailField(required=True, unique=True)
+    email = EmailField(required=True)
     status = StringField(required=True)
     roles = ListField(StringField(), required=True)
     full_name = StringField(required=True)
@@ -54,7 +54,7 @@ class AdminModel(Document):
 
     meta = {
         "collection": "Admins",
-        "indexes": ["email", "status", "current_season", "full_name", "holy_name"],
+        "indexes": [{"fields": ["email"], "unique": True}, "status", "current_season", "full_name", "holy_name"],
         "allow_inheritance": True,
         "index_cls": False,
     }

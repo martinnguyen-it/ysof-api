@@ -37,7 +37,7 @@ uploads/
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
-celerybeat-schedule
+celerybeat-schedule.*
 
 # Installer logs
 pip-log.txt

@@ -69,6 +69,13 @@ class Settings(BaseSettings):
     STUDENT_REGISTER_EMAIL_TEMPLATE: int
     HOSTING_URL: str
 
+    RABBITMQ_USER: str
+    RABBITMQ_PASS: str
+    RABBITMQ_HOST: str
+    RABBITMQ_PORT: int
+
+    CELERY_TIMEZONE: str
+
 
 # init settings instance
 settings = Settings()
