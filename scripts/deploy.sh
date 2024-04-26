@@ -19,9 +19,9 @@ fi
 echo "Deploying $2 branch to $1"
 git fetch origin && git checkout $2 && git merge origin/$2
 
-echo "Overwriting .$1.env to .env"
+echo "Overwriting .env.$1 to .env"
 rm -rf .env
-cp ".$1.env" .env
+cp ".env.$1" .env
 
 
 echo "Rebuild docker"

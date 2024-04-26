@@ -1,36 +1,57 @@
 version: "3"
 services:
-  api:
-    image: ysof_api
-    restart: unless-stopped
-    volumes:
-      - ./logs:/usr/src/app/logs
-      - ./uploads:/usr/src/app/uploads
-    depends_on:
-      - mongodb
-    networks:
-      - localnet
-    env_file:
-      - .env
-    cap_add:
-      - SYS_ADMIN
+    api:
+        image: ysof_api
+        restart: unless-stopped
+        depends_on:
+            - mongodb
+            - rabbit
+        networks:
+            - localnet
+        cap_add:
+            - SYS_ADMIN
 
-  mongodb:
-    image: mongo:7.0.2-jammy
-    restart: always
-    command: mongod
-    volumes:
-      - ./scripts/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
-      - mongodb_data:/data/db
-    env_file:
-      - .env
-    networks:
-      - localnet
+    mongodb:
+        image: mongo:7.0.2-jammy
+        restart: always
+        command: mongod
+        volumes:
+            - ./scripts/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
+            - mongodb_data:/data/db
+        networks:
+            - localnet
+
+    rabbit:
+        image: rabbitmq:3-management
+        container_name: base_rabbitmq
+        volumes:
+            - rabbit_data:/var/lib/rabbitmq
+        environment:
+            RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+            RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+            RABBITMQ_DEFAULT_VHOST: /
+        networks:
+            - localnet
+
+    celery:
+        image: ysof_celery
+        build:
+            context: .
+            dockerfile: celery.Dockerfile
+        restart: on-failure
+        depends_on:
+            - api
+            - rabbit
+            - mongodb
+        networks:
+            - localnet
 
 networks:
-  localnet:
-    driver: bridge
+    localnet:
+        driver: bridge
 
 volumes:
-  mongodb_data:
-    driver: local
+    mongodb_data:
+        driver: local
+    rabbit_data:
+        driver: local

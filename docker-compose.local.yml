@@ -9,11 +9,25 @@ services:
             - ${API_PORT}:8000
         environment:
             WEB_CONCURRENCY: 1
+        env_file:
+            - .env
 
     mongodb:
         container_name: ysof_mongodb_${ENVIRONMENT}
         environment:
-            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME}
             MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
         ports:
             - ${MONGODB_EXPOSE_PORT}:27017
+        env_file:
+            - .env
+
+    rabbit:
+        container_name: ysof_rabbitmq_${ENVIRONMENT}
+        env_file:
+            - .env
+
+    celery:
+        container_name: ysof_celery_${ENVIRONMENT}
+        env_file:
+            - .env
