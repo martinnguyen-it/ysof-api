@@ -20,6 +20,7 @@ from app.shared.utils.general import extract_id_spreadsheet_from_url, get_curren
 from app.shared.constant import HEADER_IMPORT_STUDENT
 from app.domain.student.enum import FieldStudentEnum
 from app.models.student import StudentModel
+from app.infra.tasks.email import send_email_welcome
 
 LEN_HEADER_IMPORT_STUDENT = len(HEADER_IMPORT_STUDENT)
 
@@ -99,10 +100,11 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
         for idx, row in enumerate(data_import):
             data = self.convert_value_spreadsheet_to_dict(row)
             try:
+                password = "12345678"
+                # password = generate_random_password()
                 student_in_db = StudentInDB(
                     **data,
-                    password=get_password_hash(password="12345678"),
-                    # password=get_password_hash(password=generate_random_password()),
+                    password=get_password_hash(password),
                     current_season=current_season,
                 )
 
@@ -114,6 +116,10 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
 
                 inserted_id = self.student_repository.create(student_in_db).id
                 inserted_ids.append(str(inserted_id))
+
+                send_email_welcome.delay(
+                    email=student_in_db.email, password=password, full_name=student_in_db.full_name
+                )
             except NotUniqueError:
                 errors.append({"row": idx + 2, "detail": "Email hoặc mshv đã tồn tại."})
             except ValidationError as e:

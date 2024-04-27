@@ -34,3 +34,6 @@ class EmailSMTPService:
             return res
         except Exception as e:
             logger.exception(e)
+
+    def send_email_welcome(self, email: str, plain_text: str):
+        self._send(emails_to=email, subject="YSOF - TÀI KHOẢN TRUY CẬP", plain_text=plain_text)

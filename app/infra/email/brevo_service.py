@@ -61,7 +61,7 @@ class BrevoService:
 
     def send_register_email(self, mail_to: EmailStr, password: str) -> Any:
         try:
-            data = dict(password=password, url=settings.HOSTING_URL)
+            data = dict(password=password, url=settings.FE_ADMIN_BASE_URL)
             resp = self._send(
                 emails_to=[mail_to],
                 template_id=settings.STUDENT_REGISTER_EMAIL_TEMPLATE,
@@ -73,7 +73,7 @@ class BrevoService:
 
     def send_forgot_email(self, mail_to: EmailStr, password: str) -> Any:
         try:
-            data = dict(password=password, url=settings.HOSTING_URL)
+            data = dict(password=password, url=settings.FE_ADMIN_BASE_URL)
             resp = self._send(
                 emails_to=[mail_to],
                 template_id=settings.STUDENT_FORGOT_PASSWORD_EMAIL_TEMPLATE,

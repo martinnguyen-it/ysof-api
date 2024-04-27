@@ -15,6 +15,7 @@ from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.infra.security.security_service import get_password_hash
 from app.shared.utils.general import get_current_season_value
+from app.infra.tasks.email import send_email_welcome
 
 
 class CreateStudentRequestObject(request_object.ValidRequestObject):
@@ -62,11 +63,12 @@ class CreateStudentUseCase(use_case.UseCase):
         if existing_student:
             return response_object.ResponseFailure.build_parameters_error(message="Email hoặc mshv đã tồn tại")
 
+        password = "12345678"
+        # password = generate_random_password()
         current_season = get_current_season_value()
         obj_in: StudentInDB = StudentInDB(
             **req_object.student_in.model_dump(),
-            password=get_password_hash(password="12345678"),
-            # password=get_password_hash(password=generate_random_password()),
+            password=get_password_hash(password),
             current_season=current_season,
         )
 
@@ -76,6 +78,8 @@ class CreateStudentUseCase(use_case.UseCase):
             raise e
         except Exception:
             return response_object.ResponseFailure.build_system_error("Something went wrong")
+
+        send_email_welcome(email=student.email, password=password, full_name=student.full_name)
 
         self.background_tasks.add_task(
             self.audit_log_repository.create,

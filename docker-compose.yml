@@ -41,6 +41,8 @@ services:
             context: .
             dockerfile: celery.Dockerfile
         restart: on-failure
+        volumes:
+            - ./logs:/usr/src/app/logs
         environment:
             - C_FORCE_ROOT=true
         depends_on:

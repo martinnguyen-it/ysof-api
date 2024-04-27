@@ -12,6 +12,7 @@ from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import Endpoint, AuditLogType
 from app.shared.utils.general import get_current_season_value
+from app.infra.tasks.email import send_email_welcome
 
 
 class CreateAdminRequestObject(request_object.ValidRequestObject):
@@ -61,14 +62,19 @@ class CreateAdminUseCase(use_case.UseCase):
             existing_admin.reload()
             return Admin(**existing_admin.model_dump())
 
+        password = "12345678"
+        # password = generate_random_password()
         obj_in: AdminInDB = AdminInDB(
             **admin_in.model_dump(exclude={"password"}),
-            password=get_password_hash(password="12345678"),
-            # password=get_password_hash(password=generate_random_password()),
+            password=get_password_hash(password),
             current_season=current_season,
             seasons=[current_season],
         )
         admin_in_db: AdminInDB = self.admin_repository.create(admin=obj_in)
+
+        send_email_welcome.delay(
+            email=admin_in_db.email, password=password, full_name=admin_in_db.full_name, is_admin=True
+        )
 
         self.background_tasks.add_task(
             self.audit_log_repository.create,

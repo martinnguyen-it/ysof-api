@@ -11,12 +11,14 @@ logger = logging.getLogger(__name__)
 celery_app = Celery(
     "ysof_celery_worker",
     broker=f"amqp://{settings.RABBITMQ_USER}:{settings.RABBITMQ_PASS}@{settings.RABBITMQ_HOST}:{settings.RABBITMQ_PORT}",
-    include=["app.infra.tasks.periodic.test"],
+    include=["app", "app.infra.tasks.periodic.test", "app.infra.tasks.email"],
 )
 celery_app.conf.timezone = settings.CELERY_TIMEZONE
 celery_app.conf.accept_content = ["pickle", "json"]
 celery_app.conf.task_serializer = "pickle"
-celery_app.conf.worker_prefetch_multiplier = 4
+
+if not settings.ENVIRONMENT == "testing":
+    celery_app.conf.worker_prefetch_multiplier = 4
 
 celery_app.conf.beat_schedule = {
     "add-every-2-minute": {"task": "app.infra.tasks.periodic.test.test", "schedule": crontab(minute="*/2")},
