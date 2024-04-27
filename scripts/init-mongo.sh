@@ -1,6 +1,6 @@
 mongosh -- "$MONGODB_DATABASE" <<EOF
-    var rootUser = '$MONGO_INITDB_ROOT_USERNAME';
-    var rootPassword = '$MONGO_INITDB_ROOT_PASSWORD';
+    var rootUser = '$MONGODB_USERNAME';
+    var rootPassword = '$MONGODB_PASSWORD';
     var admin = db.getSiblingDB('admin');
     admin.auth(rootUser, rootPassword);
 
@@ -10,15 +10,17 @@ mongosh -- "$MONGODB_DATABASE" <<EOF
     db.createUser({user: user, pwd: passwd, roles: ["readWrite", "dbAdmin"]});
     use $MONGODB_DATABASE;
     db.auth(user, passwd);
-    db.Users.insertOne({
-        "_cls": "User",
-        "email": "accountant@bhsoft.vn",
+    db.Admins.insertOne({
+        "_cls": "AdminModel",
+        "email": "ysofweb21@gmail.com",
         "status": "active",
-        "role": "accountant",
-        "first_name": "bhsoft",
-        "last_name": "bhsoft",
-        "hashed_password": "\$2b\$12\$vOMvhYM4zx57zTCc03H4Hu6qyv/h6KnLW1bJPFEU4EMW26m9sKlOe",
+        "roles": ["admin"],
+        "holy_name": "YSOF",
+        "full_name": "Admin",
+        "password": "\$2b\$12\$bFmH3NeboT6MMMVnFEKxmOUJwDtwxTARykY5bjZLpvQU1M1E1qnhu",
         "created_at": new Date(),
         "updated_at": new Date(),
+        "current_season": 1,
+        "seasons": [1]
     });
 EOF
