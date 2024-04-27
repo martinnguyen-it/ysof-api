@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from typing import Optional, List
 from pydantic import ConfigDict, EmailStr, field_validator
 
@@ -91,7 +91,7 @@ class StudentInUpdate(BaseEntity):
 
 
 class StudentInUpdateTime(StudentInUpdate):
-    updated_at: datetime = datetime.now()
+    updated_at: datetime = datetime.now(timezone.utc)
 
 
 class ImportSpreadsheetsPayload(BaseEntity):

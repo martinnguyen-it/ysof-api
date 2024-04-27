@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, List
 from pydantic import ConfigDict
 
@@ -64,4 +64,4 @@ class GeneralTaskInUpdate(BaseEntity):
 
 
 class GeneralTaskInUpdateTime(GeneralTaskInUpdate):
-    updated_at: datetime = datetime.now()
+    updated_at: datetime = datetime.now(timezone.utc)

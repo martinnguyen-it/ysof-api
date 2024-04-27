@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, List
 from pydantic import ConfigDict
 
@@ -53,4 +53,4 @@ class LecturerInUpdate(BaseEntity):
 
 
 class LecturerInUpdateTime(LecturerInUpdate):
-    updated_at: datetime = datetime.now()
+    updated_at: datetime = datetime.now(timezone.utc)

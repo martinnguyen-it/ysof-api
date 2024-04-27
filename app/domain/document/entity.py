@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, List
 from pydantic import ConfigDict, validator
 
@@ -104,4 +104,4 @@ class DocumentInUpdate(DocumentInUpdateBase):
 
 
 class DocumentInUpdateTime(DocumentInUpdate):
-    updated_at: datetime = datetime.now()
+    updated_at: datetime = datetime.now(timezone.utc), timezone

@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from typing import Optional
 from pydantic import ConfigDict, field_validator, ValidationInfo
 
@@ -71,7 +71,7 @@ class SubjectInUpdate(SubjectBaseUpdate):
 
 class SubjectInUpdateTime(SubjectBaseUpdate):
     lecturer: PydanticLecturerType | None = None
-    updated_at: datetime = datetime.now()
+    updated_at: datetime = datetime.now(timezone.utc)
 
 
 class SubjectRegistrationInDB(IDModelMixin):

@@ -26,3 +26,12 @@ class AuthAdminInfoInResponse(BaseEntity, Token):
 
 class AuthStudentInfoInResponse(BaseEntity, Token):
     user: Student
+
+
+class UpdatePassword(BaseEntity):
+    old_password: str
+    new_password: str
+
+
+class ForgotPassword(BaseEntity):
+    email: str

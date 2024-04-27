@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import ConfigDict
 
 from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin
@@ -33,5 +33,5 @@ class SeasonInUpdate(BaseEntity):
 
 
 class SeasonInUpdateTime(SeasonInUpdate):
-    updated_at: datetime = datetime.now()
+    updated_at: datetime = datetime.now(timezone.utc)
     is_current: bool | None = None

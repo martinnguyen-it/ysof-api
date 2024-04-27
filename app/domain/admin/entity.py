@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from typing import Optional, List
 from pydantic import ConfigDict, EmailStr, field_validator
 
@@ -99,4 +99,4 @@ class AdminInUpdate(AdminInUpdateMe):
 
 
 class AdminInUpdateTime(AdminInUpdate):
-    updated_at: datetime = datetime.now()
+    updated_at: datetime = datetime.now(timezone.utc)
