@@ -104,4 +104,4 @@ class DocumentInUpdate(DocumentInUpdateBase):
 
 
 class DocumentInUpdateTime(DocumentInUpdate):
-    updated_at: datetime = datetime.now(timezone.utc), timezone
+    updated_at: datetime = datetime.now(timezone.utc)

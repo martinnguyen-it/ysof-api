@@ -8,7 +8,7 @@ from app.infra.student.student_repository import StudentRepository
 from app.shared import request_object, use_case, response_object
 
 
-class LoginRequestObject(request_object.ValidRequestObject):
+class LoginStudentRequestObject(request_object.ValidRequestObject):
     def __init__(self, login_payload: LoginRequest):
         self.login_payload = login_payload
 
@@ -21,17 +21,17 @@ class LoginRequestObject(request_object.ValidRequestObject):
         if invalid_req.has_errors():
             return invalid_req
 
-        return LoginRequestObject(login_payload=login_payload)
+        return LoginStudentRequestObject(login_payload=login_payload)
 
 
-class LoginUseCase(use_case.UseCase):
+class LoginStudentUseCase(use_case.UseCase):
     def __init__(
         self,
         student_repository: StudentRepository = Depends(StudentRepository),
     ):
         self.student_repository = student_repository
 
-    def process_request(self, req_object: LoginRequestObject):
+    def process_request(self, req_object: LoginStudentRequestObject):
         student: StudentModel = self.student_repository.get_by_email(req_object.login_payload.email)
         checker = False
         if student:

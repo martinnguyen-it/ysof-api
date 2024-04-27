@@ -28,7 +28,7 @@ router = APIRouter()
 
 
 @router.get("/me", response_model=Admin)
-async def get_me(
+def get_me(
     current_admin: AdminModel = Depends(get_current_admin),
 ):
     """

@@ -1,5 +1,3 @@
-import app.interfaces.api_v1
-import app.interfaces.api_v1.admin
 import time
 import unittest
 from unittest.mock import patch
