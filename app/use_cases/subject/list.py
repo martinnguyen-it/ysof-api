@@ -15,6 +15,7 @@ class ListSubjectsRequestObject(request_object.ValidRequestObject):
         current_admin: AdminModel,
         search: Optional[str] = None,
         subdivision: Optional[str] = None,
+        status: Optional[str] = None,
         season: int | None = None,
         sort: Optional[dict[str, int]] = None,
     ):
@@ -23,6 +24,7 @@ class ListSubjectsRequestObject(request_object.ValidRequestObject):
         self.season = season
         self.subdivision = subdivision
         self.current_admin = current_admin
+        self.status = status
 
     @classmethod
     def builder(
@@ -30,11 +32,12 @@ class ListSubjectsRequestObject(request_object.ValidRequestObject):
         current_admin: AdminModel,
         search: Optional[str] = None,
         subdivision: Optional[str] = None,
+        status: Optional[str] = None,
         season: int | None = None,
         sort: Optional[dict[str, int]] = None,
     ):
         return ListSubjectsRequestObject(
-            season=season, search=search, sort=sort, subdivision=subdivision, current_admin=current_admin
+            season=season, search=search, sort=sort, subdivision=subdivision, current_admin=current_admin, status=status
         )
 
 
@@ -66,6 +69,8 @@ class ListSubjectsUseCase(use_case.UseCase):
             }
         if isinstance(req_object.subdivision, str):
             match_pipeline = {**match_pipeline, "subdivision": req_object.subdivision}
+        if isinstance(req_object.status, str):
+            match_pipeline = {**match_pipeline, "status": req_object.status}
 
         subjects: List[SubjectModel] = self.subject_repository.list(sort=req_object.sort, match_pipeline=match_pipeline)
 

@@ -14,12 +14,14 @@ class ListSubjectsStudentRequestObject(request_object.ValidRequestObject):
         current_student: StudentModel,
         search: Optional[str] = None,
         subdivision: Optional[str] = None,
+        status: Optional[str] = None,
         sort: Optional[dict[str, int]] = None,
     ):
         self.search = search
         self.sort = sort
         self.subdivision = subdivision
         self.current_student = current_student
+        self.status = status
 
     @classmethod
     def builder(
@@ -27,10 +29,11 @@ class ListSubjectsStudentRequestObject(request_object.ValidRequestObject):
         current_student: StudentModel,
         search: Optional[str] = None,
         subdivision: Optional[str] = None,
+        status: Optional[str] = None,
         sort: Optional[dict[str, int]] = None,
     ):
         return ListSubjectsStudentRequestObject(
-            search=search, sort=sort, subdivision=subdivision, current_student=current_student
+            search=search, sort=sort, subdivision=subdivision, current_student=current_student, status=status
         )
 
 
@@ -51,6 +54,8 @@ class ListSubjectsStudentUseCase(use_case.UseCase):
             }
         if isinstance(req_object.subdivision, str):
             match_pipeline = {**match_pipeline, "subdivision": req_object.subdivision}
+        if isinstance(req_object.status, str):
+            match_pipeline = {**match_pipeline, "status": req_object.status}
 
         subjects: List[SubjectModel] = self.subject_repository.list(sort=req_object.sort, match_pipeline=match_pipeline)
 

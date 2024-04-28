@@ -56,6 +56,7 @@ class SubjectInStudent(BaseEntity):
     question_url: Optional[str] = None
     documents_url: list[str] | None = None
     lecturer: LecturerInStudent
+    status: StatusSubjectEnum
 
 
 class SubjectBaseUpdate(BaseEntity):

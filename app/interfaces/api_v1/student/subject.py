@@ -8,6 +8,7 @@ from app.shared.decorator import response_decorator
 from app.use_cases.student_endpoint.subject.get import GetSubjectStudentCase, GetSubjectStudentRequestObject
 from app.use_cases.student_endpoint.subject.list import ListSubjectsStudentRequestObject, ListSubjectsStudentUseCase
 from app.models.student import StudentModel
+from app.domain.subject.enum import StatusSubjectEnum
 
 router = APIRouter()
 
@@ -34,6 +35,7 @@ def get_list_subjects(
     search: Optional[str] = Query(None, title="Search"),
     sort: Optional[Sort] = Sort.DESC,
     sort_by: Optional[str] = "id",
+    status: Optional[StatusSubjectEnum] = None,
     subdivision: Optional[str] = None,
     current_student: StudentModel = Depends(get_current_student),
 ):
@@ -45,7 +47,7 @@ def get_list_subjects(
     sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
 
     req_object = ListSubjectsStudentRequestObject.builder(
-        search=search, sort=sort_query, subdivision=subdivision, current_student=current_student
+        search=search, sort=sort_query, subdivision=subdivision, current_student=current_student, status=status
     )
     response = list_subjects_use_case.execute(request_object=req_object)
     return response

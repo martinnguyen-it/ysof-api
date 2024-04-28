@@ -19,6 +19,7 @@ from app.use_cases.subject.create import (
 from app.models.admin import AdminModel
 from app.shared.constant import SUPER_ADMIN
 from app.use_cases.subject.delete import DeleteSubjectRequestObject, DeleteSubjectUseCase
+from app.domain.subject.enum import StatusSubjectEnum
 
 router = APIRouter()
 
@@ -62,6 +63,7 @@ def get_list_subjects(
     sort: Optional[Sort] = Sort.DESC,
     sort_by: Optional[str] = "id",
     subdivision: Optional[str] = None,
+    status: Optional[StatusSubjectEnum] = None,
     season: Optional[int] = None,
     current_admin: AdminModel = Depends(get_current_admin),
 ):
@@ -73,7 +75,12 @@ def get_list_subjects(
     sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
 
     req_object = ListSubjectsRequestObject.builder(
-        search=search, season=season, sort=sort_query, subdivision=subdivision, current_admin=current_admin
+        search=search,
+        season=season,
+        sort=sort_query,
+        subdivision=subdivision,
+        current_admin=current_admin,
+        status=status,
     )
     response = list_subjects_use_case.execute(request_object=req_object)
     return response
