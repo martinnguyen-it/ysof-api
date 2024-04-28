@@ -72,15 +72,21 @@ class StudentRepository:
     def list(
         self,
         page_index: int = 1,
-        page_size: int = 20,
+        page_size: int | None = None,
         match_pipeline: Optional[Dict[str, Any]] = None,
         sort: Optional[Dict[str, int]] = None,
     ) -> List[StudentModel]:
         pipeline = [
             {"$sort": sort if sort else {"created_at": -1}},
-            {"$skip": page_size * (page_index - 1)},
-            {"$limit": page_size},
         ]
+
+        if isinstance(page_size, int):
+            pipeline.extend(
+                [
+                    {"$skip": page_size * (page_index - 1)},
+                    {"$limit": page_size},
+                ]
+            )
 
         if match_pipeline is not None:
             pipeline.append({"$match": match_pipeline})

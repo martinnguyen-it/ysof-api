@@ -50,12 +50,21 @@ class SubjectEvaluationRepository:
 
     def list(
         self,
+        page_index: int | None = 1,
+        page_size: int | None = None,
         match_pipeline: Optional[Dict[str, Any]] = None,
         sort: Optional[Dict[str, int]] = None,
     ) -> List[SubjectEvaluationModel]:
         pipeline = [
             {"$sort": sort if sort else {"subject": 1}},
         ]
+        if page_size:
+            pipeline.extend(
+                [
+                    {"$skip": page_size * (page_index - 1)},
+                    {"$limit": page_size},
+                ]
+            )
 
         if match_pipeline is not None:
             pipeline.append({"$match": match_pipeline})

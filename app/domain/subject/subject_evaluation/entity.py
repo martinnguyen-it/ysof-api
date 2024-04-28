@@ -1,11 +1,10 @@
 from datetime import datetime, timezone
 from pydantic import ConfigDict
 
-from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin
+from app.domain.shared.entity import BaseEntity, DateTimeModelMixin, IDModelMixin, Pagination
 from app.domain.student.field import PydanticStudentType
 from app.domain.subject.field import PydanticSubjectType
 from app.domain.subject.subject_evaluation.enum import QualityValueEnum, TypeQuestionEnum
-from app.domain.subject.entity import SubjectInStudent
 
 
 class Quality(BaseEntity):
@@ -30,6 +29,7 @@ class SubjectEvaluationBase(BaseEntity):
 class SubjectEvaluationInDB(IDModelMixin, DateTimeModelMixin, SubjectEvaluationBase):
     student: PydanticStudentType
     subject: PydanticSubjectType
+    numerical_order: int
     # https://docs.pydantic.dev/2.4/concepts/models/#arbitrary-class-instances
     model_config = ConfigDict(from_attributes=True)
 
@@ -38,9 +38,41 @@ class SubjectEvaluationInCreate(SubjectEvaluationBase):
     pass
 
 
-class SubjectEvaluation(SubjectEvaluationBase, DateTimeModelMixin):
+class LecturerInEvaluation(BaseEntity):
     id: str
-    subject: SubjectInStudent
+    title: str
+    holy_name: str | None = None
+    full_name: str
+
+
+class SubjectInEvaluation(BaseEntity):
+    id: str
+    title: str
+    lecturer: LecturerInEvaluation
+    code: str
+
+
+class StudentInEvaluation(BaseEntity):
+    id: str
+    numerical_order: int
+    holy_name: str
+    full_name: str
+
+
+class SubjectEvaluationStudent(SubjectEvaluationBase, DateTimeModelMixin):
+    id: str
+    subject: SubjectInEvaluation
+
+
+class SubjectEvaluationAdmin(SubjectEvaluationBase, DateTimeModelMixin):
+    id: str
+    subject: SubjectInEvaluation
+    student: StudentInEvaluation
+
+
+class ManySubjectEvaluationAdminInResponse(BaseEntity):
+    pagination: Pagination | None = None
+    data: list[SubjectEvaluationAdmin] | None = None
 
 
 class SubjectEvaluationInUpdate(BaseEntity):

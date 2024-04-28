@@ -4,7 +4,7 @@ from app.infra.security.security_service import get_current_student
 from app.shared.decorator import response_decorator
 from app.models.student import StudentModel
 from app.domain.subject.subject_evaluation.entity import (
-    SubjectEvaluation,
+    SubjectEvaluationStudent,
     SubjectEvaluationInCreate,
     SubjectEvaluationInUpdate,
 )
@@ -12,7 +12,7 @@ from app.use_cases.student_endpoint.subject_evaluation.create import (
     CreateSubjectEvaluationRequestObject,
     CreateSubjectEvaluationUseCase,
 )
-from app.use_cases.student_endpoint.subject_evaluation.get import (
+from app.use_cases.subject_evaluation.get import (
     GetSubjectEvaluationRequestObject,
     GetSubjectEvaluationUseCase,
 )
@@ -20,16 +20,16 @@ from app.use_cases.student_endpoint.subject_evaluation.update import (
     UpdateSubjectEvaluationRequestObject,
     UpdateSubjectEvaluationUseCase,
 )
-from app.use_cases.student_endpoint.subject_evaluation.list import (
-    ListSubjectEvaluationRequestObject,
-    ListSubjectEvaluationUseCase,
+from app.use_cases.subject_evaluation.list_by_student import (
+    ListSubjectEvaluationByStudentRequestObject,
+    ListSubjectEvaluationByStudentUseCase,
 )
 
 
 router = APIRouter()
 
 
-@router.post("/{subject_id}", response_model=SubjectEvaluation)
+@router.post("/{subject_id}", response_model=SubjectEvaluationStudent)
 @response_decorator()
 def create_subject_evaluation(
     subject_id: str = Path(..., title="Subject id"),
@@ -44,7 +44,7 @@ def create_subject_evaluation(
     return response
 
 
-@router.patch("/{subject_id}", response_model=SubjectEvaluation)
+@router.patch("/{subject_id}", response_model=SubjectEvaluationStudent)
 @response_decorator()
 def update_subject_evaluation(
     subject_id: str = Path(..., title="Subject id"),
@@ -59,7 +59,7 @@ def update_subject_evaluation(
     return response
 
 
-@router.get("/{subject_id}", response_model=SubjectEvaluation)
+@router.get("/{subject_id}", response_model=SubjectEvaluationStudent)
 @response_decorator()
 def get_subject_evaluation(
     subject_id: str = Path(..., title="Subject id"),
@@ -71,12 +71,14 @@ def get_subject_evaluation(
     return response
 
 
-@router.get("", response_model=SubjectEvaluation)
+@router.get("", response_model=SubjectEvaluationStudent)
 @response_decorator()
-def get_all_subject_evaluation(
-    list_subject_evaluation_use_case: ListSubjectEvaluationUseCase = Depends(ListSubjectEvaluationUseCase),
+def get_all_subject_evaluation_me(
+    list_subject_evaluation_use_case: ListSubjectEvaluationByStudentUseCase = Depends(
+        ListSubjectEvaluationByStudentUseCase
+    ),
     current_student: StudentModel = Depends(get_current_student),
 ):
-    req_object = ListSubjectEvaluationRequestObject.builder(current_student=current_student)
+    req_object = ListSubjectEvaluationByStudentRequestObject.builder(current_student=current_student)
     response = list_subject_evaluation_use_case.execute(request_object=req_object)
     return response

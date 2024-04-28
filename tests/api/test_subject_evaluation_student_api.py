@@ -1,5 +1,3 @@
-import app.interfaces.api_v1.admin
-import app.interfaces.api_v1.student
 import unittest
 from unittest.mock import patch
 
@@ -23,7 +21,7 @@ from app.models.manage_form import ManageFormModel
 from app.domain.manage_form.enum import FormStatus, FormType
 
 
-class TestSubjectEvaluationQuestionApi(unittest.TestCase):
+class TestSubjectEvaluationStudentApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
@@ -105,6 +103,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
             feedback_admin="Cảm ơn BTC",
             subject=cls.subject,
             student=cls.student2,
+            numerical_order=cls.student2.numerical_order,
         ).save()
 
     @classmethod
@@ -115,7 +114,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.student.email)
             r = self.client.post(
-                f"/api/v1/student/subjects/evaluation/{self.subject.id}",
+                f"/api/v1/student/subjects/evaluations/{self.subject.id}",
                 json={
                     "quality": {
                         "focused_right_topic": "Hoàn toàn đồng ý",
@@ -145,7 +144,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
                 data={"subject_id": "65f253a7fd143b81c101a63c"},
             ).save()
             r = self.client.post(
-                f"/api/v1/student/subjects/evaluation/{self.subject.id}",
+                f"/api/v1/student/subjects/evaluations/{self.subject.id}",
                 json={
                     "quality": {
                         "focused_right_topic": "Hoàn toàn đồng ý",
@@ -177,7 +176,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
             manage_form.reload()
 
             r = self.client.post(
-                f"/api/v1/student/subjects/evaluation/{self.subject.id}",
+                f"/api/v1/student/subjects/evaluations/{self.subject.id}",
                 json={
                     "quality": {
                         "focused_right_topic": "Hoàn toàn đồng ý",
@@ -202,7 +201,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
             assert r.json()["detail"] == "Câu trả lời không hợp lệ."
 
             r = self.client.post(
-                f"/api/v1/student/subjects/evaluation/{self.subject.id}",
+                f"/api/v1/student/subjects/evaluations/{self.subject.id}",
                 json={
                     "quality": {
                         "focused_right_topic": "Hoàn toàn đồng ý",
@@ -233,7 +232,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.student2.email)
             r = self.client.patch(
-                f"/api/v1/student/subjects/evaluation/{self.subject.id}",
+                f"/api/v1/student/subjects/evaluations/{self.subject.id}",
                 json={
                     "most_resonated": "Updated",
                 },
@@ -249,7 +248,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.student2.email)
             r = self.client.get(
-                f"/api/v1/student/subjects/evaluation/{self.subject.id}",
+                f"/api/v1/student/subjects/evaluations/{self.subject.id}",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -262,7 +261,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.student2.email)
             r = self.client.get(
-                "/api/v1/student/subjects/evaluation",
+                "/api/v1/student/subjects/evaluations",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },

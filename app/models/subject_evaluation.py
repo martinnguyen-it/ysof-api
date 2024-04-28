@@ -32,6 +32,8 @@ class SubjectEvaluationModel(Document):
     answers = ListField()
 
     feedback_admin = StringField()
+
+    numerical_order = IntField(required=True)
     created_at = DateTimeField()
     updated_at = DateTimeField()
 

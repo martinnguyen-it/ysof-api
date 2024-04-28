@@ -15,6 +15,7 @@ from app.interfaces.api_v1.admin import (
     audit_log,
     subject_evaluation_question,
     absent,
+    subject_evaluation,
 )
 from app.interfaces.api_v1.student import api as api_student
 
@@ -28,6 +29,7 @@ api_router.include_router(lecturer.router, prefix="/lecturers", tags=["Lecturers
 api_router.include_router(
     subject_evaluation_question.router, prefix="/subjects/evaluation-questions", tags=["Subjects"]
 )
+api_router.include_router(subject_evaluation.router, prefix="/subjects/evaluations", tags=["Subjects"])
 api_router.include_router(subject.router, prefix="/subjects", tags=["Subjects"])
 api_router.include_router(student.router, prefix="/students", tags=["Students by admin"])
 api_router.include_router(

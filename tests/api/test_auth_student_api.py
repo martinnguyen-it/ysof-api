@@ -65,8 +65,6 @@ class TestAuthAdminStudentApi(unittest.TestCase):
                 },
             )
 
-            resp = r.json()
-            print(resp)
             assert r.status_code == 200
             student: StudentModel = StudentModel.objects(id=self.student.id).get()
             assert verify_password(new_password, student.password)

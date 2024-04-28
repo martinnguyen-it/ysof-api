@@ -1,7 +1,7 @@
 from fastapi import Depends
 from mongoengine import NotUniqueError
 from app.shared import request_object, response_object, use_case
-from app.domain.subject.entity import SubjectInDB, SubjectInStudent
+from app.domain.subject.entity import SubjectInDB
 from app.infra.subject.subject_repository import SubjectRepository
 from app.models.subject import SubjectModel
 from app.models.student import StudentModel
@@ -10,13 +10,15 @@ from app.infra.manage_form.manage_form_repository import ManageFormRepository
 from app.models.manage_form import ManageFormModel
 from app.domain.manage_form.enum import FormStatus, FormType
 from app.domain.subject.subject_evaluation.entity import (
-    SubjectEvaluation,
+    LecturerInEvaluation,
     SubjectEvaluationInCreate,
     SubjectEvaluationInDB,
+    SubjectEvaluationStudent,
+    SubjectInEvaluation,
 )
 from app.infra.subject.subject_evaluation_repository import SubjectEvaluationRepository
 from app.domain.manage_form.entity import ManageFormEvaluationOrAbsent
-from app.domain.lecturer.entity import LecturerInDB, LecturerInStudent
+from app.domain.lecturer.entity import LecturerInDB
 from app.models.subject_evaluation import SubjectEvaluationModel, SubjectEvaluationQuestionModel
 from app.infra.subject.subject_evaluation_question_repository import SubjectEvaluationQuestionRepository
 
@@ -94,7 +96,10 @@ class CreateSubjectEvaluationUseCase(use_case.UseCase):
         try:
             subject_evaluation: SubjectEvaluationModel = self.subject_evaluation_repository.create(
                 SubjectEvaluationInDB(
-                    **req_object.payload.model_dump(), student=req_object.current_student, subject=subject
+                    **req_object.payload.model_dump(),
+                    student=req_object.current_student,
+                    subject=subject,
+                    numerical_order=req_object.current_student.numerical_order,
                 )
             )
         except NotUniqueError:
@@ -102,11 +107,11 @@ class CreateSubjectEvaluationUseCase(use_case.UseCase):
         except Exception:
             return response_object.ResponseFailure.build_system_error("Something went wrong")
 
-        return SubjectEvaluation(
+        return SubjectEvaluationStudent(
             **SubjectEvaluationInDB.model_validate(subject_evaluation).model_dump(exclude={"student", "subject"}),
-            subject=SubjectInStudent(
+            subject=SubjectInEvaluation(
                 **SubjectInDB.model_validate(subject_evaluation.subject).model_dump(exclude=({"lecturer"})),
-                lecturer=LecturerInStudent(
+                lecturer=LecturerInEvaluation(
                     **LecturerInDB.model_validate(subject_evaluation.subject.lecturer).model_dump()
                 ),
             ),
