@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import Depends, BackgroundTasks
 
 from app.infra.security.security_service import get_password_hash
-from app.shared import request_object, use_case
+from app.shared import request_object, use_case, response_object
 
 from app.domain.admin.entity import Admin, AdminInCreate, AdminInDB, AdminInUpdateTime
 from app.infra.admin.admin_repository import AdminRepository
@@ -12,7 +12,7 @@ from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import Endpoint, AuditLogType
 from app.shared.utils.general import get_current_season_value
-from app.infra.tasks.email import send_email_welcome
+from app.infra.tasks.email import send_email_welcome_task
 
 
 class CreateAdminRequestObject(request_object.ValidRequestObject):
@@ -50,17 +50,19 @@ class CreateAdminUseCase(use_case.UseCase):
 
     def process_request(self, req_object: CreateAdminRequestObject):
         admin_in: AdminInCreate = req_object.admin_in
-        existing_admin: Optional[AdminInDB] = self.admin_repository.get_by_email(email=admin_in.email)
+        existing_admin: Optional[AdminModel] = self.admin_repository.get_by_email(email=admin_in.email)
 
         current_season = get_current_season_value()
         if existing_admin:
+            if existing_admin.current_season == current_season:
+                return response_object.ResponseFailure.build_parameters_error(message="Email này đã tồn tại")
             seasons = [*existing_admin.seasons, current_season]
             self.admin_repository.update(
                 id=existing_admin.id,
                 data=AdminInUpdateTime(current_season=current_season, seasons=seasons, roles=admin_in.roles),
             )
             existing_admin.reload()
-            return Admin(**existing_admin.model_dump())
+            return Admin(**AdminInDB.model_validate(existing_admin).model_dump())
 
         password = "12345678"
         # password = generate_random_password()
@@ -72,7 +74,7 @@ class CreateAdminUseCase(use_case.UseCase):
         )
         admin_in_db: AdminInDB = self.admin_repository.create(admin=obj_in)
 
-        send_email_welcome.delay(
+        send_email_welcome_task.delay(
             email=admin_in_db.email, password=password, full_name=admin_in_db.full_name, is_admin=True
         )
 

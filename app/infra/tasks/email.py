@@ -8,7 +8,7 @@ email_smtp_service = EmailSMTPService()
 
 
 @celery_app.task
-def send_email_welcome(email: str, password: str, full_name: str, is_admin: bool = False):
+def send_email_welcome_task(email: str, password: str, full_name: str, is_admin: bool = False):
     plain_text = EMAIL_TEMPLATE[Template.WELCOME][TemplateContent.PLAIN_TEXT]
     plain_text = plain_text.replace("{{full_name}}", full_name)
     plain_text = plain_text.replace("{{password}}", password)

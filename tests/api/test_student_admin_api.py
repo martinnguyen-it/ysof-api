@@ -89,7 +89,9 @@ class TestStudentAdminApi(unittest.TestCase):
         disconnect()
 
     def test_create_student(self):
-        with patch("app.infra.security.security_service.verify_token") as mock_token:
+        with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
+            "app.infra.tasks.email.send_email_welcome_task.delay"
+        ):
             mock_email = "student3@example.com"
 
             mock_token.return_value = TokenData(email=self.admin2.email)
@@ -228,7 +230,9 @@ class TestStudentAdminApi(unittest.TestCase):
             "app.use_cases.student_admin.import_from_spreadsheets.ImportSpreadsheetsStudentUseCase.get_data_from_spreadsheet"
         ) as mock_get_data_spreadsheet, patch(
             "app.infra.services.google_drive_api.GoogleDriveAPIService._get_oauth_token"
-        ) as mock_get_oauth_token:
+        ) as mock_get_oauth_token, patch(
+            "app.infra.tasks.email.send_email_welcome_task.delay"
+        ):
             mock_token.return_value = TokenData(email=self.admin.email)
             mock_get_oauth_token.return_value = Credentials(
                 token="<access_token>",

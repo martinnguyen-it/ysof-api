@@ -20,7 +20,7 @@ from app.shared.utils.general import extract_id_spreadsheet_from_url, get_curren
 from app.shared.constant import HEADER_IMPORT_STUDENT
 from app.domain.student.enum import FieldStudentEnum
 from app.models.student import StudentModel
-from app.infra.tasks.email import send_email_welcome
+from app.infra.tasks.email import send_email_welcome_task
 
 LEN_HEADER_IMPORT_STUDENT = len(HEADER_IMPORT_STUDENT)
 
@@ -117,7 +117,7 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
                 inserted_id = self.student_repository.create(student_in_db).id
                 inserted_ids.append(str(inserted_id))
 
-                send_email_welcome.delay(
+                send_email_welcome_task.delay(
                     email=student_in_db.email, password=password, full_name=student_in_db.full_name
                 )
             except NotUniqueError:

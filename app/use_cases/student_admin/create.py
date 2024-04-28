@@ -15,7 +15,7 @@ from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.infra.security.security_service import get_password_hash
 from app.shared.utils.general import get_current_season_value
-from app.infra.tasks.email import send_email_welcome
+from app.infra.tasks.email import send_email_welcome_task
 
 
 class CreateStudentRequestObject(request_object.ValidRequestObject):
@@ -79,7 +79,7 @@ class CreateStudentUseCase(use_case.UseCase):
         except Exception:
             return response_object.ResponseFailure.build_system_error("Something went wrong")
 
-        send_email_welcome(email=student.email, password=password, full_name=student.full_name)
+        send_email_welcome_task.delay(email=student.email, password=password, full_name=student.full_name)
 
         self.background_tasks.add_task(
             self.audit_log_repository.create,

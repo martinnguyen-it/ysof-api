@@ -83,7 +83,9 @@ class TestAdminApi(unittest.TestCase):
         disconnect()
 
     def test_create_admin(self):
-        with patch("app.infra.security.security_service.verify_token") as mock_token:
+        with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
+            "app.infra.tasks.email.send_email_welcome_task.delay"
+        ):
             mock_token.return_value = TokenData(email=self.user.email)
             r = self.client.post(
                 "/api/v1/admins",
