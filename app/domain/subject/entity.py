@@ -7,6 +7,7 @@ from app.domain.lecturer.field import PydanticLecturerType
 from app.domain.lecturer.entity import Lecturer, LecturerInStudent
 from app.domain.student.field import PydanticStudentType
 from app.domain.subject.field import PydanticSubjectType
+from app.domain.subject.enum import StatusSubjectEnum
 
 
 class Zoom(BaseEntity):
@@ -29,6 +30,7 @@ class SubjectBase(BaseEntity):
 class SubjectInDB(IDModelMixin, DateTimeModelMixin, SubjectBase):
     lecturer: PydanticLecturerType
     season: int
+    status: StatusSubjectEnum = StatusSubjectEnum.INIT
     # https://docs.pydantic.dev/2.4/concepts/models/#arbitrary-class-instances
     model_config = ConfigDict(from_attributes=True)
 
@@ -41,6 +43,7 @@ class Subject(SubjectBase, DateTimeModelMixin):
     id: str
     lecturer: Lecturer
     season: int
+    status: StatusSubjectEnum
 
 
 class SubjectInStudent(BaseEntity):

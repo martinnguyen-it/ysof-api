@@ -60,6 +60,7 @@ class TestAbsentApi(unittest.TestCase):
             zoom={"meeting_id": 0, "pass_code": "string", "link": "string"},
             documents_url=["string"],
             lecturer=cls.lecturer,
+            status="init",
             season=3,
         ).save()
         cls.student: StudentModel = StudentModel(

@@ -27,6 +27,7 @@ class SubjectModel(Document):
     question_url = StringField()
     documents_url = ListField(StringField())
     zoom = EmbeddedDocumentField(ZoomInfo)
+    status = StringField(required=True)
 
     season = IntField(required=True)
     created_at = DateTimeField()

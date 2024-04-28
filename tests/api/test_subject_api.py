@@ -88,6 +88,7 @@ class TestSubjectApi(unittest.TestCase):
             zoom={"meeting_id": 0, "pass_code": "string", "link": "string"},
             documents_url=["string"],
             lecturer=cls.lecturer,
+            status="init",
             season=3,
         ).save()
         cls.subject2: SubjectModel = SubjectModel(
@@ -98,6 +99,7 @@ class TestSubjectApi(unittest.TestCase):
             question_url="string",
             zoom={"meeting_id": 0, "pass_code": "string", "link": "string"},
             documents_url=["string"],
+            status="init",
             lecturer=cls.lecturer,
             season=3,
         ).save()
@@ -109,6 +111,7 @@ class TestSubjectApi(unittest.TestCase):
             question_url="string",
             zoom={"meeting_id": 0, "pass_code": "string", "link": "string"},
             documents_url=["string"],
+            status="init",
             lecturer=cls.lecturer,
             season=2,
         ).save()

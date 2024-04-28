@@ -75,6 +75,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
             zoom={"meeting_id": 0, "pass_code": "string", "link": "string"},
             documents_url=["string"],
             lecturer=cls.lecturer,
+            status="init",
             season=3,
         ).save()
         cls.subject2: SubjectModel = SubjectModel(
@@ -86,6 +87,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
             zoom={"meeting_id": 0, "pass_code": "string", "link": "string"},
             documents_url=["string"],
             lecturer=cls.lecturer,
+            status="init",
             season=3,
         ).save()
         cls.student: StudentModel = StudentModel(

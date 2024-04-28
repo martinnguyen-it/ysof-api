@@ -20,6 +20,7 @@ from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.domain.manage_form.enum import FormStatus, FormType
 from app.models.lecturer import LecturerModel
 from app.models.subject import SubjectModel
+from app.domain.subject.enum import StatusSubjectEnum
 
 
 class TestManageFormApi(unittest.TestCase):
@@ -59,6 +60,7 @@ class TestManageFormApi(unittest.TestCase):
             question_url="string",
             zoom={"meeting_id": 0, "pass_code": "string", "link": "string"},
             documents_url=["string"],
+            status="init",
             lecturer=cls.lecturer,
             season=3,
         ).save()
@@ -151,6 +153,9 @@ class TestManageFormApi(unittest.TestCase):
             resp = r.json()
             assert resp["type"] == FormType.SUBJECT_EVALUATION
             assert resp["status"] == FormStatus.ACTIVE
+
+            subject: SubjectModel = SubjectModel.objects(id=self.subject.id).get()
+            assert subject.status == StatusSubjectEnum.SENT_EVALUATION
 
             time.sleep(1)
             cursor = AuditLogModel._get_collection().find(

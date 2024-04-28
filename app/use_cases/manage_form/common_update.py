@@ -1,3 +1,4 @@
+from datetime import timezone, datetime
 from fastapi import Depends, BackgroundTasks, HTTPException
 from pydantic import ValidationError
 from app.shared import request_object, use_case, response_object
@@ -17,6 +18,7 @@ from app.shared.utils.general import get_current_season_value
 import json
 from app.domain.manage_form.enum import FormType
 from app.infra.subject.subject_repository import SubjectRepository
+from app.domain.subject.enum import StatusSubjectEnum
 
 
 class UpdateManageFormCommonRequestObject(request_object.ValidRequestObject):
@@ -63,6 +65,24 @@ class UpdateManageFormCommonUseCase(use_case.UseCase):
                 subject = self.subject_repository.get_by_id(subject_id=req_object.payload.data["subject_id"])
                 if not subject:
                     return response_object.ResponseFailure.build_not_found_error(message="Môn học không tồn tại")
+                if req_object.payload.type == FormType.SUBJECT_ABSENT:
+                    if subject.status == StatusSubjectEnum.INIT:
+                        self.subject_repository.update(
+                            id=subject.id,
+                            data={
+                                "status": StatusSubjectEnum.SENT_STUDENT,
+                                "updated_at": datetime.now(timezone.utc),
+                            },
+                        )
+                else:
+                    if subject.status != StatusSubjectEnum.SENT_EVALUATION:
+                        self.subject_repository.update(
+                            id=subject.id,
+                            data={
+                                "status": StatusSubjectEnum.SENT_EVALUATION,
+                                "updated_at": datetime.now(timezone.utc),
+                            },
+                        )
 
             if doc.status == req_object.payload.status and doc.data == req_object.payload.data:
                 return ManageFormInDB.model_validate(doc)
@@ -103,6 +123,24 @@ class UpdateManageFormCommonUseCase(use_case.UseCase):
                 except ValidationError as e:
                     errs = e.errors()
                     raise HTTPException(status_code=422, detail=errs)
+                if req_object.payload.type == FormType.SUBJECT_ABSENT:
+                    if subject.status == StatusSubjectEnum.INIT:
+                        self.subject_repository.update(
+                            id=subject.id,
+                            data={
+                                "status": StatusSubjectEnum.SENT_STUDENT,
+                                "updated_at": datetime.now(timezone.utc),
+                            },
+                        )
+                else:
+                    if subject.status != StatusSubjectEnum.SENT_EVALUATION:
+                        self.subject_repository.update(
+                            id=subject.id,
+                            data={
+                                "status": StatusSubjectEnum.SENT_EVALUATION,
+                                "updated_at": datetime.now(timezone.utc),
+                            },
+                        )
 
             doc = self.manage_form_repository.create(ManageFormInDB(**req_object.payload.model_dump()))
             self.background_tasks.add_task(
