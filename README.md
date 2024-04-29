@@ -80,5 +80,5 @@ docker exec -i <CONTAINER_ID> /usr/bin/mongodump --username "<username>" --passw
 ## Restore mongodb to Docker
 
 ```
-docker exec -i <CONTAINER_ID> /usr/bin/mongorestore --username ""<username>" --password "<password>" --authenticationDatabase admin --nsInclude="ysof.*" --archive < ~/Downloads/ysof.dump
+docker exec -i <CONTAINER_ID> /usr/bin/mongorestore --username "<username>" --password "<password>" --authenticationDatabase admin --nsInclude="ysof.*" --archive < ~/Downloads/ysof.dump
 ```
