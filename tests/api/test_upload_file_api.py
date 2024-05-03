@@ -64,7 +64,6 @@ class TestUploadFileApi(unittest.TestCase):
                     "id": "1_YHlcIIE7b6tftTgknPB_freQRJfiOmy",
                     "mimeType": "application/pdf",
                     "name": "test.pdf",
-                    "thumbnailLink": "null",
                 }
             )
 
@@ -101,7 +100,6 @@ class TestUploadFileApi(unittest.TestCase):
                     "id": "1_YHlcIIE7b6tftTgknPB_freQRJfiOmy",
                     "mimeType": "application/pdf",
                     "name": "test.pdf",
-                    "thumbnailLink": "null",
                 }
             )
 

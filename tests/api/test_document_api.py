@@ -62,7 +62,6 @@ class TestDocumentApi(unittest.TestCase):
             file_id="1hXt8WI3g6p8YUtN2gR35yA-gO_fE2vD3",
             mimeType="image/jpeg",
             name="Tài liệu học",
-            thumbnailLink="https://lh3.googleusercontent.com/drive-storage/AJQWtBPQ0cDHLtK8eFG3nyGUQ02897KWOM87NIeoCu6OSyOoehPiZrY7__MpTVFAxsSM3UBsJz-4yDVoB-yio8LMQsaqQpNsgewuzf3F2VCI=s220",
             role="bhv",
             type="common",
             label=["string"],
@@ -73,7 +72,6 @@ class TestDocumentApi(unittest.TestCase):
             file_id="1hXt8WI3g6p8YUtN2gR35yA-gO_fE2vD3",
             mimeType="image/jpeg",
             name="Tài liệu học",
-            thumbnailLink="https://lh3.googleusercontent.com/drive-storage/AJQWtBPQ0cDHLtK8eFG3nyGUQ02897KWOM87NIeoCu6OSyOoehPiZrY7__MpTVFAxsSM3UBsJz-4yDVoB-yio8LMQsaqQpNsgewuzf3F2VCI=s220",
             role="bhv",
             type="common",
             label=["string"],
@@ -84,7 +82,6 @@ class TestDocumentApi(unittest.TestCase):
             file_id="1hXt8WI3g6p8YUtN2gR35yA-gO_fE2vD3",
             mimeType="image/jpeg",
             name="Tài liệu học",
-            thumbnailLink="https://lh3.googleusercontent.com/drive-storage/AJQWtBPQ0cDHLtK8eFG3nyGUQ02897KWOM87NIeoCu6OSyOoehPiZrY7__MpTVFAxsSM3UBsJz-4yDVoB-yio8LMQsaqQpNsgewuzf3F2VCI=s220",
             role="bhv",
             type="student",
             label=["string"],
@@ -129,7 +126,6 @@ class TestDocumentApi(unittest.TestCase):
                     "id": "1_YHlcIIE7b6tftTgknPB_freQRJfiOmy",
                     "mimeType": "application/pdf",
                     "name": "test",
-                    "thumbnailLink": "null",
                 }
             )
 
@@ -235,7 +231,6 @@ class TestDocumentApi(unittest.TestCase):
                     "id": "1_YHlcIIE7b6tftTgknPB_freQRJfiOmy",
                     "mimeType": "application/pdf",
                     "name": "Updated",
-                    "thumbnailLink": "null",
                 }
             )
 
@@ -281,7 +276,6 @@ class TestDocumentApi(unittest.TestCase):
                     "id": "1_YHlcIIE7b6tftTgknPB_freQRJfiOmy",
                     "mimeType": "application/pdf",
                     "name": "Updated",
-                    "thumbnailLink": "null",
                 }
             )
 

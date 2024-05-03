@@ -19,7 +19,6 @@ class DocumentBase(BaseEntity):
     file_id: str
     mimeType: Optional[str] = None
     name: str
-    thumbnailLink: Optional[str] = None
     role: str
     type: DocumentType
     description: Optional[str] = None
@@ -100,7 +99,6 @@ class DocumentInUpdatePayload(DocumentInUpdateBase, PayloadWithFile):
 class DocumentInUpdate(DocumentInUpdateBase):
     file_id: str | None = None
     mimeType: Optional[str] = None
-    thumbnailLink: Optional[str] = None
 
 
 class DocumentInUpdateTime(DocumentInUpdate):

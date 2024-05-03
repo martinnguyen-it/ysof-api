@@ -27,7 +27,7 @@ class GoogleSheetAPIService:
 
         file_id = spreadsheet.get("spreadsheetId")
 
-        file_info = self.google_drive_api_service.get(file_id=file_id, fields="id,mimeType,name,thumbnailLink,parents")
+        file_info = self.google_drive_api_service.get(file_id=file_id, fields="id,mimeType,name,parents")
         previous_parents = ",".join(file_info.get("parents"))
         self.google_drive_api_service.change_file_folder_parents(file_id=file_id, previous_parents=previous_parents)
 

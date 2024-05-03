@@ -6,7 +6,6 @@ class GoogleDriveAPIRes(BaseModel):
     id: str
     mimeType: str
     name: Optional[str] = None
-    thumbnailLink: Optional[str] = None
 
 
 class ImageRes(BaseModel):

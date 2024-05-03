@@ -51,11 +51,7 @@ class GoogleDriveAPIService:
             media = MediaIoBaseUpload(io.BytesIO(file.file.read()), mimetype=file.content_type, resumable=True)
 
             # Uploading the file
-            res = (
-                self.service.files()
-                .create(body=file_metadata, media_body=media, fields="id,mimeType,name,thumbnailLink")
-                .execute()
-            )
+            res = self.service.files().create(body=file_metadata, media_body=media, fields="id,mimeType,name").execute()
             return GoogleDriveAPIRes.model_validate(res)
 
         except HttpError as error:
@@ -91,7 +87,7 @@ class GoogleDriveAPIService:
                 logger.error(f"An error occurred when deleting the file: {error}")
                 raise HTTPException(status_code=400, detail="Hệ thống Cloud bị lỗi.")
 
-    def get(self, file_id: str, fields: str = "id,mimeType,name,thumbnailLink"):
+    def get(self, file_id: str, fields: str = "id,mimeType,name"):
         try:
             res = self.service.files().get(fileId=file_id, fields=fields).execute()
             return res
