@@ -10,11 +10,9 @@ import logging
 
 from app.config import settings
 from app.domain.upload.entity import GoogleDriveAPIRes
-from cachetools import TTLCache
 from app.domain.upload.enum import RolePermissionGoogleEnum
 
 logger = logging.getLogger(__name__)
-cache = TTLCache(maxsize=1, ttl=60 * 5)  # Cache 1 item for 5 minutes
 
 
 SCOPES = [

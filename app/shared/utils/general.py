@@ -97,3 +97,7 @@ def get_current_season_value() -> int:
         season: int = SeasonRepository().get_current_season().season
         cache["season"] = season
     return cache["season"]
+
+
+def clear_all_cache():
+    cache.clear()
