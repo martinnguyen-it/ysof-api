@@ -80,6 +80,8 @@ class ListDocumentsUseCase(use_case.UseCase):
                 or (isinstance(req_object.season, int) and req_object.season <= req_object.current_admin.current_season)
                 or req_object.season is None
             ):
+                if isinstance(req_object.type, str):
+                    match_pipeline = {**match_pipeline, "type": req_object.type}
                 match_pipeline = {
                     **match_pipeline,
                     "$or": [
@@ -141,9 +143,6 @@ class ListDocumentsUseCase(use_case.UseCase):
                     "Bạn không có quyền truy cập "
                     + (f"mùa {req_object.season}" if req_object.season != 0 else "tất cả mùa")
                 )
-
-            if isinstance(req_object.type, str):
-                match_pipeline = {**match_pipeline, "type": req_object.type}
 
         else:
             match_pipeline = {**match_pipeline, "type": req_object.type}

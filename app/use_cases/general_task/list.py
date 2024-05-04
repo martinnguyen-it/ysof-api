@@ -78,6 +78,8 @@ class ListGeneralTasksUseCase(use_case.UseCase):
 
         match_pipeline: dict[str, Any] | None = {}
 
+        if isinstance(req_object.type, str):
+            match_pipeline = {**match_pipeline, "type": req_object.type}
         if (
             (is_super_admin and req_object.season != 0)
             or (isinstance(req_object.season, int) and req_object.season <= req_object.current_admin.current_season)

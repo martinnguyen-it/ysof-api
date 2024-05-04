@@ -73,7 +73,7 @@ def get_list_general_tasks(
     label: Optional[list[str]] = Query(None, title="Labels"),
     roles: Optional[list[str]] = Query(None, title="Roles"),
     sort: Optional[Sort] = Sort.DESC,
-    sort_by: Optional[str] = "id",
+    sort_by: Optional[str] = "created_at",
     season: Optional[int] = None,
     type: Optional[GeneralTaskType] = None,
     current_admin: AdminModel = Depends(get_current_admin),

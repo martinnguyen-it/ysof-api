@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 from typing import Optional, List
 from pydantic import ConfigDict
 
@@ -20,8 +20,8 @@ class GeneralTaskBase(BaseEntity):
     title: str
     short_desc: Optional[str] = None
     description: str
-    start_at: datetime
-    end_at: datetime
+    start_at: date
+    end_at: date
     role: str
     label: Optional[list[str]] = None
     type: GeneralTaskType
@@ -55,8 +55,8 @@ class GeneralTaskInUpdate(BaseEntity):
     title: Optional[str] = None
     short_desc: Optional[str] = None
     description: Optional[str] = None
-    start_at: Optional[datetime] = None
-    end_at: Optional[datetime] = None
+    start_at: Optional[date] = None
+    end_at: Optional[date] = None
     role: Optional[str] = None
     label: Optional[list[str]] = None
     type: Optional[GeneralTaskType] = None
