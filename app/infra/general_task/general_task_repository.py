@@ -1,4 +1,5 @@
 """GeneralTask repository module"""
+
 from typing import Optional, Dict, Union, List, Any
 from mongoengine import QuerySet, DoesNotExist
 from bson import ObjectId
@@ -43,8 +44,11 @@ class GeneralTaskRepository:
     def update(self, id: ObjectId, data: Union[GeneralTaskInUpdateTime, Dict[str, Any]]) -> bool:
         try:
             attachments = data.attachments
-            data = data.model_dump(exclude_none=True, exclude={"attachments"}) if isinstance(
-                data, GeneralTaskInUpdateTime) else data
+            data = (
+                data.model_dump(exclude_none=True, exclude={"attachments"})
+                if isinstance(data, GeneralTaskInUpdateTime)
+                else data
+            )
             if isinstance(attachments, List):
                 data["attachments"] = [ObjectId(id) for id in attachments]
             GeneralTaskModel.objects(id=id).update_one(**data, upsert=False)
@@ -58,22 +62,24 @@ class GeneralTaskRepository:
         except Exception:
             return 0
 
-    def list(self,
-             page_index: int = 1,
-             page_size: int = 20,
-             match_pipeline: Optional[Dict[str, Any]] = None,
-             sort: Optional[Dict[str, int]] = None,
-             ) -> List[GeneralTaskModel]:
-        pipeline = [
-            {"$sort": sort if sort else {"created_at": -1}},
-            {"$skip": page_size * (page_index - 1)},
-            {"$limit": page_size}
-        ]
-
+    def list(
+        self,
+        page_index: int = 1,
+        page_size: int = 20,
+        match_pipeline: Optional[Dict[str, Any]] = None,
+        sort: Optional[Dict[str, int]] = None,
+    ) -> List[GeneralTaskModel]:
+        pipeline = []
         if match_pipeline is not None:
-            pipeline.append({
-                "$match": match_pipeline
-            })
+            pipeline.append({"$match": match_pipeline})
+
+        pipeline.extend(
+            [
+                {"$sort": sort if sort else {"created_at": -1}},
+                {"$skip": page_size * (page_index - 1)},
+                {"$limit": page_size},
+            ]
+        )
 
         try:
             docs = GeneralTaskModel.objects().aggregate(pipeline)
@@ -81,20 +87,19 @@ class GeneralTaskRepository:
         except Exception:
             return []
 
-    def count_list(self,
-                   match_pipeline: Optional[Dict[str, Any]] = None,
-                   ) -> int:
+    def count_list(
+        self,
+        match_pipeline: Optional[Dict[str, Any]] = None,
+    ) -> int:
         pipeline = []
 
         if match_pipeline is not None:
-            pipeline.append({
-                "$match": match_pipeline
-            })
+            pipeline.append({"$match": match_pipeline})
         pipeline.append({"$count": "general_task_count"})
 
         try:
             docs = GeneralTaskModel.objects().aggregate(pipeline)
-            return list(docs)[0]['general_task_count']
+            return list(docs)[0]["general_task_count"]
         except Exception:
             return 0
 

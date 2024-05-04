@@ -76,16 +76,20 @@ class AdminRepository:
         match_pipeline: Optional[Dict[str, Any]] = None,
         sort: Optional[Dict[str, int]] = None,
     ) -> List[AdminModel]:
-        pipeline = [
-            {"$sort": sort if sort else {"created_at": -1}},
-            {"$skip": page_size * (page_index - 1)},
-            {"$limit": page_size},
-        ]
+        pipeline = []
 
         match_pipe = {"roles": {"$ne": "admin"}}
         if match_pipeline is not None:
             match_pipe = {**match_pipeline, **match_pipe}
         pipeline.append({"$match": match_pipe})
+
+        pipeline.extend(
+            [
+                {"$sort": sort if sort else {"created_at": -1}},
+                {"$skip": page_size * (page_index - 1)},
+                {"$limit": page_size},
+            ]
+        )
 
         try:
             docs = AdminModel.objects().aggregate(pipeline)

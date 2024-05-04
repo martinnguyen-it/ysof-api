@@ -1,4 +1,5 @@
 """Document repository module"""
+
 from typing import Optional, Dict, Union, List, Any
 from mongoengine import QuerySet, DoesNotExist
 from bson import ObjectId
@@ -41,8 +42,7 @@ class DocumentRepository:
 
     def update(self, id: ObjectId, data: Union[DocumentInUpdateTime, Dict[str, Any]]) -> bool:
         try:
-            data = data.model_dump(exclude_none=True) if isinstance(
-                data, DocumentInUpdateTime) else data
+            data = data.model_dump(exclude_none=True) if isinstance(data, DocumentInUpdateTime) else data
             DocumentModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception:
@@ -54,22 +54,24 @@ class DocumentRepository:
         except Exception:
             return 0
 
-    def list(self,
-             page_index: int = 1,
-             page_size: int = 20,
-             match_pipeline: Optional[Dict[str, Any]] = None,
-             sort: Optional[Dict[str, int]] = None,
-             ) -> List[DocumentModel]:
-        pipeline = [
-            {"$sort": sort if sort else {"created_at": -1}},
-            {"$skip": page_size * (page_index - 1)},
-            {"$limit": page_size}
-        ]
-
+    def list(
+        self,
+        page_index: int = 1,
+        page_size: int = 20,
+        match_pipeline: Optional[Dict[str, Any]] = None,
+        sort: Optional[Dict[str, int]] = None,
+    ) -> List[DocumentModel]:
+        pipeline = []
         if match_pipeline is not None:
-            pipeline.append({
-                "$match": match_pipeline
-            })
+            pipeline.append({"$match": match_pipeline})
+
+        pipeline.extend(
+            [
+                {"$sort": sort if sort else {"created_at": -1}},
+                {"$skip": page_size * (page_index - 1)},
+                {"$limit": page_size},
+            ]
+        )
 
         try:
             docs = DocumentModel.objects().aggregate(pipeline)
@@ -77,20 +79,19 @@ class DocumentRepository:
         except Exception:
             return []
 
-    def count_list(self,
-                   match_pipeline: Optional[Dict[str, Any]] = None,
-                   ) -> int:
+    def count_list(
+        self,
+        match_pipeline: Optional[Dict[str, Any]] = None,
+    ) -> int:
         pipeline = []
 
         if match_pipeline is not None:
-            pipeline.append({
-                "$match": match_pipeline
-            })
+            pipeline.append({"$match": match_pipeline})
         pipeline.append({"$count": "document_count"})
 
         try:
             docs = DocumentModel.objects().aggregate(pipeline)
-            return list(docs)[0]['document_count']
+            return list(docs)[0]["document_count"]
         except Exception:
             return 0
 

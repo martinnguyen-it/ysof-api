@@ -55,9 +55,13 @@ class SubjectEvaluationRepository:
         match_pipeline: Optional[Dict[str, Any]] = None,
         sort: Optional[Dict[str, int]] = None,
     ) -> List[SubjectEvaluationModel]:
-        pipeline = [
-            {"$sort": sort if sort else {"subject": 1}},
-        ]
+
+        pipeline = []
+        if match_pipeline is not None:
+            pipeline.append({"$match": match_pipeline})
+        pipeline.append(
+            {"$sort": sort if sort else {"subject": -1}},
+        )
         if page_size:
             pipeline.extend(
                 [
@@ -65,9 +69,6 @@ class SubjectEvaluationRepository:
                     {"$limit": page_size},
                 ]
             )
-
-        if match_pipeline is not None:
-            pipeline.append({"$match": match_pipeline})
 
         try:
             docs = SubjectEvaluationModel.objects().aggregate(pipeline)

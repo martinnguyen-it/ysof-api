@@ -64,12 +64,13 @@ class SubjectEvaluationQuestionRepository:
         match_pipeline: Optional[Dict[str, Any]] = None,
         sort: Optional[Dict[str, int]] = None,
     ) -> List[SubjectEvaluationQuestionModel]:
-        pipeline = [
-            {"$sort": sort if sort else {"created_at": -1}},
-        ]
-
+        pipeline = []
         if match_pipeline is not None:
             pipeline.append({"$match": match_pipeline})
+
+        pipeline.append(
+            {"$sort": sort if sort else {"created_at": -1}},
+        )
 
         try:
             docs = SubjectEvaluationQuestionModel.objects().aggregate(pipeline)

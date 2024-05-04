@@ -76,10 +76,13 @@ class StudentRepository:
         match_pipeline: Optional[Dict[str, Any]] = None,
         sort: Optional[Dict[str, int]] = None,
     ) -> List[StudentModel]:
-        pipeline = [
-            {"$sort": sort if sort else {"created_at": -1}},
-        ]
 
+        pipeline = []
+        if match_pipeline is not None:
+            pipeline.append({"$match": match_pipeline})
+        pipeline.append(
+            {"$sort": sort if sort else {"created_at": -1}},
+        )
         if isinstance(page_size, int):
             pipeline.extend(
                 [
@@ -87,9 +90,6 @@ class StudentRepository:
                     {"$limit": page_size},
                 ]
             )
-
-        if match_pipeline is not None:
-            pipeline.append({"$match": match_pipeline})
 
         try:
             docs = StudentModel.objects().aggregate(pipeline)

@@ -1,4 +1,5 @@
 """Season repository module"""
+
 from typing import Optional, Dict, Union, List, Any
 from mongoengine import QuerySet, DoesNotExist
 from bson import ObjectId
@@ -41,8 +42,7 @@ class SeasonRepository:
 
     def update(self, id: ObjectId, data: Union[SeasonInUpdateTime, Dict[str, Any]]) -> bool:
         try:
-            data = data.model_dump(exclude_none=True) if isinstance(
-                data, SeasonInUpdateTime) else data
+            data = data.model_dump(exclude_none=True) if isinstance(data, SeasonInUpdateTime) else data
             SeasonModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception:
@@ -54,30 +54,32 @@ class SeasonRepository:
         except Exception:
             return 0
 
-    def list(self,
-             page_index: int | None = None,
-             page_size: int | None = None,
-             match_pipeline: Optional[List[Dict[str, Any]]] = None,
-             sort: Optional[Dict[str, int]] = None,
-             ) -> List[SeasonModel]:
-        pipeline = [
-            {"$sort": sort if sort else {"season": 1}},
-        ]
-        if page_index is not None and page_size is not None:
-            pipeline.append(
-                {"$skip": page_size * (page_index - 1)}, {"$limit": page_size}
-            )
+    def list(
+        self,
+        page_index: int | None = None,
+        page_size: int | None = None,
+        match_pipeline: Optional[List[Dict[str, Any]]] = None,
+        sort: Optional[Dict[str, int]] = None,
+    ) -> List[SeasonModel]:
+        pipeline = []
         if match_pipeline is not None:
             pipeline.append(match_pipeline)
+
+        pipeline.append(
+            {"$sort": sort if sort else {"season": 1}},
+        )
+        if page_index is not None and page_size is not None:
+            pipeline.append({"$skip": page_size * (page_index - 1)}, {"$limit": page_size})
         try:
             docs = SeasonModel.objects().aggregate(pipeline)
             return [SeasonModel.from_mongo(doc) for doc in docs] if docs else []
         except Exception:
             return []
 
-    def count_list(self,
-                   match_pipeline: Optional[List[Dict[str, Any]]] = None,
-                   ) -> int:
+    def count_list(
+        self,
+        match_pipeline: Optional[List[Dict[str, Any]]] = None,
+    ) -> int:
         pipeline = []
 
         if match_pipeline is not None:
@@ -86,7 +88,7 @@ class SeasonRepository:
 
         try:
             docs = SeasonModel.objects().aggregate(pipeline)
-            return list(docs)[0]['season_count']
+            return list(docs)[0]["season_count"]
         except Exception:
             return 0
 
@@ -101,25 +103,17 @@ class SeasonRepository:
         try:
             doc = SeasonModel._get_collection().find_one({"is_current": True})
             if not doc:
-                raise HTTPException(
-                    status_code=400, detail="Admin cần khởi tạo mùa"
-                )
+                raise HTTPException(status_code=400, detail="Admin cần khởi tạo mùa")
             return SeasonModel.from_mongo(doc)
         except Exception:
-            raise HTTPException(
-                status_code=400, detail="Admin cần khởi tạo mùa"
-            )
+            raise HTTPException(status_code=400, detail="Admin cần khởi tạo mùa")
 
     def bulk_update(self, data: Union[SeasonInUpdate, Dict[str, Any]], entities: List[SeasonModel]) -> bool:
         try:
             if len(entities) == 0:
                 return False
 
-            data = (
-                data.model_dump(exclude_none=True, exclude_unset=True)
-                if isinstance(data, SeasonInUpdate)
-                else data
-            )
+            data = data.model_dump(exclude_none=True, exclude_unset=True) if isinstance(data, SeasonInUpdate) else data
             operations = [
                 pymongo.UpdateOne(
                     {"_id": season.id},

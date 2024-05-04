@@ -1,4 +1,5 @@
 """Lecturer repository module"""
+
 from typing import Optional, Dict, Union, List, Any
 from mongoengine import QuerySet, DoesNotExist
 from bson import ObjectId
@@ -41,8 +42,7 @@ class LecturerRepository:
 
     def update(self, id: ObjectId, data: Union[LecturerInUpdateTime, Dict[str, Any]]) -> bool:
         try:
-            data = data.model_dump(exclude_none=True) if isinstance(
-                data, LecturerInUpdateTime) else data
+            data = data.model_dump(exclude_none=True) if isinstance(data, LecturerInUpdateTime) else data
             LecturerModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception:
@@ -54,20 +54,24 @@ class LecturerRepository:
         except Exception:
             return 0
 
-    def list(self,
-             page_index: int = 1,
-             page_size: int = 20,
-             match_pipeline: Optional[Dict[str, Any]] = None,
-             sort: Optional[Dict[str, int]] = None,
-             ) -> List[LecturerModel]:
-        pipeline = [
-            {"$sort": sort if sort else {"created_at": -1}},
-            {"$skip": page_size * (page_index - 1)},
-            {"$limit": page_size}
-        ]
-
+    def list(
+        self,
+        page_index: int = 1,
+        page_size: int = 20,
+        match_pipeline: Optional[Dict[str, Any]] = None,
+        sort: Optional[Dict[str, int]] = None,
+    ) -> List[LecturerModel]:
+        pipeline = []
         if match_pipeline is not None:
             pipeline.append(match_pipeline)
+
+        pipeline.extend(
+            [
+                {"$sort": sort if sort else {"created_at": -1}},
+                {"$skip": page_size * (page_index - 1)},
+                {"$limit": page_size},
+            ]
+        )
 
         try:
             docs = LecturerModel.objects().aggregate(pipeline)
@@ -75,9 +79,10 @@ class LecturerRepository:
         except Exception:
             return []
 
-    def count_list(self,
-                   match_pipeline: Optional[Dict[str, Any]] = None,
-                   ) -> int:
+    def count_list(
+        self,
+        match_pipeline: Optional[Dict[str, Any]] = None,
+    ) -> int:
         pipeline = []
 
         if match_pipeline is not None:
@@ -86,7 +91,7 @@ class LecturerRepository:
 
         try:
             docs = LecturerModel.objects().aggregate(pipeline)
-            return list(docs)[0]['lecturer_count']
+            return list(docs)[0]["lecturer_count"]
         except Exception:
             return 0
 
