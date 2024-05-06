@@ -6,6 +6,7 @@ from app.models.subject import SubjectModel
 from app.infra.subject.subject_repository import SubjectRepository
 from app.domain.lecturer.entity import LecturerInDB, LecturerInStudent
 from app.models.student import StudentModel
+from app.domain.document.entity import DocumentInDB, DocumentInStudent
 
 
 class ListSubjectsStudentRequestObject(request_object.ValidRequestObject):
@@ -61,8 +62,12 @@ class ListSubjectsStudentUseCase(use_case.UseCase):
 
         return [
             SubjectInStudent(
-                **SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer"})),
+                **SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer", "attachments"})),
                 lecturer=LecturerInStudent(**LecturerInDB.model_validate(subject.lecturer).model_dump()),
+                attachments=[
+                    DocumentInStudent(**DocumentInDB.model_validate(doc).model_dump(exclude=({"author"})))
+                    for doc in subject.attachments
+                ],
             )
             for subject in subjects
         ]

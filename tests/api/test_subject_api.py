@@ -22,6 +22,8 @@ from app.models.audit_log import AuditLogModel
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.models.student import StudentModel
 from app.models.subject_registration import SubjectRegistrationModel
+from app.models.document import DocumentModel
+from app.domain.document.enum import DocumentType
 
 
 class TestSubjectApi(unittest.TestCase):
@@ -79,6 +81,27 @@ class TestSubjectApi(unittest.TestCase):
             information="Thạc sĩ thần học",
             contact="Phone: 012345657",
         ).save()
+        cls.document = DocumentModel(
+            file_id="1hXt8WI3g6p8YUtN2gR35yA-gO_fE2vD3",
+            mimeType="image/jpeg",
+            name="Tài liệu học",
+            role="bhv",
+            type=DocumentType.STUDENT,
+            label=["string"],
+            season=3,
+            author=cls.user,
+        ).save()
+        cls.document2 = DocumentModel(
+            file_id="1hXt8WI3g6p8YUtN2gR35yA-gO_fE2vD3",
+            mimeType="image/jpeg",
+            name="Tài liệu học",
+            role="bhv",
+            type=DocumentType.COMMON,
+            label=["string"],
+            season=3,
+            author=cls.user,
+        ).save()
+
         cls.subject: SubjectModel = SubjectModel(
             title="Môn học 1",
             start_at="2024-03-27",
@@ -88,6 +111,7 @@ class TestSubjectApi(unittest.TestCase):
             zoom={"meeting_id": 0, "pass_code": "string", "link": "string"},
             documents_url=["string"],
             lecturer=cls.lecturer,
+            attachments=[cls.document],
             status="init",
             season=3,
         ).save()
@@ -100,6 +124,7 @@ class TestSubjectApi(unittest.TestCase):
             zoom={"meeting_id": 0, "pass_code": "string", "link": "string"},
             documents_url=["string"],
             status="init",
+            attachments=[cls.document],
             lecturer=cls.lecturer,
             season=3,
         ).save()
@@ -111,6 +136,7 @@ class TestSubjectApi(unittest.TestCase):
             question_url="string",
             zoom={"meeting_id": 0, "pass_code": "string", "link": "string"},
             documents_url=["string"],
+            attachments=[cls.document],
             status="init",
             lecturer=cls.lecturer,
             season=2,
@@ -169,16 +195,58 @@ class TestSubjectApi(unittest.TestCase):
                     "zoom": {"meeting_id": 912424124, "pass_code": "123456", "link": "xyz.com"},
                     "documents_url": ["123.com"],
                     "lecturer": str(self.lecturer.id),
+                    "attachments": [str(self.lecturer.id)],
                 },
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
             )
+            assert r.status_code == 404
+            assert r.json()["detail"].startswith("Tài liệu đính kèm không tồn tại hoặc thuộc mùa cũ")
 
+            r = self.client.post(
+                "/api/v1/subjects",
+                json={
+                    "title": "Học hỏi",
+                    "start_at": "2024-03-26",
+                    "subdivision": "Kinh thánh",
+                    "code": "Y10.1",
+                    "question_url": "abc.com",
+                    "zoom": {"meeting_id": 912424124, "pass_code": "123456", "link": "xyz.com"},
+                    "documents_url": ["123.com"],
+                    "lecturer": str(self.lecturer.id),
+                    "attachments": [str(self.document.id), str(self.document2.id)],
+                },
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 400
+            assert r.json()["detail"].startswith("Vui lòng chỉ chọn tài liệu đính kèm dành cho học viên")
+
+            r = self.client.post(
+                "/api/v1/subjects",
+                json={
+                    "title": "Học hỏi",
+                    "start_at": "2024-03-26",
+                    "subdivision": "Kinh thánh",
+                    "code": "Y10.1",
+                    "question_url": "abc.com",
+                    "zoom": {"meeting_id": 912424124, "pass_code": "123456", "link": "xyz.com"},
+                    "documents_url": ["123.com"],
+                    "lecturer": str(self.lecturer.id),
+                    "attachments": [str(self.document.id)],
+                },
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
             assert r.status_code == 200
-            doc: SubjectModel = SubjectModel.objects(id=r.json().get("id")).get()
-            assert doc.title == "Học hỏi"
-            assert doc.lecturer.full_name == self.lecturer.full_name
+            resp = r.json()
+            assert resp["title"] == "Học hỏi"
+            assert resp["lecturer"]["full_name"] == self.lecturer.full_name
+            assert "attachments" in resp
+            assert len(resp["attachments"]) == 1
 
             time.sleep(1)
             cursor = AuditLogModel._get_collection().find({"type": AuditLogType.CREATE, "endpoint": Endpoint.SUBJECT})
@@ -304,6 +372,7 @@ class TestSubjectApi(unittest.TestCase):
             assert "contact" not in resp["lecturer"]
 
             assert resp["lecturer"]["full_name"] == self.subject.lecturer.full_name
+            assert resp["attachments"][0]["name"] == self.subject.attachments[0].name
 
     def test_student_get_all_subjects(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
@@ -314,12 +383,12 @@ class TestSubjectApi(unittest.TestCase):
                     "Authorization": "Bearer {}".format("xxx"),
                 },
             )
-            assert r.status_code == 200
             resp = r.json()
+            assert r.status_code == 200
             assert isinstance(resp, list)
-            if len(resp) > 0:
-                assert "zoom" not in resp[0]
-                assert resp[0]["title"] == self.subject.title
-                assert "contact" not in resp[0]["lecturer"]
+            assert "zoom" not in resp[0]
+            assert resp[0]["title"] == self.subject.title
+            assert "contact" not in resp[0]["lecturer"]
 
-                assert resp[0]["lecturer"]["full_name"] == self.subject.lecturer.full_name
+            assert resp[0]["lecturer"]["full_name"] == self.subject.lecturer.full_name
+            assert resp[0]["attachments"][0]["name"] == self.subject.attachments[0].name

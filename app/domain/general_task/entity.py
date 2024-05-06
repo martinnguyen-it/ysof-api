@@ -21,7 +21,7 @@ class GeneralTaskBase(BaseEntity):
     short_desc: Optional[str] = None
     description: str
     start_at: date
-    end_at: date
+    end_at: date | None = None
     role: str
     label: Optional[list[str]] = None
     type: GeneralTaskType

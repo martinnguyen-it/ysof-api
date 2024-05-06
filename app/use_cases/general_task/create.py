@@ -65,7 +65,7 @@ class CreateGeneralTaskUseCase(use_case.UseCase):
             author=req_object.current_admin,
         )
         general_task: GeneralTaskModel = self.general_task_repository.create(
-            general_task=obj_in, attachments=req_object.general_task_in.attachments
+            general_task=obj_in, attachments=req_object.general_task_in.attachments or []
         )
 
         self.background_tasks.add_task(

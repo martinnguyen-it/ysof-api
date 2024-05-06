@@ -5,6 +5,7 @@ from app.domain.subject.entity import SubjectInDB, SubjectInStudent
 from app.infra.subject.subject_repository import SubjectRepository
 from app.models.subject import SubjectModel
 from app.domain.lecturer.entity import LecturerInDB, LecturerInStudent
+from app.domain.document.entity import DocumentInDB, DocumentInStudent
 
 
 class GetSubjectStudentRequestObject(request_object.ValidRequestObject):
@@ -33,6 +34,10 @@ class GetSubjectStudentCase(use_case.UseCase):
             return response_object.ResponseFailure.build_not_found_error(message="Môn học không tồn tại")
 
         return SubjectInStudent(
-            **SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer"})),
+            **SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer", "attachments"})),
             lecturer=LecturerInStudent(**LecturerInDB.model_validate(subject.lecturer).model_dump()),
+            attachments=[
+                DocumentInStudent(**DocumentInDB.model_validate(doc).model_dump(exclude=({"author"})))
+                for doc in subject.attachments
+            ],
         )

@@ -118,7 +118,7 @@ def create_document_google(
 def get_list_documents(
     list_documents_use_case: ListDocumentsUseCase = Depends(ListDocumentsUseCase),
     page_index: Annotated[int, Query(title="Page Index")] = 1,
-    page_size: Annotated[int, Query(title="Page size")] = 100,
+    page_size: Annotated[int, Query(title="Page size")] = 20,
     search: Optional[str] = Query(None, title="Search"),
     label: Optional[list[str]] = Query(None, title="Labels"),
     roles: Optional[list[str]] = Query(None, title="Roles"),

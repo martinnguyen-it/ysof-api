@@ -7,7 +7,7 @@ class GeneralTaskModel(Document):
     short_desc = StringField()
     description = StringField(required=True)
     start_at = DateField(required=True)
-    end_at = DateField(required=True)
+    end_at = DateField()
 
     season = IntField(required=True)
     role = StringField(required=True)

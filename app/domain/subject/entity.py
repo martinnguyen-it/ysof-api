@@ -8,6 +8,8 @@ from app.domain.lecturer.entity import Lecturer, LecturerInStudent
 from app.domain.student.field import PydanticStudentType
 from app.domain.subject.field import PydanticSubjectType
 from app.domain.subject.enum import StatusSubjectEnum
+from app.domain.document.field import PydanticDocumentType
+from app.domain.document.entity import Document, DocumentInStudent
 
 
 class Zoom(BaseEntity):
@@ -31,12 +33,14 @@ class SubjectInDB(IDModelMixin, DateTimeModelMixin, SubjectBase):
     lecturer: PydanticLecturerType
     season: int
     status: StatusSubjectEnum = StatusSubjectEnum.INIT
+    attachments: Optional[list[PydanticDocumentType]] = None
     # https://docs.pydantic.dev/2.4/concepts/models/#arbitrary-class-instances
     model_config = ConfigDict(from_attributes=True)
 
 
 class SubjectInCreate(SubjectBase):
     lecturer: str
+    attachments: Optional[list[str]] = None
 
 
 class Subject(SubjectBase, DateTimeModelMixin):
@@ -44,6 +48,7 @@ class Subject(SubjectBase, DateTimeModelMixin):
     lecturer: Lecturer
     season: int
     status: StatusSubjectEnum
+    attachments: Optional[list[Document]] = None
 
 
 class SubjectInStudent(BaseEntity):
@@ -57,6 +62,7 @@ class SubjectInStudent(BaseEntity):
     documents_url: list[str] | None = None
     lecturer: LecturerInStudent
     status: StatusSubjectEnum
+    attachments: Optional[list[DocumentInStudent]] = None
 
 
 class SubjectBaseUpdate(BaseEntity):
@@ -71,10 +77,12 @@ class SubjectBaseUpdate(BaseEntity):
 
 class SubjectInUpdate(SubjectBaseUpdate):
     lecturer: str | None = None
+    attachments: Optional[list[str]] = None
 
 
 class SubjectInUpdateTime(SubjectBaseUpdate):
     lecturer: PydanticLecturerType | None = None
+    attachments: Optional[list[PydanticDocumentType]] = None
     updated_at: datetime = datetime.now(timezone.utc)
 
 

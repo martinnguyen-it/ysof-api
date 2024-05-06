@@ -14,6 +14,7 @@ from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.domain.document.entity import DocumentInDB
 from app.shared.utils.general import get_current_season_value
+from app.infra.subject.subject_repository import SubjectRepository
 
 
 class DeleteDocumentRequestObject(request_object.ValidRequestObject):
@@ -38,6 +39,7 @@ class DeleteDocumentUseCase(use_case.UseCase):
         self,
         background_tasks: BackgroundTasks,
         google_drive_api_service: GoogleDriveAPIService = Depends(GoogleDriveAPIService),
+        subject_repository: SubjectRepository = Depends(SubjectRepository),
         document_repository: DocumentRepository = Depends(DocumentRepository),
         general_task_repository: GeneralTaskRepository = Depends(GeneralTaskRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
@@ -47,6 +49,7 @@ class DeleteDocumentUseCase(use_case.UseCase):
         self.background_tasks = background_tasks
         self.general_task_repository = general_task_repository
         self.audit_log_repository = audit_log_repository
+        self.subject_repository = subject_repository
 
     def process_request(self, req_object: DeleteDocumentRequestObject):
         document: Optional[DocumentModel] = self.document_repository.get_by_id(req_object.id)
@@ -59,10 +62,15 @@ class DeleteDocumentUseCase(use_case.UseCase):
             return response_object.ResponseFailure.build_auth_error("Bạn không có quyền sửa")
 
         general_task = self.general_task_repository.find_one(conditions={"attachments": {"$in": [document.id]}})
+        subject = self.subject_repository.find_one(conditions={"attachments": {"$in": [document.id]}})
 
         if general_task is not None:
             return response_object.ResponseFailure.build_parameters_error(
                 "Không thể xóa tài liệu có công việc đang đính kèm."
+            )
+        if subject is not None:
+            return response_object.ResponseFailure.build_parameters_error(
+                "Không thể xóa tài liệu có môn học đang đính kèm."
             )
 
         try:

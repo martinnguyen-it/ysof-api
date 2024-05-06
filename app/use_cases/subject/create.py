@@ -15,6 +15,10 @@ from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.shared.utils.general import get_current_season_value
+from app.domain.document.entity import AdminInDocument, Document, DocumentInDB
+from app.domain.admin.entity import AdminInDB
+from app.infra.document.document_repository import DocumentRepository
+from app.domain.document.enum import DocumentType
 
 
 class CreateSubjectRequestObject(request_object.ValidRequestObject):
@@ -41,6 +45,7 @@ class CreateSubjectUseCase(use_case.UseCase):
         self,
         background_tasks: BackgroundTasks,
         subject_repository: SubjectRepository = Depends(SubjectRepository),
+        document_repository: DocumentRepository = Depends(DocumentRepository),
         lecturer_repository: LecturerRepository = Depends(LecturerRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
     ):
@@ -48,6 +53,7 @@ class CreateSubjectUseCase(use_case.UseCase):
         self.lecturer_repository = lecturer_repository
         self.background_tasks = background_tasks
         self.audit_log_repository = audit_log_repository
+        self.document_repository = document_repository
 
     def process_request(self, req_object: CreateSubjectRequestObject):
         lecturer: Optional[LecturerModel] = self.lecturer_repository.get_by_id(req_object.subject_in.lecturer)
@@ -56,8 +62,26 @@ class CreateSubjectUseCase(use_case.UseCase):
 
         current_season = get_current_season_value()
 
+        attachments: list | None = None
+        if isinstance(req_object.subject_in.attachments, list):
+            for doc_id in req_object.subject_in.attachments:
+                doc = self.document_repository.get_by_id(doc_id)
+                if doc is None or doc.season != current_season:
+                    return response_object.ResponseFailure.build_not_found_error(
+                        message="Tài liệu đính kèm không tồn tại hoặc thuộc mùa cũ"
+                    )
+                if doc.type != DocumentType.STUDENT:
+                    return response_object.ResponseFailure.build_parameters_error(
+                        message="Vui lòng chỉ chọn tài liệu đính kèm dành cho học viên"
+                    )
+                if isinstance(attachments, list):
+                    attachments.append(doc)
+                else:
+                    attachments = [doc]
+
         obj_in: SubjectInDB = SubjectInDB(
-            **req_object.subject_in.model_dump(exclude={"lecturer"}),
+            **req_object.subject_in.model_dump(exclude={"lecturer", "attachments"}),
+            attachments=attachments,
             lecturer=lecturer,
             season=current_season,
         )
@@ -80,6 +104,13 @@ class CreateSubjectUseCase(use_case.UseCase):
         )
 
         return Subject(
-            **SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer"})),
+            **SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer", "attachments"})),
             lecturer=Lecturer(**LecturerInDB.model_validate(subject.lecturer).model_dump()),
+            attachments=[
+                Document(
+                    **DocumentInDB.model_validate(doc).model_dump(exclude=({"author"})),
+                    author=AdminInDocument(**AdminInDB.model_validate(doc.author).model_dump()),
+                )
+                for doc in subject.attachments
+            ],
         )

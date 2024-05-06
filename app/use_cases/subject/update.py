@@ -16,6 +16,10 @@ from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.shared.utils.general import get_current_season_value
+from app.domain.document.entity import AdminInDocument, Document, DocumentInDB
+from app.domain.admin.entity import AdminInDB
+from app.domain.document.enum import DocumentType
+from app.infra.document.document_repository import DocumentRepository
 
 
 class UpdateSubjectRequestObject(request_object.ValidRequestObject):
@@ -46,6 +50,7 @@ class UpdateSubjectUseCase(use_case.UseCase):
         self,
         background_tasks: BackgroundTasks,
         lecturer_repository: LecturerRepository = Depends(LecturerRepository),
+        document_repository: DocumentRepository = Depends(DocumentRepository),
         subject_repository: SubjectRepository = Depends(SubjectRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
     ):
@@ -53,6 +58,7 @@ class UpdateSubjectUseCase(use_case.UseCase):
         self.subject_repository = subject_repository
         self.background_tasks = background_tasks
         self.audit_log_repository = audit_log_repository
+        self.document_repository = document_repository
 
     def process_request(self, req_object: UpdateSubjectRequestObject):
         subject: Optional[SubjectModel] = self.subject_repository.get_by_id(req_object.id)
@@ -60,6 +66,22 @@ class UpdateSubjectUseCase(use_case.UseCase):
             return response_object.ResponseFailure.build_not_found_error("Môn học không tồn tại")
 
         current_season = get_current_season_value()
+
+        attachments: list | None = None
+        if isinstance(req_object.obj_in.attachments, list):
+            attachments = []
+            for doc_id in req_object.obj_in.attachments:
+                doc = self.document_repository.get_by_id(doc_id)
+                if doc is None or doc.season != current_season:
+                    return response_object.ResponseFailure.build_not_found_error(
+                        message="Tài liệu đính kèm không tồn tại hoặc thuộc mùa cũ"
+                    )
+                if doc.type != DocumentType.STUDENT:
+                    return response_object.ResponseFailure.build_parameters_error(
+                        message="Vui lòng chỉ chọn tài liệu đính kèm dành cho học viên"
+                    )
+                attachments.append(doc)
+
         if subject.season != current_season and not any(role in req_object.current_admin.roles for role in SUPER_ADMIN):
             raise forbidden_exception
 
@@ -72,9 +94,13 @@ class UpdateSubjectUseCase(use_case.UseCase):
         self.subject_repository.update(
             id=subject.id,
             data=(
-                SubjectInUpdateTime(**req_object.obj_in.model_dump(exclude=()))
+                SubjectInUpdateTime(**req_object.obj_in.model_dump(exclude=("attachments")), attachments=attachments)
                 if lecturer is None
-                else SubjectInUpdateTime(**req_object.obj_in.model_dump(exclude={"lecturer"}), lecturer=lecturer)
+                else SubjectInUpdateTime(
+                    **req_object.obj_in.model_dump(
+                        exclude=("lecturer", "attachments"), lecturer=lecturer, attachments=attachments
+                    )
+                )
             ),
         )
         subject.reload()
@@ -96,6 +122,13 @@ class UpdateSubjectUseCase(use_case.UseCase):
         )
 
         return Subject(
-            **SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer"})),
+            **SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer", "attachments"})),
             lecturer=Lecturer(**LecturerInDB.model_validate(subject.lecturer).model_dump()),
+            attachments=[
+                Document(
+                    **DocumentInDB.model_validate(doc).model_dump(exclude=({"author"})),
+                    author=AdminInDocument(**AdminInDB.model_validate(doc.author).model_dump()),
+                )
+                for doc in subject.attachments
+            ],
         )

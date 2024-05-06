@@ -32,7 +32,7 @@ celery_app.conf.beat_schedule = {
         "task": "app.infra.tasks.periodic.manage_form_absent.open_form_absent_task",
         "schedule": crontab(minute="00", hour=12, day_of_week=0, month_of_year="1-5,9-12"),
     },
-    "check-close-form-absent-every-sunday": {
+    "check-close-form-absent-every-saturday": {
         "task": "app.infra.tasks.periodic.manage_form_absent.close_form_absent_task",
         "schedule": crontab(minute="00", hour=12, day_of_week=6, month_of_year="1-5,9-12"),
     },

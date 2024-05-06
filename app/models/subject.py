@@ -29,6 +29,8 @@ class SubjectModel(Document):
     zoom = EmbeddedDocumentField(ZoomInfo)
     status = StringField(required=True)
 
+    attachments = ListField(ReferenceField("DocumentModel"))
+
     season = IntField(required=True)
     created_at = DateTimeField()
     updated_at = DateTimeField()

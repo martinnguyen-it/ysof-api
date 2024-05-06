@@ -5,6 +5,8 @@ from app.domain.subject.entity import Subject, SubjectInDB
 from app.infra.subject.subject_repository import SubjectRepository
 from app.models.subject import SubjectModel
 from app.domain.lecturer.entity import Lecturer, LecturerInDB
+from app.domain.document.entity import AdminInDocument, Document, DocumentInDB
+from app.domain.admin.entity import AdminInDB
 
 
 class GetSubjectRequestObject(request_object.ValidRequestObject):
@@ -28,10 +30,18 @@ class GetSubjectCase(use_case.UseCase):
         self.subject_repository = subject_repository
 
     def process_request(self, req_object: GetSubjectRequestObject):
-        subject: Optional[SubjectModel] = self.subject_repository.get_by_id(
-            subject_id=req_object.subject_id)
+        subject: Optional[SubjectModel] = self.subject_repository.get_by_id(subject_id=req_object.subject_id)
         if not subject:
             return response_object.ResponseFailure.build_not_found_error(message="Môn học không tồn tại")
 
-        return Subject(**SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer"})),
-                       lecturer=Lecturer(**LecturerInDB.model_validate(subject.lecturer).model_dump()))
+        return Subject(
+            **SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer", "attachments"})),
+            lecturer=Lecturer(**LecturerInDB.model_validate(subject.lecturer).model_dump()),
+            attachments=[
+                Document(
+                    **DocumentInDB.model_validate(doc).model_dump(exclude=({"author"})),
+                    author=AdminInDocument(**AdminInDB.model_validate(doc.author).model_dump()),
+                )
+                for doc in subject.attachments
+            ],
+        )

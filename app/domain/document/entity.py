@@ -32,6 +32,25 @@ class DocumentInDB(IDModelMixin, DateTimeModelMixin, DocumentBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class DocumentInStudent(BaseEntity):
+    id: str
+    season: int
+    file_id: str
+    mimeType: Optional[str] = None
+    name: str
+    description: Optional[str] = None
+    label: Optional[list[str]] = None
+    webViewLink: Optional[str] = None
+
+    @validator("webViewLink", pre=True, always=True)
+    def create_web_link(cls, v, values):
+        if values["mimeType"] == "application/vnd.google-apps.spreadsheet":
+            return f"https://docs.google.com/spreadsheets/d/{values['file_id']}"
+        if values["mimeType"] in ["application/vnd.google-apps.document", "application/vnd.google-apps.kix"]:
+            return f"https://docs.google.com/document/d/{values['file_id']}"
+        return f"https://drive.google.com/file/d/{values['file_id']}/view?usp=drivesdk"
+
+
 class DocumentInCreatePayloadBase(BaseEntity):
     name: str
     type: DocumentType

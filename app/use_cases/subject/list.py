@@ -7,6 +7,8 @@ from app.infra.subject.subject_repository import SubjectRepository
 from app.domain.lecturer.entity import Lecturer, LecturerInDB
 from app.shared.utils.general import get_current_season_value
 from app.models.admin import AdminModel
+from app.domain.document.entity import AdminInDocument, Document, DocumentInDB
+from app.domain.admin.entity import AdminInDB
 
 
 class ListSubjectsRequestObject(request_object.ValidRequestObject):
@@ -76,8 +78,15 @@ class ListSubjectsUseCase(use_case.UseCase):
 
         return [
             Subject(
-                **SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer"})),
+                **SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer", "attachments"})),
                 lecturer=Lecturer(**LecturerInDB.model_validate(subject.lecturer).model_dump()),
+                attachments=[
+                    Document(
+                        **DocumentInDB.model_validate(doc).model_dump(exclude=({"author"})),
+                        author=AdminInDocument(**AdminInDB.model_validate(doc.author).model_dump()),
+                    )
+                    for doc in subject.attachments
+                ],
             )
             for subject in subjects
         ]
