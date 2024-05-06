@@ -94,12 +94,10 @@ class UpdateSubjectUseCase(use_case.UseCase):
         self.subject_repository.update(
             id=subject.id,
             data=(
-                SubjectInUpdateTime(**req_object.obj_in.model_dump(exclude=("attachments")), attachments=attachments)
-                if lecturer is None
-                else SubjectInUpdateTime(
-                    **req_object.obj_in.model_dump(
-                        exclude=("lecturer", "attachments"), lecturer=lecturer, attachments=attachments
-                    )
+                SubjectInUpdateTime(
+                    **req_object.obj_in.model_dump(exclude=("lecturer", "attachments")),
+                    lecturer=lecturer,
+                    attachments=attachments,
                 )
             ),
         )
