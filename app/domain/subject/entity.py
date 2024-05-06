@@ -27,6 +27,7 @@ class SubjectBase(BaseEntity):
     question_url: Optional[str] = None
     zoom: Optional[Zoom] = None
     documents_url: list[str] | None = None
+    abstract: Optional[str] = None
 
 
 class SubjectInDB(IDModelMixin, DateTimeModelMixin, SubjectBase):
@@ -59,6 +60,7 @@ class SubjectInStudent(BaseEntity):
     code: str
     season: int
     question_url: Optional[str] = None
+    abstract: Optional[str] = None
     documents_url: list[str] | None = None
     lecturer: LecturerInStudent
     status: StatusSubjectEnum
@@ -69,10 +71,11 @@ class SubjectBaseUpdate(BaseEntity):
     title: str | None = None
     start_at: date | None = None
     subdivision: str | None = None
-    code: int | None = None
+    code: str | None = None
     question_url: Optional[str] = None
     zoom: Optional[Zoom] = None
     documents_url: list[str] | None = None
+    abstract: Optional[str] = None
 
 
 class SubjectInUpdate(SubjectBaseUpdate):

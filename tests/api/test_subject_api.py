@@ -246,6 +246,7 @@ class TestSubjectApi(unittest.TestCase):
             assert resp["title"] == "Học hỏi"
             assert resp["lecturer"]["full_name"] == self.lecturer.full_name
             assert "attachments" in resp
+            assert "abstract" in resp
             assert len(resp["attachments"]) == 1
 
             time.sleep(1)
@@ -370,6 +371,7 @@ class TestSubjectApi(unittest.TestCase):
             assert "zoom" not in resp
             assert resp["title"] == self.subject.title
             assert "contact" not in resp["lecturer"]
+            assert "abstract" in resp
 
             assert resp["lecturer"]["full_name"] == self.subject.lecturer.full_name
             assert resp["attachments"][0]["name"] == self.subject.attachments[0].name
@@ -389,6 +391,7 @@ class TestSubjectApi(unittest.TestCase):
             assert "zoom" not in resp[0]
             assert resp[0]["title"] == self.subject.title
             assert "contact" not in resp[0]["lecturer"]
+            assert "abstract" in resp[0]
 
             assert resp[0]["lecturer"]["full_name"] == self.subject.lecturer.full_name
             assert resp[0]["attachments"][0]["name"] == self.subject.attachments[0].name
