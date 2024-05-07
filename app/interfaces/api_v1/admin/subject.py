@@ -60,8 +60,8 @@ def create_subject(
 def get_list_subjects(
     list_subjects_use_case: ListSubjectsUseCase = Depends(ListSubjectsUseCase),
     search: Optional[str] = Query(None, title="Search"),
-    sort: Optional[Sort] = Sort.DESC,
-    sort_by: Optional[str] = "id",
+    sort: Optional[Sort] = Sort.ASCE,
+    sort_by: Optional[str] = "start_at",
     subdivision: Optional[str] = None,
     status: Optional[StatusSubjectEnum] = None,
     season: Optional[int] = None,

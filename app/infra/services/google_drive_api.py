@@ -9,8 +9,8 @@ from fastapi import HTTPException, UploadFile
 import logging
 
 from app.config import settings
-from app.domain.upload.entity import GoogleDriveAPIRes
-from app.domain.upload.enum import RolePermissionGoogleEnum
+from app.domain.upload.entity import AddPermissionDriveFile, GoogleDriveAPIRes
+from app.domain.upload.enum import RolePermissionGoogleEnum, TypePermissionGoogleEnum
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,14 @@ class GoogleDriveAPIService:
 
             # Uploading the file
             res = self.service.files().create(body=file_metadata, media_body=media, fields="id,mimeType,name").execute()
-            return GoogleDriveAPIRes.model_validate(res)
+            data = GoogleDriveAPIRes.model_validate(res)
+
+            # Add permission for file
+            self.add_permission(
+                file_id=data.id, role=RolePermissionGoogleEnum.READER, type=TypePermissionGoogleEnum.ANYONE
+            )
+
+            return data
 
         except HttpError as error:
             if "File not found" in str(error):
@@ -121,11 +128,43 @@ class GoogleDriveAPIService:
             raise HTTPException(status_code=400, detail="Hệ thống Cloud bị lỗi.")
 
     def add_permission(
-        self, file_id: str, email_address: str, role: RolePermissionGoogleEnum = RolePermissionGoogleEnum.READER
+        self,
+        file_id: str,
+        type: TypePermissionGoogleEnum,
+        role: RolePermissionGoogleEnum = RolePermissionGoogleEnum.READER,
+        email_address: str | None = None,
     ):
         try:
-            permission = {"role": role, "type": "user", "emailAddress": email_address}
+            permission = {"role": role, "type": type}
+            if email_address:
+                permission = {**permission, "emailAddress": email_address}
+
             self.service.permissions().create(fileId=file_id, body=permission).execute()
+        except HttpError as error:
+            logger.error(f"An error occurred when change permission the file: {error}")
+            raise HTTPException(status_code=400, detail="Hệ thống Cloud bị lỗi.")
+
+    def add_multi_permissions(self, file_id: str, permissions: list[AddPermissionDriveFile]):
+        try:
+
+            def callback(_request_id, _response, exception):
+                if exception:
+                    # Handle error
+                    logger.error(f"An error occurred when change permission the file: {exception}")
+
+            batch = self.service.new_batch_http_request(callback=callback)
+            for permission in permissions:
+                data = {"role": permission.role, "type": permission.type}
+                if permission.email_address:
+                    data = {**data, "emailAddress": permission.email_address}
+                batch.add(
+                    self.service.permissions().create(
+                        fileId=file_id,
+                        body=data,
+                        fields="id",
+                    )
+                )
+            batch.execute()
         except HttpError as error:
             logger.error(f"An error occurred when change permission the file: {error}")
             raise HTTPException(status_code=400, detail="Hệ thống Cloud bị lỗi.")
