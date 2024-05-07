@@ -99,9 +99,14 @@ class ImportSpreadsheetsPayload(BaseEntity):
     sheet_name: str | None = "main"
 
 
+class ErrorImport(BaseEntity):
+    row: int
+    detail: str
+
+
 class ImportSpreadsheetsInResponse(BaseEntity):
     inserted_ids: list[str]
-    errors: list
+    errors: list[ErrorImport]
 
 
 class ResetPasswordResponse(BaseEntity):

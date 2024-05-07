@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from app.shared import request_object, use_case, response_object
 
-from app.domain.student.entity import ImportSpreadsheetsInResponse, ImportSpreadsheetsPayload, StudentInDB
+from app.domain.student.entity import ErrorImport, ImportSpreadsheetsInResponse, ImportSpreadsheetsPayload, StudentInDB
 from app.infra.student.student_repository import StudentRepository
 from app.infra.lecturer.lecturer_repository import LecturerRepository
 from app.models.admin import AdminModel
@@ -94,7 +94,7 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
             return response_object.ResponseFailure.build_parameters_error("Header của file import không hợp lệ")
 
         inserted_ids: list[str] = []
-        errors: list = []
+        errors: list[ErrorImport] = []
 
         current_season = get_current_season_value()
         for idx, row in enumerate(data_import):
@@ -121,14 +121,19 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
                     email=student_in_db.email, password=password, full_name=student_in_db.full_name
                 )
             except NotUniqueError:
-                errors.append({"row": idx + 2, "detail": "Email hoặc mshv đã tồn tại."})
+                errors.append(
+                    ErrorImport(
+                        row=idx + 2,
+                        detail=f"Email hoặc mshv đã tồn tại. ({data.get('numerical_order')} - {data.get('email')})",
+                    )
+                )
             except ValidationError as e:
                 errs = e.errors()
                 message = [(FieldStudentEnum[err["loc"][0]].value + ": " + err["msg"]) for err in errs]
                 message = "\n".join(message)
-                errors.append({"row": idx + 2, "detail": message})
+                errors.append(ErrorImport(row=idx + 2, detail=message))
             except Exception as e:
-                errors.append({"row": idx + 2, "detail": str(e)})
+                errors.append(ErrorImport(row=idx + 2, detail=str(e)))
 
         if len(inserted_ids) > 0:
             self.background_tasks.add_task(
