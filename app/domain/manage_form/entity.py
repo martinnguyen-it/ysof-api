@@ -20,7 +20,7 @@ class ManageFormUpdateWithTime(ManageFormBase):
 
 
 class CommonResponse(BaseEntity):
-    type: FormType
+    type: FormType | None = None
     status: FormStatus = FormStatus.INACTIVE
     data: dict | None = None
     model_config = ConfigDict(from_attributes=True)
