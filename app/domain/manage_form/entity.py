@@ -5,7 +5,7 @@ from pydantic import ConfigDict
 
 
 class ManageFormBase(BaseEntity):
-    status: FormStatus = FormStatus.INACTIVE
+    status: FormStatus | None = None
     type: FormType
     data: dict | None = None
 

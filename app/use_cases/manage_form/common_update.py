@@ -29,8 +29,6 @@ class UpdateManageFormCommonRequestObject(request_object.ValidRequestObject):
     @classmethod
     def builder(cls, payload: ManageFormBase, current_admin: AdminModel) -> request_object.RequestObject:
         invalid_req = request_object.InvalidRequestObject()
-        if not isinstance(payload.status, str):
-            invalid_req.add_error("status", "Invalid")
         if not isinstance(payload.type, str):
             invalid_req.add_error("type", "Invalid")
 
