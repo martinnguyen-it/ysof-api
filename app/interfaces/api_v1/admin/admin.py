@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends, Path, Query, HTTPException
+from fastapi import APIRouter, Body, Depends, Path, Query
 from typing import Annotated, Optional
 from app.domain.admin.entity import (
     Admin,
@@ -85,13 +85,7 @@ def get_list_admins(
     season: Optional[int] = None,
     current_admin: AdminModel = Depends(get_current_admin),
 ):
-    annotations = {}
-    for base in reversed(Admin.__mro__):
-        annotations.update(getattr(base, "__annotations__", {}))
-    if sort_by not in annotations:
-        raise HTTPException(status_code=400, detail=f"Invalid sort_by: {sort_by}")
     sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
-
     req_object = ListAdminsRequestObject.builder(
         page_index=page_index,
         page_size=page_size,
