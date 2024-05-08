@@ -93,7 +93,6 @@ avatars/
 invoices/
 logs/
 *.html
-static/
 celerybeat-schedule.db
 .vscode/
 .env*
