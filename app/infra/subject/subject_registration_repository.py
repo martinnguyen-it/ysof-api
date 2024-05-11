@@ -45,6 +45,17 @@ class SubjectRegistrationRepository:
         except Exception:
             return None
 
+    def get_by_subject_id(self, subject_id: ObjectId) -> SubjectRegistrationInResponse | None:
+        pipeline = [
+            {"$match": {"subject": subject_id}},
+        ]
+
+        try:
+            cursor = SubjectRegistrationModel.objects().aggregate(pipeline)
+            return [SubjectRegistrationModel.from_mongo(doc) for doc in cursor] if cursor else []
+        except Exception:
+            return []
+
     def find_one(self, conditions: list[str, str | bool | ObjectId]) -> SubjectRegistrationModel | None:
         try:
             doc = SubjectRegistrationModel._get_collection().find_one(conditions)

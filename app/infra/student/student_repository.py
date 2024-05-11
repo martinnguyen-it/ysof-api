@@ -6,6 +6,12 @@ from bson import ObjectId
 
 from app.models.student import StudentModel
 from app.domain.student.entity import StudentInDB, StudentInUpdate
+from app.domain.subject.entity import (
+    _SubjectRegistrationInResponse,
+    ListSubjectRegistrationInResponse,
+    StudentInSubject,
+)
+from app.domain.shared.entity import Pagination
 
 
 class StudentRepository:
@@ -126,3 +132,53 @@ class StudentRepository:
             return StudentModel.from_mongo(doc) if doc else None
         except Exception:
             return None
+
+    def list_subject_registrations(
+        self,
+        page_index: int = 1,
+        page_size: int | None = None,
+        match_pipeline: Optional[Dict[str, Any]] = None,
+        sort: Optional[Dict[str, int]] = None,
+    ):
+        total = self.count_list(match_pipeline=match_pipeline)
+        resp = ListSubjectRegistrationInResponse(data=[], pagination=Pagination(total_pages=0, total=total))
+        total_pages = 0
+
+        pipeline = []
+        if match_pipeline:
+            pipeline.append({"$match": match_pipeline})
+
+        pipeline.extend(
+            [
+                {
+                    "$lookup": {
+                        "from": "SubjectRegistration",
+                        "localField": "_id",
+                        "foreignField": "student",
+                        "as": "subject_registrations",
+                    },
+                },
+                {"$sort": sort if sort else {"numerical_order": 1}},
+                {"$skip": page_size * (page_index - 1)},
+                {"$limit": page_size},
+            ]
+        )
+
+        cursor = StudentModel.objects().aggregate(pipeline)
+        if not cursor.alive:
+            return resp
+        for record in cursor:
+            total_pages = total_pages + 1
+            total_regis = len(record.get("subject_registrations"))
+            subject_registrations = (
+                [str(doc["subject"]) for doc in record.get("subject_registrations")] if total_regis > 0 else []
+            )
+            record.pop("subject_registrations")
+            student = StudentInSubject(**StudentInDB.model_validate(StudentModel.from_mongo(record)).model_dump())
+            resp.data.append(
+                _SubjectRegistrationInResponse(
+                    student=student, subject_registrations=subject_registrations, total=total_regis
+                )
+            )
+        resp.pagination = Pagination(total=total, total_pages=total_pages, page_index=page_index)
+        return resp

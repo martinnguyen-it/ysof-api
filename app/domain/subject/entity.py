@@ -2,7 +2,7 @@ from datetime import datetime, date, timezone
 from typing import Optional
 from pydantic import ConfigDict, field_validator, ValidationInfo
 
-from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin
+from app.domain.shared.entity import BaseEntity, DateTimeModelMixin, IDModelMixin, Pagination
 from app.domain.lecturer.field import PydanticLecturerType
 from app.domain.lecturer.entity import Lecturer, LecturerInStudent
 from app.domain.student.field import PydanticStudentType
@@ -115,3 +115,23 @@ class SubjectRegistrationInResponse(BaseEntity):
         elif info.field_name == "subjects_registration":
             v = [str(val) for val in v]
         return v
+
+
+class StudentInSubject(BaseEntity):
+    numerical_order: int
+    group: int
+    holy_name: str
+    full_name: str
+    email: str
+    id: str
+
+
+class _SubjectRegistrationInResponse(BaseEntity):
+    student: StudentInSubject
+    total: int
+    subject_registrations: list[str] | list
+
+
+class ListSubjectRegistrationInResponse(BaseEntity):
+    pagination: Optional[Pagination] = None
+    data: Optional[list[_SubjectRegistrationInResponse]] = None
