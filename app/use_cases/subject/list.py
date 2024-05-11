@@ -9,6 +9,7 @@ from app.shared.utils.general import get_current_season_value
 from app.models.admin import AdminModel
 from app.domain.document.entity import AdminInDocument, Document, DocumentInDB
 from app.domain.admin.entity import AdminInDB
+from app.domain.shared.enum import AdminRole
 
 
 class ListSubjectsRequestObject(request_object.ValidRequestObject):
@@ -52,7 +53,11 @@ class ListSubjectsUseCase(use_case.UseCase):
         match_pipeline = {}
 
         if (
-            isinstance(req_object.season, int) and req_object.season <= req_object.current_admin.current_season
+            isinstance(req_object.season, int)
+            and (
+                req_object.season <= req_object.current_admin.current_season
+                or AdminRole.ADMIN in req_object.current_admin.roles
+            )
         ) or req_object.season is None:
             match_pipeline = {**match_pipeline, "season": req_object.season if req_object.season else current_season}
         else:
