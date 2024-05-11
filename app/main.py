@@ -2,7 +2,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
-from starlette.middleware.sessions import SessionMiddleware
 from app.interfaces.api import api_router
 from app.config import settings, database
 from app.interfaces.error_handler import (
@@ -25,7 +24,6 @@ app = FastAPI(
     docs_url=docs_paths["docs_url"],
     redoc_url=docs_paths["redoc_url"],
 )
-app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 # app startup handler
 

@@ -90,7 +90,6 @@ class AdminInUpdateMe(BaseEntity):
     date_of_birth: Optional[date] = None
     facebook: Optional[str] = None
     _extract_email = field_validator("email", mode="before")(transform_email)
-    _convert_valid_date = field_validator("date_of_birth", mode="before")(convert_valid_date)
 
 
 class AdminInUpdate(AdminInUpdateMe):

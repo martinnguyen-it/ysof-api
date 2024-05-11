@@ -20,7 +20,7 @@ class UpdateAdminRequestObject(request_object.ValidRequestObject):
 
     @classmethod
     def builder(
-        cls, id: str, current_admin: AdminModel, payload: Optional[AdminInUpdate]
+        cls, id: str, current_admin: AdminModel, payload: Optional[AdminInUpdate] | None = None
     ) -> request_object.RequestObject:
         invalid_req = request_object.InvalidRequestObject()
         if id is None:

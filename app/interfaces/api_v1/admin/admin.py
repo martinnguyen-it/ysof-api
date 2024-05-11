@@ -108,7 +108,9 @@ def update_me(
     update_admin_use_case: UpdateAdminUseCase = Depends(UpdateAdminUseCase),
     current_admin: AdminModel = Depends(get_current_admin),
 ):
-    req_object = UpdateAdminRequestObject.builder(id=current_admin.id, payload=payload)
+    req_object = UpdateAdminRequestObject.builder(
+        id=str(current_admin.id), payload=payload, current_admin=current_admin
+    )
     response = update_admin_use_case.execute(request_object=req_object)
     return response
 
@@ -124,6 +126,7 @@ def update_admin(
     update_admin_use_case: UpdateAdminUseCase = Depends(UpdateAdminUseCase),
     current_admin: AdminModel = Depends(get_current_admin),
 ):
+    print("1>>>", payload)
     """_summary_
 
     Args:

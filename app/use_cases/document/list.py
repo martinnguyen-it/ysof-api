@@ -91,9 +91,14 @@ class ListDocumentsUseCase(use_case.UseCase):
                                 {
                                     "season": {
                                         "$lte": (
-                                            req_object.current_admin.current_season
-                                            if AdminRole.ADMIN not in req_object.current_admin.roles
-                                            else current_season
+                                            req_object.season
+                                            if req_object.season
+                                            and req_object.season <= req_object.current_admin.current_season
+                                            else (
+                                                req_object.current_admin.current_season
+                                                if AdminRole.ADMIN not in req_object.current_admin.roles
+                                                else current_season
+                                            )
                                         )
                                     }
                                 },
