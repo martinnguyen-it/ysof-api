@@ -10,7 +10,7 @@ from app.infra.security.security_service import get_password_hash, TokenData
 from app.models.season import SeasonModel
 
 
-class TestStudentAdminApi(unittest.TestCase):
+class TestStudentApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
@@ -30,6 +30,17 @@ class TestStudentAdminApi(unittest.TestCase):
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
+        cls.student2: StudentModel = StudentModel(
+            numerical_order=2,
+            group=2,
+            status="active",
+            holy_name="Martin",
+            phone_number="0123456789",
+            current_season=3,
+            email="student2@example.com",
+            full_name="Nguyen Thanh Tam",
+            password=get_password_hash(password="local@local"),
+        ).save()
 
     @classmethod
     def tearDownClass(cls):
@@ -39,7 +50,7 @@ class TestStudentAdminApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.student.email)
             r = self.client.get(
-                "/api/v1/student/me",
+                "/api/v1/student/students/me",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -51,3 +62,20 @@ class TestStudentAdminApi(unittest.TestCase):
             assert resp["email"] == self.student.email
             assert resp["full_name"] == self.student.full_name
             assert resp["phone_number"] == self.student.phone_number
+
+    def test_student_get_list(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.student.email)
+            r = self.client.get(
+                "/api/v1/student/students",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+
+            assert r.status_code == 200
+            resp = r.json()
+            assert resp["pagination"]["total"] == 2
+            assert "password" not in resp["data"][0]
+            assert "*" in resp["data"][0]["email"]
+            assert "*" in resp["data"][0]["phone_number"]

@@ -90,7 +90,10 @@ class CreateSubjectEvaluationUseCase(use_case.UseCase):
         if not subject_evaluation_question:
             return response_object.ResponseFailure.build_not_found_error(message="Câu hỏi lượng giá chưa được thêm.")
 
-        if len(req_object.payload.answers) != len(subject_evaluation_question.questions):
+        if (
+            len(req_object.payload.answers) != len(subject_evaluation_question.questions)
+            and len(subject_evaluation_question.questions) != 0
+        ):
             return response_object.ResponseFailure.build_parameters_error("Câu trả lời không hợp lệ.")
 
         try:

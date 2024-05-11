@@ -101,3 +101,17 @@ def get_current_season_value() -> int:
 
 def clear_all_cache():
     cache.clear()
+
+
+def mask_email(email: str | None = None) -> str | None:
+    if not email:
+        return email
+    username, domain = email.split("@")
+    masked_username = username[:4] + "*" * (len(username) - 4)
+    return masked_username + "@" + domain
+
+
+def mask_phone_number(phone_number: str | None = None) -> str | None:
+    if not phone_number:
+        return phone_number
+    return (len(phone_number) - 4) * "*" + phone_number[-4:]

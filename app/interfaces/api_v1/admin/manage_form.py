@@ -22,11 +22,11 @@ def manage_form(
     current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     if payload.type == FormType.SUBJECT_ABSENT:
-        authorization(current_admin, [*SUPER_ADMIN, AdminRole.BKT])
+        authorization(current_admin, [*SUPER_ADMIN, AdminRole.BKL])
     elif payload.type == FormType.SUBJECT_EVALUATION:
         authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV])
     elif payload.type == FormType.SUBJECT_REGISTRATION:
-        authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV, AdminRole.BKT])
+        authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV, AdminRole.BKL])
 
     req_object = UpdateManageFormCommonRequestObject.builder(payload=payload, current_admin=current_admin)
     response = manage_form_common_use_case.execute(request_object=req_object)

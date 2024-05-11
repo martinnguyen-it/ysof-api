@@ -68,6 +68,7 @@ def create_student(
 
 @router.get(
     "",
+    dependencies=[Depends(get_current_active_admin)],
     response_model=ManyStudentsInResponse,
 )
 @response_decorator()
@@ -79,7 +80,6 @@ def get_list_students(
     sort: Optional[Sort] = Sort.ASCE,
     sort_by: Optional[str] = "numerical_order",
     group: Optional[int] = None,
-    current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     annotations = {}
     for base in reversed(Student.__mro__):
@@ -92,7 +92,6 @@ def get_list_students(
         page_index=page_index,
         page_size=page_size,
         search=search,
-        current_admin=current_admin,
         sort=sort_query,
         group=group,
     )

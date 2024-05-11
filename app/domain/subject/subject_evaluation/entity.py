@@ -22,7 +22,7 @@ class SubjectEvaluationBase(BaseEntity):
     invited: str
     feedback_lecturer: str
     satisfied: int
-    answers: list
+    answers: list | None = None
     feedback_admin: str | None = None
 
 

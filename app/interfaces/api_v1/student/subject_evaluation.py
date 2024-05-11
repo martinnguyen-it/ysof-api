@@ -71,7 +71,7 @@ def get_subject_evaluation(
     return response
 
 
-@router.get("", response_model=SubjectEvaluationStudent)
+@router.get("", response_model=list[SubjectEvaluationStudent])
 @response_decorator()
 def get_all_subject_evaluation_me(
     list_subject_evaluation_use_case: ListSubjectEvaluationByStudentUseCase = Depends(

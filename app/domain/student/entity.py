@@ -5,7 +5,13 @@ from pydantic import ConfigDict, EmailStr, field_validator
 from app.domain.shared.enum import AccountStatus
 from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin, Pagination
 from app.domain.student.enum import SexEnum
-from app.shared.utils.general import convert_valid_date, get_current_season_value, transform_email
+from app.shared.utils.general import (
+    convert_valid_date,
+    get_current_season_value,
+    mask_email,
+    mask_phone_number,
+    transform_email,
+)
 
 
 class StudentBase(BaseEntity):
@@ -69,6 +75,25 @@ class Student(StudentBase, DateTimeModelMixin):
 class ManyStudentsInResponse(BaseEntity):
     pagination: Optional[Pagination] = None
     data: Optional[List[Student]] = None
+
+
+class StudentInStudentRequestResponse(BaseEntity):
+    numerical_order: int
+    group: int
+    holy_name: str
+    full_name: str
+    email: EmailStr
+    sex: Optional[SexEnum] = None
+    diocese: Optional[str] = None
+    phone_number: Optional[str] = None
+    avatar: Optional[str] = None
+    _mask_email = field_validator("email", mode="before")(mask_email)
+    _mask_phone_number = field_validator("phone_number", mode="before")(mask_phone_number)
+
+
+class ManyStudentsInStudentRequestResponse(BaseEntity):
+    pagination: Optional[Pagination] = None
+    data: Optional[List[StudentInStudentRequestResponse]] = None
 
 
 class StudentInUpdate(BaseEntity):
