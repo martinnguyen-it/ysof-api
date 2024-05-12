@@ -56,6 +56,8 @@ class SubjectRepository:
 
     def list(
         self,
+        page_index: int | None = 1,
+        page_size: int | None = None,
         match_pipeline: Optional[Dict[str, Any]] = None,
         sort: Optional[Dict[str, int]] = None,
     ) -> List[SubjectModel]:
@@ -65,6 +67,13 @@ class SubjectRepository:
         pipeline.append(
             {"$sort": sort if sort else {"created_at": -1}},
         )
+        if page_size:
+            pipeline.extend(
+                [
+                    {"$skip": page_size * (page_index - 1)},
+                    {"$limit": page_size},
+                ]
+            )
         try:
             docs = SubjectModel.objects().aggregate(pipeline)
             return [SubjectModel.from_mongo(doc) for doc in docs] if docs else []

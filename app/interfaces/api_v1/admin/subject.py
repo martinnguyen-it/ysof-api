@@ -20,8 +20,54 @@ from app.models.admin import AdminModel
 from app.shared.constant import SUPER_ADMIN
 from app.use_cases.subject.delete import DeleteSubjectRequestObject, DeleteSubjectUseCase
 from app.domain.subject.enum import StatusSubjectEnum
+from app.use_cases.subject.get_next_most_recent import GetSubjectNextMostRecentUseCase
+from app.use_cases.subject.get_last_sent_evaluation import GetSubjectLastSentEvaluationUseCase
+from app.use_cases.subject.get_last_sent_student import GetSubjectLastSentStudentUseCase
 
 router = APIRouter()
+
+
+@router.get(
+    "/next-most-recent",
+    dependencies=[Depends(get_current_active_admin)],
+    response_model=Subject,
+)
+@response_decorator()
+def get_subject_next_most_recent(
+    get_subject_next_most_recent_use_case: GetSubjectNextMostRecentUseCase = Depends(GetSubjectNextMostRecentUseCase),
+):
+    response = get_subject_next_most_recent_use_case.process_request()
+    return response
+
+
+@router.get(
+    "/last-sent-student",
+    dependencies=[Depends(get_current_active_admin)],
+    response_model=Subject,
+)
+@response_decorator()
+def get_subject_last_sent_student(
+    get_subject_last_sent_student_use_case: GetSubjectLastSentStudentUseCase = Depends(
+        GetSubjectLastSentStudentUseCase
+    ),
+):
+    response = get_subject_last_sent_student_use_case.process_request()
+    return response
+
+
+@router.get(
+    "/last-sent-evaluation",
+    dependencies=[Depends(get_current_active_admin)],
+    response_model=Subject,
+)
+@response_decorator()
+def get_subject_last_sent_evaluation(
+    get_subject_last_sent_evaluation_use_case: GetSubjectLastSentEvaluationUseCase = Depends(
+        GetSubjectLastSentEvaluationUseCase
+    ),
+):
+    response = get_subject_last_sent_evaluation_use_case.process_request()
+    return response
 
 
 @router.get(

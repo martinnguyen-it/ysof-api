@@ -13,11 +13,12 @@ from app.use_cases.subject_registration.list_by_subject_id import (
     ListSubjectRegistrationsBySubjectIdRequestObject,
     ListSubjectRegistrationsBySubjectIdUseCase,
 )
+from app.infra.security.security_service import get_current_active_admin
 
 router = APIRouter()
 
 
-@router.get("", response_model=ListSubjectRegistrationInResponse)
+@router.get("", response_model=ListSubjectRegistrationInResponse, dependencies=[Depends(get_current_active_admin)])
 @response_decorator()
 def get_subject_registration(
     list_subject_registration_use_case: ListSubjectRegistrationsUseCase = Depends(ListSubjectRegistrationsUseCase),
@@ -37,7 +38,11 @@ def get_subject_registration(
     return response
 
 
-@router.get("/subject/{subject_id}", response_model=ListSubjectRegistrationInResponse)
+@router.get(
+    "/subject/{subject_id}",
+    response_model=ListSubjectRegistrationInResponse,
+    dependencies=[Depends(get_current_active_admin)],
+)
 @response_decorator()
 def get_subject_registration_by_subject_id(
     subject_id: str,
