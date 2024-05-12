@@ -23,6 +23,7 @@ from app.domain.subject.enum import StatusSubjectEnum
 from app.use_cases.subject.get_next_most_recent import GetSubjectNextMostRecentUseCase
 from app.use_cases.subject.get_last_sent_evaluation import GetSubjectLastSentEvaluationUseCase
 from app.use_cases.subject.get_last_sent_student import GetSubjectLastSentStudentUseCase
+from app.use_cases.subject.send_notification import SubjectSendNotificationRequestObject, SubjectSendNotificationUseCase
 
 router = APIRouter()
 
@@ -67,6 +68,21 @@ def get_subject_last_sent_evaluation(
     ),
 ):
     response = get_subject_last_sent_evaluation_use_case.process_request()
+    return response
+
+
+@router.post(
+    "/send-notification/{subject_id}",
+    dependencies=[Depends(get_current_admin)],
+    response_model=Subject,
+)
+@response_decorator()
+def get_subject_notification(
+    subject_id: str = Path(..., title="Subject id"),
+    subject_send_notification_use_case: SubjectSendNotificationUseCase = Depends(SubjectSendNotificationUseCase),
+):
+    subject_send_notification_request_object = SubjectSendNotificationRequestObject.builder(subject_id=subject_id)
+    response = subject_send_notification_use_case.execute(request_object=subject_send_notification_request_object)
     return response
 
 

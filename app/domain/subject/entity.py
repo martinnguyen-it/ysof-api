@@ -85,6 +85,7 @@ class SubjectInUpdate(SubjectBaseUpdate):
 
 class SubjectInUpdateTime(SubjectBaseUpdate):
     lecturer: PydanticLecturerType | None = None
+    status: StatusSubjectEnum | None = None
     attachments: Optional[list[PydanticDocumentType]] = None
     updated_at: datetime = datetime.now(timezone.utc)
 

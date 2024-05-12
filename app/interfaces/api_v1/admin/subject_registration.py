@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.shared.decorator import response_decorator
-from app.domain.subject.entity import (
-    ListSubjectRegistrationInResponse,
-)
+from app.domain.subject.entity import ListSubjectRegistrationInResponse, StudentInSubject
 from app.use_cases.subject_registration.list import (
     ListSubjectRegistrationsRequestObject,
     ListSubjectRegistrationsUseCase,
@@ -40,7 +38,7 @@ def get_subject_registration(
 
 @router.get(
     "/subject/{subject_id}",
-    response_model=ListSubjectRegistrationInResponse,
+    response_model=list[StudentInSubject],
     dependencies=[Depends(get_current_active_admin)],
 )
 @response_decorator()
