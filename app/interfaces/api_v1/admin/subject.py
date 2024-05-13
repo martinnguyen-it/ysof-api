@@ -73,15 +73,17 @@ def get_subject_last_sent_evaluation(
 
 @router.post(
     "/send-notification/{subject_id}",
-    dependencies=[Depends(get_current_admin)],
     response_model=Subject,
 )
 @response_decorator()
 def get_subject_notification(
     subject_id: str = Path(..., title="Subject id"),
+    current_admin: AdminModel = Depends(get_current_active_admin),
     subject_send_notification_use_case: SubjectSendNotificationUseCase = Depends(SubjectSendNotificationUseCase),
 ):
-    subject_send_notification_request_object = SubjectSendNotificationRequestObject.builder(subject_id=subject_id)
+    subject_send_notification_request_object = SubjectSendNotificationRequestObject.builder(
+        subject_id=subject_id, current_admin=current_admin
+    )
     response = subject_send_notification_use_case.execute(request_object=subject_send_notification_request_object)
     return response
 

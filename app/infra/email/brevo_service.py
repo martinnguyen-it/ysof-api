@@ -59,7 +59,7 @@ class BrevoService:
         except ApiException as ex:
             raise ex
 
-    def send_students_notification_subject(self, email_to: str, params: dict) -> Any:
+    def send_student_notification_subject(self, email_to: str, params: dict) -> Any:
         try:
             resp = self._send(
                 emails_to=email_to,
