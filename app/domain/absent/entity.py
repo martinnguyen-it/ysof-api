@@ -4,8 +4,8 @@ from pydantic import ConfigDict
 from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin
 from app.domain.student.field import PydanticStudentType
 from app.domain.subject.field import PydanticSubjectType
-from app.domain.subject.entity import SubjectInStudent
 from app.domain.student.entity import Student
+from app.domain.subject.subject_evaluation.entity import SubjectInEvaluation
 
 
 class StudentAbsentInCreate(BaseEntity):
@@ -37,7 +37,7 @@ class AbsentInDB(IDModelMixin, DateTimeModelMixin):
 
 class AbsentResponseBase(DateTimeModelMixin):
     id: str
-    subject: SubjectInStudent
+    subject: SubjectInEvaluation
     reason: str | None = None
 
 

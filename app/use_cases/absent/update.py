@@ -1,7 +1,7 @@
 from fastapi import Depends, BackgroundTasks
 from bson import ObjectId
 from app.shared import request_object, response_object, use_case
-from app.domain.subject.entity import SubjectInDB, SubjectInStudent
+from app.domain.subject.entity import SubjectInDB
 from app.infra.subject.subject_repository import SubjectRepository
 from app.models.subject import SubjectModel
 from app.models.student import StudentModel
@@ -10,7 +10,7 @@ from app.infra.manage_form.manage_form_repository import ManageFormRepository
 from app.models.manage_form import ManageFormModel
 from app.domain.manage_form.enum import FormStatus, FormType
 from app.domain.manage_form.entity import ManageFormEvaluationOrAbsent
-from app.domain.lecturer.entity import LecturerInDB, LecturerInStudent
+from app.domain.lecturer.entity import LecturerInDB
 from app.domain.absent.entity import (
     AbsentInDB,
     AbsentInUpdateTime,
@@ -27,6 +27,7 @@ from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 import json
+from app.domain.subject.subject_evaluation.entity import LecturerInEvaluation, SubjectInEvaluation
 
 
 class UpdateAbsentRequestObject(request_object.ValidRequestObject):
@@ -146,17 +147,17 @@ class UpdateAbsentUseCase(use_case.UseCase):
         return (
             StudentAbsentInResponse(
                 **AbsentInDB.model_validate(absent).model_dump(exclude={"student", "subject"}),
-                subject=SubjectInStudent(
+                subject=SubjectInEvaluation(
                     **SubjectInDB.model_validate(absent.subject).model_dump(exclude=({"lecturer"})),
-                    lecturer=LecturerInStudent(**LecturerInDB.model_validate(absent.subject.lecturer).model_dump()),
+                    lecturer=LecturerInEvaluation(**LecturerInDB.model_validate(absent.subject.lecturer).model_dump()),
                 ),
             )
             if is_student_request
             else AdminAbsentInResponse(
                 **AbsentInDB.model_validate(absent).model_dump(exclude={"student", "subject"}),
-                subject=SubjectInStudent(
+                subject=SubjectInEvaluation(
                     **SubjectInDB.model_validate(absent.subject).model_dump(exclude=({"lecturer"})),
-                    lecturer=LecturerInStudent(**LecturerInDB.model_validate(absent.subject.lecturer).model_dump()),
+                    lecturer=LecturerInEvaluation(**LecturerInDB.model_validate(absent.subject.lecturer).model_dump()),
                 ),
                 student=Student(**StudentInDB.model_validate(absent.student).model_dump()),
             )

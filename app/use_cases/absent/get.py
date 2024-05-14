@@ -1,15 +1,16 @@
 from bson import ObjectId
 from fastapi import Depends
 from app.shared import request_object, response_object, use_case
-from app.domain.subject.entity import SubjectInDB, SubjectInStudent
+from app.domain.subject.entity import SubjectInDB
 from app.models.student import StudentModel
-from app.domain.lecturer.entity import LecturerInDB, LecturerInStudent
+from app.domain.lecturer.entity import LecturerInDB
 from app.infra.absent.absent_repository import AbsentRepository
 from app.models.absent import AbsentModel
 from app.domain.absent.entity import AbsentInDB, AdminAbsentInResponse, StudentAbsentInResponse
 from app.domain.student.entity import Student, StudentInDB
 from app.infra.subject.subject_repository import SubjectRepository
 from app.infra.student.student_repository import StudentRepository
+from app.domain.subject.subject_evaluation.entity import LecturerInEvaluation, SubjectInEvaluation
 
 
 class GetAbsentRequestObject(request_object.ValidRequestObject):
@@ -58,17 +59,17 @@ class GetAbsentUseCase(use_case.UseCase):
         return (
             StudentAbsentInResponse(
                 **AbsentInDB.model_validate(absent).model_dump(exclude={"student", "subject"}),
-                subject=SubjectInStudent(
-                    **SubjectInDB.model_validate(absent.subject).model_dump(exclude=({"lecturer"})),
-                    lecturer=LecturerInStudent(**LecturerInDB.model_validate(absent.subject.lecturer).model_dump()),
+                subject=SubjectInEvaluation(
+                    **SubjectInDB.model_validate(absent.subject).model_dump(exclude=({"lecturer", "attachments"})),
+                    lecturer=LecturerInEvaluation(**LecturerInDB.model_validate(absent.subject.lecturer).model_dump()),
                 ),
             )
             if is_student_request
             else AdminAbsentInResponse(
                 **AbsentInDB.model_validate(absent).model_dump(exclude={"student", "subject"}),
-                subject=SubjectInStudent(
-                    **SubjectInDB.model_validate(absent.subject).model_dump(exclude=({"lecturer"})),
-                    lecturer=LecturerInStudent(**LecturerInDB.model_validate(absent.subject.lecturer).model_dump()),
+                subject=SubjectInEvaluation(
+                    **SubjectInDB.model_validate(absent.subject).model_dump(exclude=({"lecturer", "attachments"})),
+                    lecturer=LecturerInEvaluation(**LecturerInDB.model_validate(absent.subject.lecturer).model_dump()),
                 ),
                 student=Student(**StudentInDB.model_validate(absent.student).model_dump()),
             )
