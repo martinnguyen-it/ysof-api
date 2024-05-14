@@ -7,6 +7,7 @@ from app.infra.subject.subject_repository import SubjectRepository
 from app.domain.lecturer.entity import LecturerInDB, LecturerInStudent
 from app.models.student import StudentModel
 from app.domain.document.entity import DocumentInDB, DocumentInStudent
+from app.domain.subject.enum import StatusSubjectEnum
 
 
 class ListSubjectsStudentRequestObject(request_object.ValidRequestObject):
@@ -15,7 +16,7 @@ class ListSubjectsStudentRequestObject(request_object.ValidRequestObject):
         current_student: StudentModel,
         search: Optional[str] = None,
         subdivision: Optional[str] = None,
-        status: Optional[str] = None,
+        status: Optional[list[StatusSubjectEnum]] = None,
         sort: Optional[dict[str, int]] = None,
     ):
         self.search = search
@@ -30,7 +31,7 @@ class ListSubjectsStudentRequestObject(request_object.ValidRequestObject):
         current_student: StudentModel,
         search: Optional[str] = None,
         subdivision: Optional[str] = None,
-        status: Optional[str] = None,
+        status: Optional[list[StatusSubjectEnum]] = None,
         sort: Optional[dict[str, int]] = None,
     ):
         return ListSubjectsStudentRequestObject(
@@ -55,8 +56,8 @@ class ListSubjectsStudentUseCase(use_case.UseCase):
             }
         if isinstance(req_object.subdivision, str):
             match_pipeline = {**match_pipeline, "subdivision": req_object.subdivision}
-        if isinstance(req_object.status, str):
-            match_pipeline = {**match_pipeline, "status": req_object.status}
+        if isinstance(req_object.status, list):
+            match_pipeline = {**match_pipeline, "status": {"$in": req_object.status}}
 
         subjects: List[SubjectModel] = self.subject_repository.list(sort=req_object.sort, match_pipeline=match_pipeline)
 

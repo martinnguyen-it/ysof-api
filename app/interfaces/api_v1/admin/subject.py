@@ -145,7 +145,7 @@ def get_list_subjects(
     sort: Optional[Sort] = Sort.ASCE,
     sort_by: Optional[str] = "start_at",
     subdivision: Optional[str] = None,
-    status: Optional[StatusSubjectEnum] = None,
+    status: Optional[list[StatusSubjectEnum]] = Query(None, title="Status"),
     season: Optional[int] = None,
     current_admin: AdminModel = Depends(get_current_admin),
 ):

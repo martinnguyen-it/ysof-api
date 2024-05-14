@@ -10,6 +10,7 @@ from app.models.admin import AdminModel
 from app.domain.document.entity import AdminInDocument, Document, DocumentInDB
 from app.domain.admin.entity import AdminInDB
 from app.domain.shared.enum import AdminRole
+from app.domain.subject.enum import StatusSubjectEnum
 
 
 class ListSubjectsRequestObject(request_object.ValidRequestObject):
@@ -18,7 +19,7 @@ class ListSubjectsRequestObject(request_object.ValidRequestObject):
         current_admin: AdminModel,
         search: Optional[str] = None,
         subdivision: Optional[str] = None,
-        status: Optional[str] = None,
+        status: Optional[list[StatusSubjectEnum]] = None,
         season: int | None = None,
         sort: Optional[dict[str, int]] = None,
     ):
@@ -35,7 +36,7 @@ class ListSubjectsRequestObject(request_object.ValidRequestObject):
         current_admin: AdminModel,
         search: Optional[str] = None,
         subdivision: Optional[str] = None,
-        status: Optional[str] = None,
+        status: Optional[list[StatusSubjectEnum]] = None,
         season: int | None = None,
         sort: Optional[dict[str, int]] = None,
     ):
@@ -76,9 +77,8 @@ class ListSubjectsUseCase(use_case.UseCase):
             }
         if isinstance(req_object.subdivision, str):
             match_pipeline = {**match_pipeline, "subdivision": req_object.subdivision}
-        if isinstance(req_object.status, str):
-            match_pipeline = {**match_pipeline, "status": req_object.status}
-
+        if isinstance(req_object.status, list):
+            match_pipeline = {**match_pipeline, "status": {"$in": req_object.status}}
         subjects: List[SubjectModel] = self.subject_repository.list(sort=req_object.sort, match_pipeline=match_pipeline)
 
         return [

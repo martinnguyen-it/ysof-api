@@ -35,7 +35,7 @@ def get_list_subjects(
     search: Optional[str] = Query(None, title="Search"),
     sort: Optional[Sort] = Sort.DESC,
     sort_by: Optional[str] = "id",
-    status: Optional[StatusSubjectEnum] = None,
+    status: Optional[list[StatusSubjectEnum]] = Query(None, title="Status"),
     subdivision: Optional[str] = None,
     current_student: StudentModel = Depends(get_current_student),
 ):
