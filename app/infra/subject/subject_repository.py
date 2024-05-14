@@ -3,6 +3,7 @@
 from typing import Optional, Dict, Union, List, Any
 from mongoengine import QuerySet, DoesNotExist
 from bson import ObjectId
+import pymongo
 
 from app.models.subject import SubjectModel
 from app.domain.subject.entity import SubjectInDB, SubjectInUpdateTime
@@ -109,3 +110,33 @@ class SubjectRepository:
             return SubjectModel.from_mongo(doc) if doc else None
         except Exception:
             return None
+
+    def find(self, conditions: Dict[str, Union[str, bool, ObjectId]]) -> List[Optional[SubjectModel]]:
+        try:
+            docs = SubjectModel._get_collection().find(conditions)
+            return [SubjectModel.from_mongo(doc) for doc in docs] if docs else []
+        except Exception:
+            return []
+
+    def bulk_update(self, data: Union[SubjectInUpdateTime, Dict[str, Any]], entities: List[SubjectModel]) -> bool:
+        try:
+            if len(entities) == 0:
+                return False
+
+            data = (
+                data.model_dump(exclude_none=True, exclude_unset=True)
+                if isinstance(data, SubjectInUpdateTime)
+                else data
+            )
+            operations = [
+                pymongo.UpdateOne(
+                    {"_id": season.id},
+                    {"$set": data},
+                    upsert=False,
+                )
+                for season in entities
+            ]
+            SubjectModel._get_collection().bulk_write(operations)
+            return True
+        except Exception:
+            return False

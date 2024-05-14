@@ -17,6 +17,7 @@ celery_app = Celery(
         "app.infra.tasks.periodic.test",
         "app.infra.tasks.email",
         "app.infra.tasks.periodic.manage_form_absent",
+        "app.infra.tasks.periodic.manage_form_evaluation",
     ],
 )
 celery_app.conf.timezone = settings.CELERY_TIMEZONE
@@ -35,6 +36,10 @@ celery_app.conf.beat_schedule = {
     "check-close-form-absent-every-saturday": {
         "task": "app.infra.tasks.periodic.manage_form_absent.close_form_absent_task",
         "schedule": crontab(minute="00", hour=12, day_of_week=6, month_of_year="1-5,9-12"),
+    },
+    "check-close-form-evaluation-every-monday": {
+        "task": "app.infra.tasks.periodic.manage_form_evaluation.close_form_evaluation_task",
+        "schedule": crontab(minute="59", hour=23, day_of_week=1, month_of_year="1-5,9-12"),
     },
 }
 
