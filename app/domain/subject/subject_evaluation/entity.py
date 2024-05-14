@@ -54,9 +54,11 @@ class SubjectInEvaluation(BaseEntity):
 
 class StudentInEvaluation(BaseEntity):
     id: str
+    group: int
     numerical_order: int
     holy_name: str
     full_name: str
+    email: str
 
 
 class SubjectEvaluationStudent(SubjectEvaluationBase, DateTimeModelMixin):

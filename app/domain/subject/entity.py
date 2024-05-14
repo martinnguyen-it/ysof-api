@@ -52,6 +52,12 @@ class Subject(SubjectBase, DateTimeModelMixin):
     attachments: Optional[list[Document]] = None
 
 
+class SubjectShortResponse(BaseEntity):
+    id: str
+    title: str
+    code: str
+
+
 class SubjectInStudent(BaseEntity):
     id: str
     title: str

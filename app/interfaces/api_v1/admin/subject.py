@@ -2,7 +2,7 @@ from app.shared import response_object
 from fastapi import APIRouter, Body, Depends, Query, HTTPException, Path
 from typing import Optional
 
-from app.domain.subject.entity import Subject, SubjectInCreate, SubjectInUpdate
+from app.domain.subject.entity import Subject, SubjectInCreate, SubjectInUpdate, SubjectShortResponse
 from app.domain.shared.enum import AdminRole, Sort
 from app.infra.security.security_service import authorization, get_current_active_admin, get_current_admin
 from app.shared.decorator import response_decorator
@@ -25,6 +25,7 @@ from app.use_cases.subject.get_last_sent_evaluation import GetSubjectLastSentEva
 from app.use_cases.subject.get_last_sent_student import GetSubjectLastSentStudentUseCase
 from app.use_cases.subject.send_notification import SubjectSendNotificationRequestObject, SubjectSendNotificationUseCase
 from app.use_cases.subject.send_evaluation import SubjectSendEvaluationRequestObject, SubjectSendEvaluationUseCase
+from app.use_cases.subject.list_short import ListSubjectsShortRequestObject, ListSubjectsShortUseCase
 
 router = APIRouter()
 
@@ -103,6 +104,37 @@ def get_subject_evaluation(
         subject_id=subject_id, current_admin=current_admin
     )
     response = subject_send_evaluation_use_case.execute(request_object=subject_send_evaluation_request_object)
+    return response
+
+
+@router.get("/list-short", response_model=list[SubjectShortResponse])
+@response_decorator()
+def get_list_subjects_short(
+    list_subjects_short_use_case: ListSubjectsShortUseCase = Depends(ListSubjectsShortUseCase),
+    search: Optional[str] = Query(None, title="Search"),
+    sort: Optional[Sort] = Sort.ASCE,
+    sort_by: Optional[str] = "start_at",
+    subdivision: Optional[str] = None,
+    status: Optional[list[StatusSubjectEnum]] = Query(None, title="Status"),
+    season: Optional[int] = None,
+    current_admin: AdminModel = Depends(get_current_admin),
+):
+    annotations = {}
+    for base in reversed(Subject.__mro__):
+        annotations.update(getattr(base, "__annotations__", {}))
+    if sort_by not in annotations:
+        raise HTTPException(status_code=400, detail=f"Invalid sort_by: {sort_by}")
+    sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
+
+    req_object = ListSubjectsShortRequestObject.builder(
+        search=search,
+        season=season,
+        sort=sort_query,
+        subdivision=subdivision,
+        current_admin=current_admin,
+        status=status,
+    )
+    response = list_subjects_short_use_case.execute(request_object=req_object)
     return response
 
 
