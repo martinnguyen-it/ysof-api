@@ -12,6 +12,7 @@ from app.shared.utils.general import get_current_season_value
 from app.models.admin import AdminModel
 from app.infra.email.brevo_service import BrevoService
 from celery import group
+from datetime import timedelta
 
 email_smtp_service = EmailSMTPService()
 brevo_service = BrevoService()
@@ -88,5 +89,54 @@ def send_email_notification_subject_task(subject_id: str):
 def send_email_notification_subject_to_user_task(email: str, params: dict):
     try:
         brevo_service.send_student_notification_subject(email_to=email, params=params)
+    except Exception as ex:
+        logger.exception(ex)
+
+
+@celery_app.task
+def send_student_evaluation_subject_task(subject_id: str):
+    logger.info(f"[send_student_evaluation_subject_task subject_id:{subject_id}] running...")
+    try:
+        admin_repository = AdminRepository()
+        subject_repository = SubjectRepository()
+        subject_registration_repository = SubjectRegistrationRepository()
+
+        current_season = get_current_season_value()
+        admins: list[AdminModel] = admin_repository.list(match_pipeline={"current_season": current_season})
+        emails_admin = [admin.email for admin in admins]
+
+        subject = subject_repository.get_by_id(subject_id)
+        if not subject:
+            raise Exception("Not found subject")
+
+        lecturer = (
+            (subject.lecturer.title + " " if subject.lecturer.title else "")
+            + (subject.lecturer.holy_name + " " if subject.lecturer.holy_name else "")
+            + (subject.lecturer.full_name)
+        )
+
+        params = dict(
+            code=subject.code,
+            end_at=(subject.start_at + timedelta(days=7)).strftime("%d.%m.%Y"),
+            title=subject.title,
+            lecturer=lecturer,
+            url=settings.FE_STUDENT_BASE_URL + "/luong-gia",
+        )
+        docs: list[SubjectRegistrationModel] = subject_registration_repository.get_by_subject_id(
+            subject_id=ObjectId(subject_id)
+        )
+        emails_to: list[str] = [doc.student.email for doc in docs]
+        emails_to.extend(emails_admin)
+
+        job = group([send_student_evaluation_subject_to_user_task.s(email, params) for email in emails_to])
+        job.apply_async()
+    except Exception as ex:
+        logger.exception(ex)
+
+
+@celery_app.task
+def send_student_evaluation_subject_to_user_task(email: str, params: dict):
+    try:
+        brevo_service.send_student_evaluation_subject(email_to=email, params=params)
     except Exception as ex:
         logger.exception(ex)

@@ -70,6 +70,17 @@ class BrevoService:
         except Exception as ex:
             raise ex
 
+    def send_student_evaluation_subject(self, email_to: str, params: dict) -> Any:
+        try:
+            resp = self._send(
+                emails_to=email_to,
+                template_id=settings.STUDENT_SUBJECT_EVALUATION_TEMPLATE,
+                params=params,
+            )
+            return resp
+        except Exception as ex:
+            raise ex
+
     def send_register_email(self, mail_to: EmailStr, password: str) -> Any:
         try:
             data = dict(password=password, url=settings.FE_ADMIN_BASE_URL)

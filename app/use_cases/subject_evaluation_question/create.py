@@ -66,6 +66,13 @@ class CreateSubjectEvaluationQuestionUseCase(use_case.UseCase):
             **req_object.obj_in.model_dump(),
             subject=subject,
         )
+
+        existed: SubjectEvaluationQuestionModel | None = self.subject_evaluation_question_repository.get_by_subject_id(
+            subject_id=req_object.subject_id
+        )
+        if existed:
+            self.subject_evaluation_question_repository.delete(id=existed.id)
+
         subject_evaluation_question: SubjectEvaluationQuestionModel = (
             self.subject_evaluation_question_repository.create(doc=obj_in)
         )

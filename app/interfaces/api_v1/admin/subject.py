@@ -24,6 +24,7 @@ from app.use_cases.subject.get_next_most_recent import GetSubjectNextMostRecentU
 from app.use_cases.subject.get_last_sent_evaluation import GetSubjectLastSentEvaluationUseCase
 from app.use_cases.subject.get_last_sent_student import GetSubjectLastSentStudentUseCase
 from app.use_cases.subject.send_notification import SubjectSendNotificationRequestObject, SubjectSendNotificationUseCase
+from app.use_cases.subject.send_evaluation import SubjectSendEvaluationRequestObject, SubjectSendEvaluationUseCase
 
 router = APIRouter()
 
@@ -85,6 +86,23 @@ def get_subject_notification(
         subject_id=subject_id, current_admin=current_admin
     )
     response = subject_send_notification_use_case.execute(request_object=subject_send_notification_request_object)
+    return response
+
+
+@router.post(
+    "/send-evaluation/{subject_id}",
+    response_model=Subject,
+)
+@response_decorator()
+def get_subject_evaluation(
+    subject_id: str = Path(..., title="Subject id"),
+    current_admin: AdminModel = Depends(get_current_active_admin),
+    subject_send_evaluation_use_case: SubjectSendEvaluationUseCase = Depends(SubjectSendEvaluationUseCase),
+):
+    subject_send_evaluation_request_object = SubjectSendEvaluationRequestObject.builder(
+        subject_id=subject_id, current_admin=current_admin
+    )
+    response = subject_send_evaluation_use_case.execute(request_object=subject_send_evaluation_request_object)
     return response
 
 
