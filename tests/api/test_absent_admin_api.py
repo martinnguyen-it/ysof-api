@@ -99,9 +99,8 @@ class TestAdminAbsentApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.admin.email)
             r = self.client.post(
-                f"/api/v1/absents/{self.subject.id}",
+                f"/api/v1/absents/subject/{self.subject.id}/student/{self.student2.id}",
                 json={"reason": "Xin phép nghỉ"},
-                params={"student_id": self.student2.id},
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -110,9 +109,8 @@ class TestAdminAbsentApi(unittest.TestCase):
             assert r.json()["detail"] == "Đơn nghỉ phép đã được tạo trước đây."
 
             r = self.client.post(
-                f"/api/v1/absents/{self.subject.id}",
+                f"/api/v1/absents/subject/{self.subject.id}/student/{self.student.id}",
                 json={"reason": "Xin phép nghỉ"},
-                params={"student_id": self.student.id},
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -133,11 +131,10 @@ class TestAdminAbsentApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.admin.email)
             r = self.client.patch(
-                f"/api/v1/absents/{self.subject.id}",
+                f"/api/v1/absents/subject/{self.subject.id}/student/{self.student.id}",
                 json={
                     "reason": "Updated",
                 },
-                params={"student_id": self.student.id},
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -152,12 +149,11 @@ class TestAdminAbsentApi(unittest.TestCase):
             assert len(audit_logs) == 1
 
     @pytest.mark.order(3)
-    def test_get_absent_by_subject_id(self):
+    def test_get_absent_by_subject_id_and_student_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.admin.email)
             r = self.client.get(
-                f"/api/v1/absents/{self.subject.id}",
-                params={"student_id": self.student.id},
+                f"/api/v1/absents/subject/{self.subject.id}/student/{self.student.id}",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -171,7 +167,7 @@ class TestAdminAbsentApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.admin.email)
             r = self.client.get(
-                f"/api/v1/absents/list/{self.subject.id}",
+                f"/api/v1/absents/{self.subject.id}",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -185,8 +181,7 @@ class TestAdminAbsentApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.admin.email)
             r = self.client.delete(
-                f"/api/v1/absents/{self.subject.id}",
-                params={"student_id": self.student.id},
+                f"/api/v1/absents/subject/{self.subject.id}/student/{self.student.id}",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -194,8 +189,7 @@ class TestAdminAbsentApi(unittest.TestCase):
             assert r.status_code == 200
 
             r = self.client.get(
-                f"/api/v1/absents/{self.subject.id}",
-                params={"student_id": self.student.id},
+                f"/api/v1/absents/subject/{self.subject.id}/student/{self.student.id}",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },

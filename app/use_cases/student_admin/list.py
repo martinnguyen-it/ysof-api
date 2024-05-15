@@ -65,6 +65,11 @@ class ListStudentsUseCase(use_case.UseCase):
         match_pipeline: Optional[Dict[str, Any]] = {"current_season": current_season}
 
         if isinstance(req_object.search, str):
+            num = None
+            try:
+                num = int(req_object.search)
+            except Exception:
+                pass
             match_pipeline = {
                 **match_pipeline,
                 "$or": [
@@ -72,7 +77,7 @@ class ListStudentsUseCase(use_case.UseCase):
                     {"full_name": {"$regex": req_object.search, "$options": "i"}},
                     {"holy_name": {"$regex": req_object.search, "$options": "i"}},
                     {"diocese": {"$regex": req_object.search, "$options": "i"}},
-                    {"numerical_order": req_object.search},
+                    {"numerical_order": num},
                 ],
             }
 

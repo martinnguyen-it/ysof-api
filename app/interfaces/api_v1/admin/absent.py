@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Body, Path, Query
+from fastapi import APIRouter, Depends, Body, Path
 
 from app.infra.security.security_service import authorization, get_current_active_admin
 from app.shared.decorator import response_decorator
@@ -15,11 +15,11 @@ from app.domain.shared.enum import AdminRole
 router = APIRouter()
 
 
-@router.post("/{subject_id}", response_model=AdminAbsentInResponse)
+@router.post("/subject/{subject_id}/student/{student_id}", response_model=AdminAbsentInResponse)
 @response_decorator()
 def create_absent(
     subject_id: str = Path(..., title="Subject id"),
-    student_id: str = Query(..., title="Student id"),
+    student_id: str = Path(..., title="Student id"),
     payload: AdminAbsentInCreate = Body(..., title="Subject absent In Create payload"),
     create_absent_use_case: CreateAbsentUseCase = Depends(CreateAbsentUseCase),
     current_admin: AdminModel = Depends(get_current_active_admin),
@@ -36,11 +36,11 @@ def create_absent(
     return response
 
 
-@router.patch("/{subject_id}", response_model=AdminAbsentInResponse)
+@router.patch("/subject/{subject_id}/student/{student_id}", response_model=AdminAbsentInResponse)
 @response_decorator()
 def update_absent(
     subject_id: str = Path(..., title="Subject id"),
-    student_id: str = Query(..., title="Student id"),
+    student_id: str = Path(..., title="Student id"),
     payload: AdminAbsentInUpdate = Body(..., title="Subject absent In update payload"),
     update_absent_use_case: UpdateAbsentUseCase = Depends(UpdateAbsentUseCase),
     current_admin: AdminModel = Depends(get_current_active_admin),
@@ -53,11 +53,11 @@ def update_absent(
     return response
 
 
-@router.get("/{subject_id}", response_model=AdminAbsentInResponse)
+@router.get("/subject/{subject_id}/student/{student_id}", response_model=AdminAbsentInResponse)
 @response_decorator()
 def get_absent(
     subject_id: str = Path(..., title="Subject id"),
-    student_id: str = Query(..., title="Student id"),
+    student_id: str = Path(..., title="Student id"),
     get_absent_use_case: GetAbsentUseCase = Depends(GetAbsentUseCase),
     current_admin: AdminModel = Depends(get_current_active_admin),
 ):
@@ -68,7 +68,7 @@ def get_absent(
 
 
 @router.get(
-    "/list/{subject_id}",
+    "/{subject_id}",
     response_model=AdminAbsentInResponse,
 )
 @response_decorator()
@@ -83,11 +83,11 @@ def list_absent_by_subject_id(
     return response
 
 
-@router.delete("/{subject_id}", response_model=AdminAbsentInResponse)
+@router.delete("/subject/{subject_id}/student/{student_id}")
 @response_decorator()
 def delete_absent(
     subject_id: str = Path(..., title="Subject id"),
-    student_id: str = Query(..., title="Student id"),
+    student_id: str = Path(..., title="Student id"),
     delete_absent_use_case: DeleteAbsentUseCase = Depends(DeleteAbsentUseCase),
     current_admin: AdminModel = Depends(get_current_active_admin),
 ):
