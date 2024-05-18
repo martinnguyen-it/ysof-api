@@ -6,7 +6,7 @@ from app.models.subject import SubjectModel
 from app.domain.lecturer.entity import Lecturer, LecturerInDB
 from app.domain.document.entity import AdminInDocument, Document, DocumentInDB
 from app.domain.admin.entity import AdminInDB
-from datetime import datetime
+from datetime import datetime, date
 from app.shared.utils.general import get_current_season_value
 
 
@@ -16,8 +16,12 @@ class GetSubjectNextMostRecentUseCase(use_case.UseCase):
 
     def process_request(self):
         current_season = get_current_season_value()
+        today = date.today()
         subjects: list[SubjectModel] = self.subject_repository.list(
-            match_pipeline={"start_at": {"$gte": datetime.now()}, "season": current_season},
+            match_pipeline={
+                "start_at": {"$gte": datetime(today.year, today.month, today.day)},
+                "season": current_season,
+            },
             sort={"start_at": 1},
             page_index=1,
             page_size=1,
