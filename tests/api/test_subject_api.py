@@ -1,4 +1,5 @@
 import app.interfaces.api_v1.admin
+from datetime import date, timedelta
 import time
 import unittest
 from unittest.mock import patch
@@ -24,6 +25,16 @@ from app.models.student import StudentModel
 from app.models.subject_registration import SubjectRegistrationModel
 from app.models.document import DocumentModel
 from app.domain.document.enum import DocumentType
+
+
+today = date.today() + timedelta(days=365)
+mockData = {
+    "title": "Data mock",
+    "start_at": f"{today.year}-01-01",
+    "subdivision": "Kinh thánh",
+    "code": "Y10.1",
+    "question_url": "abc.com",
+}
 
 
 class TestSubjectApi(unittest.TestCase):
@@ -160,6 +171,7 @@ class TestSubjectApi(unittest.TestCase):
     def tearDownClass(cls):
         disconnect()
 
+    @pytest.mark.order(2)
     def test_create_subject(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user2.email)
@@ -227,11 +239,11 @@ class TestSubjectApi(unittest.TestCase):
             r = self.client.post(
                 "/api/v1/subjects",
                 json={
-                    "title": "Học hỏi",
-                    "start_at": "2024-03-26",
-                    "subdivision": "Kinh thánh",
-                    "code": "Y10.1",
-                    "question_url": "abc.com",
+                    "title": mockData["title"],
+                    "start_at": mockData["start_at"],
+                    "subdivision": mockData["subdivision"],
+                    "code": mockData["code"],
+                    "question_url": mockData["question_url"],
                     "zoom": {"meeting_id": 912424124, "pass_code": "123456", "link": "xyz.com"},
                     "documents_url": ["123.com"],
                     "lecturer": str(self.lecturer.id),
@@ -241,9 +253,9 @@ class TestSubjectApi(unittest.TestCase):
                     "Authorization": "Bearer {}".format("xxx"),
                 },
             )
-            assert r.status_code == 200
             resp = r.json()
-            assert resp["title"] == "Học hỏi"
+            assert r.status_code == 200
+            assert resp["title"] == mockData["title"]
             assert resp["lecturer"]["full_name"] == self.lecturer.full_name
             assert "attachments" in resp
             assert "abstract" in resp
@@ -314,7 +326,7 @@ class TestSubjectApi(unittest.TestCase):
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 
-    @pytest.mark.order("first")
+    @pytest.mark.order(1)
     def test_delete_subject_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user2.email)
@@ -395,3 +407,18 @@ class TestSubjectApi(unittest.TestCase):
 
             assert resp[0]["lecturer"]["full_name"] == self.subject.lecturer.full_name
             assert resp[0]["attachments"][0]["name"] == self.subject.attachments[0].name
+
+    def test_get_next_most_recent(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user1.email)
+            r = self.client.get(
+                "/api/v1/subjects/next-most-recent",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+
+            resp = r.json()
+            print(resp)
+            assert r.status_code == 200
+            assert resp["title"] == mockData["title"]
