@@ -22,7 +22,7 @@ def close_form_evaluation_task():
         )
         if isinstance(subjects, list) and len(subjects) > 0:
             subject_repository.bulk_update(
-                data={"status": StatusSubjectEnum.COMPLETED, "updated_at": datetime.now(timezone.utc)},
+                data={"status": StatusSubjectEnum.CLOSE_EVALUATION, "updated_at": datetime.now(timezone.utc)},
                 entities=subjects,
             )
 

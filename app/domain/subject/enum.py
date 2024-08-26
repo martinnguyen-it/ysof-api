@@ -5,4 +5,5 @@ class StatusSubjectEnum(str, ExtendedEnum):
     INIT = "init"
     SENT_STUDENT = "sent_student"
     SENT_EVALUATION = "sent_evaluation"
+    CLOSE_EVALUATION = "close_evaluation"
     COMPLETED = "completed"

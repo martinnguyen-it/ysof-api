@@ -78,11 +78,12 @@ def get_subject_last_sent_evaluation(
     response_model=Subject,
 )
 @response_decorator()
-def get_subject_notification(
+def send_subject_notification(
     subject_id: str = Path(..., title="Subject id"),
     current_admin: AdminModel = Depends(get_current_active_admin),
     subject_send_notification_use_case: SubjectSendNotificationUseCase = Depends(SubjectSendNotificationUseCase),
 ):
+    authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV])
     subject_send_notification_request_object = SubjectSendNotificationRequestObject.builder(
         subject_id=subject_id, current_admin=current_admin
     )
@@ -100,6 +101,7 @@ def get_subject_evaluation(
     current_admin: AdminModel = Depends(get_current_active_admin),
     subject_send_evaluation_use_case: SubjectSendEvaluationUseCase = Depends(SubjectSendEvaluationUseCase),
 ):
+    authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV])
     subject_send_evaluation_request_object = SubjectSendEvaluationRequestObject.builder(
         subject_id=subject_id, current_admin=current_admin
     )

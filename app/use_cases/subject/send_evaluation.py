@@ -82,7 +82,7 @@ class SubjectSendEvaluationUseCase(use_case.UseCase):
         self.background_tasks.add_task(
             self.audit_log_repository.create,
             AuditLogInDB(
-                type=AuditLogType.CREATE,
+                type=AuditLogType.OTHER,
                 endpoint=Endpoint.SUBJECT,
                 season=current_season,
                 author=req_object.current_admin,

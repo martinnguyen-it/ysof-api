@@ -6,6 +6,7 @@ class AuditLogType(str, ExtendedEnum):
     UPDATE = "update"
     CREATE = "create"
     IMPORT = "import"
+    OTHER = "other"
 
 
 class Endpoint(str, ExtendedEnum):

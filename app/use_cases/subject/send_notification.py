@@ -26,8 +26,8 @@ class SubjectSendNotificationRequestObject(request_object.ValidRequestObject):
     @classmethod
     def builder(cls, subject_id: str, current_admin: AdminModel) -> request_object.RequestObject:
         invalid_req = request_object.InvalidRequestObject()
-        if not id:
-            invalid_req.add_error("id", "Invalid")
+        if not subject_id:
+            invalid_req.add_error("subject_id", "Invalid")
 
         if invalid_req.has_errors():
             return invalid_req
@@ -56,6 +56,10 @@ class SubjectSendNotificationUseCase(use_case.UseCase):
 
         if not subject:
             return response_object.ResponseFailure.build_not_found_error(message="Môn học không tồn tại")
+
+        if not subject.zoom.link or not subject.zoom.meeting_id or not subject.zoom.pass_code:
+            return response_object.ResponseFailure.build_parameters_error(message="Môn học chưa có thông tin zoom.")
+
         res = self.subject_repository.update(
             subject.id, data=SubjectInUpdateTime(status=StatusSubjectEnum.SENT_STUDENT)
         )
@@ -82,7 +86,7 @@ class SubjectSendNotificationUseCase(use_case.UseCase):
         self.background_tasks.add_task(
             self.audit_log_repository.create,
             AuditLogInDB(
-                type=AuditLogType.CREATE,
+                type=AuditLogType.OTHER,
                 endpoint=Endpoint.SUBJECT,
                 season=current_season,
                 author=req_object.current_admin,

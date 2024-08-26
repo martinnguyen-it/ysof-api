@@ -25,19 +25,32 @@ from app.models.student import StudentModel
 from app.models.subject_registration import SubjectRegistrationModel
 from app.models.document import DocumentModel
 from app.domain.document.enum import DocumentType
+from app.models.manage_form import ManageFormModel
+from app.domain.manage_form.enum import FormStatus, FormType
+from app.domain.subject.enum import StatusSubjectEnum
 
 
-today = date.today() + timedelta(days=365)
-mockData = {
+today = date.today()
+mock_data_most_recent = {
     "title": "Data mock",
-    "start_at": f"{today.year}-01-01",
+    "start_at": f"{(today+timedelta(days=365)).year}-01-01",
     "subdivision": "Kinh thánh",
     "code": "Y10.1",
     "question_url": "abc.com",
 }
 
+mock_data_send_notification = {
+    "title": "Data mock",
+    "start_at": f"{(today-timedelta(days=365)).year}-01-01",
+    "subdivision": "Kinh thánh",
+    "code": "Y10.2",
+    "question_url": "abc.com",
+}
+
 
 class TestSubjectApi(unittest.TestCase):
+    id_subject_send_notification = ""
+
     @classmethod
     def setUpClass(cls):
         disconnect()
@@ -239,11 +252,32 @@ class TestSubjectApi(unittest.TestCase):
             r = self.client.post(
                 "/api/v1/subjects",
                 json={
-                    "title": mockData["title"],
-                    "start_at": mockData["start_at"],
-                    "subdivision": mockData["subdivision"],
-                    "code": mockData["code"],
-                    "question_url": mockData["question_url"],
+                    "title": mock_data_send_notification["title"],
+                    "start_at": mock_data_send_notification["start_at"],
+                    "subdivision": mock_data_send_notification["subdivision"],
+                    "code": mock_data_send_notification["code"],
+                    "question_url": mock_data_send_notification["question_url"],
+                    "zoom": {"meeting_id": 912424124, "pass_code": "123456", "link": "xyz.com"},
+                    "documents_url": ["123.com"],
+                    "lecturer": str(self.lecturer.id),
+                    "attachments": [str(self.document.id)],
+                },
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            resp = r.json()
+            TestSubjectApi.id_subject_send_notification = resp["id"]
+            assert r.status_code == 200
+
+            r = self.client.post(
+                "/api/v1/subjects",
+                json={
+                    "title": mock_data_most_recent["title"],
+                    "start_at": mock_data_most_recent["start_at"],
+                    "subdivision": mock_data_most_recent["subdivision"],
+                    "code": mock_data_most_recent["code"],
+                    "question_url": mock_data_most_recent["question_url"],
                     "zoom": {"meeting_id": 912424124, "pass_code": "123456", "link": "xyz.com"},
                     "documents_url": ["123.com"],
                     "lecturer": str(self.lecturer.id),
@@ -255,7 +289,7 @@ class TestSubjectApi(unittest.TestCase):
             )
             resp = r.json()
             assert r.status_code == 200
-            assert resp["title"] == mockData["title"]
+            assert resp["title"] == mock_data_most_recent["title"]
             assert resp["lecturer"]["full_name"] == self.lecturer.full_name
             assert "attachments" in resp
             assert "abstract" in resp
@@ -264,7 +298,7 @@ class TestSubjectApi(unittest.TestCase):
             time.sleep(1)
             cursor = AuditLogModel._get_collection().find({"type": AuditLogType.CREATE, "endpoint": Endpoint.SUBJECT})
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
-            assert len(audit_logs) == 1
+            assert len(audit_logs) == 2
 
     def test_get_all_subjects(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
@@ -278,11 +312,11 @@ class TestSubjectApi(unittest.TestCase):
             assert r.status_code == 200
             resp = r.json()
             """_summary_
-                len(resp) == 2
-                Because mock 3 subjects, but one subject is season 2, one subject deleted
+                len(resp) == 3
+                Because mock 3 subjects, but one subject is season 2, one subject deleted and api add subject called 2 times success.
                 Default get list subject is current season
             """
-            assert len(resp) == 2
+            assert len(resp) == 3
 
     def test_get_subject_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
@@ -419,6 +453,34 @@ class TestSubjectApi(unittest.TestCase):
             )
 
             resp = r.json()
-            print(resp)
             assert r.status_code == 200
-            assert resp["title"] == mockData["title"]
+            assert resp["title"] == mock_data_most_recent["title"]
+
+    @pytest.mark.order(3)
+    def test_send_notification_subject(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
+            "app.infra.tasks.email.send_email_notification_subject_task.delay"
+        ):
+            mock_token.return_value = TokenData(email=self.user1.email)
+            r = self.client.post(
+                f"/api/v1/subjects/send-notification/{self.id_subject_send_notification}",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+
+            assert r.status_code == 200
+
+            subject: SubjectModel = SubjectModel.objects(id=self.id_subject_send_notification).get()
+            assert subject.status == StatusSubjectEnum.SENT_STUDENT
+
+            time.sleep(1)
+            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.OTHER, "endpoint": Endpoint.SUBJECT})
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 1
+
+            cursor = ManageFormModel._get_collection().find({"type": FormType.SUBJECT_EVALUATION})
+            forms = [ManageFormModel.from_mongo(doc) for doc in cursor] if cursor else []
+            assert len(forms) == 1
+            assert forms[0].status == FormStatus.INACTIVE
+            assert forms[0].data["subject_id"] == self.id_subject_send_notification
