@@ -472,7 +472,7 @@ class TestSubjectApi(unittest.TestCase):
             assert r.status_code == 200
 
             subject: SubjectModel = SubjectModel.objects(id=self.id_subject_send_notification).get()
-            assert subject.status == StatusSubjectEnum.SENT_STUDENT
+            assert subject.status == StatusSubjectEnum.SENT_NOTIFICATION
 
             time.sleep(1)
             cursor = AuditLogModel._get_collection().find({"type": AuditLogType.OTHER, "endpoint": Endpoint.SUBJECT})
@@ -484,3 +484,26 @@ class TestSubjectApi(unittest.TestCase):
             assert len(forms) == 1
             assert forms[0].status == FormStatus.INACTIVE
             assert forms[0].data["subject_id"] == self.id_subject_send_notification
+
+    @pytest.mark.order(4)
+    def test_get_last_sent_notification(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
+            "app.infra.tasks.email.send_email_notification_subject_task.delay"
+        ):
+            mock_token.return_value = TokenData(email=self.user1.email)
+            r = self.client.get(
+                "/api/v1/subjects/last-sent-student",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+
+            assert r.status_code == 200
+            resp = r.json()
+
+            subject: SubjectModel = SubjectModel.objects(id=self.id_subject_send_notification).get()
+            assert subject.status == StatusSubjectEnum.SENT_NOTIFICATION
+
+            assert resp["title"] == subject.title
+            assert resp["start_at"] == str(subject.start_at)
+            assert resp["code"] == subject.code

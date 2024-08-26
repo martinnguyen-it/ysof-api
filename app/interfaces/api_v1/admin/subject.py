@@ -22,7 +22,7 @@ from app.use_cases.subject.delete import DeleteSubjectRequestObject, DeleteSubje
 from app.domain.subject.enum import StatusSubjectEnum
 from app.use_cases.subject.get_next_most_recent import GetSubjectNextMostRecentUseCase
 from app.use_cases.subject.get_last_sent_evaluation import GetSubjectLastSentEvaluationUseCase
-from app.use_cases.subject.get_last_sent_student import GetSubjectLastSentStudentUseCase
+from app.use_cases.subject.get_last_sent_notification import GetSubjectLastSentNotificationUseCase
 from app.use_cases.subject.send_notification import SubjectSendNotificationRequestObject, SubjectSendNotificationUseCase
 from app.use_cases.subject.send_evaluation import SubjectSendEvaluationRequestObject, SubjectSendEvaluationUseCase
 from app.use_cases.subject.list_short import ListSubjectsShortRequestObject, ListSubjectsShortUseCase
@@ -49,12 +49,12 @@ def get_subject_next_most_recent(
     response_model=Subject,
 )
 @response_decorator()
-def get_subject_last_sent_student(
-    get_subject_last_sent_student_use_case: GetSubjectLastSentStudentUseCase = Depends(
-        GetSubjectLastSentStudentUseCase
+def get_subject_last_sent_notification(
+    get_subject_last_sent_notification_use_case: GetSubjectLastSentNotificationUseCase = Depends(
+        GetSubjectLastSentNotificationUseCase
     ),
 ):
-    response = get_subject_last_sent_student_use_case.process_request()
+    response = get_subject_last_sent_notification_use_case.process_request()
     return response
 
 

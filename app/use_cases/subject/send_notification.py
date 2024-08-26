@@ -61,7 +61,7 @@ class SubjectSendNotificationUseCase(use_case.UseCase):
             return response_object.ResponseFailure.build_parameters_error(message="Môn học chưa có thông tin zoom.")
 
         res = self.subject_repository.update(
-            subject.id, data=SubjectInUpdateTime(status=StatusSubjectEnum.SENT_STUDENT)
+            subject.id, data=SubjectInUpdateTime(status=StatusSubjectEnum.SENT_NOTIFICATION)
         )
 
         if manage_form:

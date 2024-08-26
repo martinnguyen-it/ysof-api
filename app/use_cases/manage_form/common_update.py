@@ -68,7 +68,7 @@ class UpdateManageFormCommonUseCase(use_case.UseCase):
                         self.subject_repository.update(
                             id=subject.id,
                             data={
-                                "status": StatusSubjectEnum.SENT_STUDENT,
+                                "status": StatusSubjectEnum.SENT_NOTIFICATION,
                                 "updated_at": datetime.now(timezone.utc),
                             },
                         )
@@ -126,7 +126,7 @@ class UpdateManageFormCommonUseCase(use_case.UseCase):
                         self.subject_repository.update(
                             id=subject.id,
                             data={
-                                "status": StatusSubjectEnum.SENT_STUDENT,
+                                "status": StatusSubjectEnum.SENT_NOTIFICATION,
                                 "updated_at": datetime.now(timezone.utc),
                             },
                         )

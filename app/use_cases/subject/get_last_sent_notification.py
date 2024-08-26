@@ -11,7 +11,7 @@ from app.shared.utils.general import get_current_season_value
 from app.domain.subject.enum import StatusSubjectEnum
 
 
-class GetSubjectLastSentStudentUseCase(use_case.UseCase):
+class GetSubjectLastSentNotificationUseCase(use_case.UseCase):
     def __init__(self, subject_repository: SubjectRepository = Depends(SubjectRepository)):
         self.subject_repository = subject_repository
 
@@ -20,7 +20,7 @@ class GetSubjectLastSentStudentUseCase(use_case.UseCase):
         subjects: list[SubjectModel] = self.subject_repository.list(
             match_pipeline={
                 "start_at": {"$lte": datetime.now()},
-                "status": StatusSubjectEnum.SENT_STUDENT,
+                "status": StatusSubjectEnum.SENT_NOTIFICATION,
                 "season": current_season,
             },
             sort={"start_at": -1},
