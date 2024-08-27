@@ -30,18 +30,20 @@ class GetGeneralTaskCase(use_case.UseCase):
 
     def process_request(self, req_object: GetGeneralTaskRequestObject):
         general_task: Optional[GeneralTaskModel] = self.general_task_repository.get_by_id(
-            general_task_id=req_object.general_task_id)
+            general_task_id=req_object.general_task_id
+        )
         if not general_task:
             return response_object.ResponseFailure.build_not_found_error(message="Công việc không tồn tại")
 
         author: AdminInDB = AdminInDB.model_validate(general_task.author)
         return GeneralTask(
             **GeneralTaskInDB.model_validate(general_task).model_dump(exclude=({"author", "attachments"})),
-            author=AdminInGeneralTask(
-                **author.model_dump(), active=author.active()),
-            attachments=[Document(**DocumentInDB.model_validate(doc).model_dump(exclude=({"author"})),
-                                  author=AdminInDocument(
-                                      **AdminInDB.model_validate(doc.author).model_dump(),
-                                  active=author.active()))
-                         for doc in general_task.attachments]
+            author=AdminInGeneralTask(**author.model_dump(), active=author.active()),
+            attachments=[
+                Document(
+                    **DocumentInDB.model_validate(doc).model_dump(exclude=({"author"})),
+                    author=AdminInDocument(**AdminInDB.model_validate(doc.author).model_dump(), active=author.active()),
+                )
+                for doc in general_task.attachments
+            ],
         )

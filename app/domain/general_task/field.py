@@ -8,9 +8,9 @@ from app.models.general_task import GeneralTaskModel
 class _PydanticGeneralTaskType(GeneralTaskModel):
     @classmethod
     def __get_pydantic_core_schema__(
-            cls,
-            _source_type: Any,
-            _handler: Callable[[Any], core_schema.CoreSchema],
+        cls,
+        _source_type: Any,
+        _handler: Callable[[Any], core_schema.CoreSchema],
     ) -> core_schema.CoreSchema:
         return core_schema.union_schema(
             [

@@ -315,7 +315,7 @@ class TestSubjectApi(unittest.TestCase):
                 len(resp) == 3
                 Because mock 3 subjects, but one subject is season 2, one subject deleted and api add subject called 2 times success.
                 Default get list subject is current season
-            """
+            """  # noqa: E501
             assert len(resp) == 3
 
     def test_get_subject_by_id(self):

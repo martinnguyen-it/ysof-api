@@ -1,4 +1,5 @@
 """base use case class module"""
+
 import traceback
 from fastapi import HTTPException
 from app.shared import response_object as res, request_object as req

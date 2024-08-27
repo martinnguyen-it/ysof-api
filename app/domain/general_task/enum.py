@@ -9,6 +9,7 @@ class GeneralTaskType(str, ExtendedEnum):
         common: Just only each admin in current season can access /
         internal: Just only each admin in current season and belong same department can access
     """
+
     ANNUAL = "annual"
     COMMON = "common"
     INTERNAL = "internal"

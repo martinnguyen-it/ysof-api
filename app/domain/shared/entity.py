@@ -18,8 +18,7 @@ class BaseEntity(BaseModel):
         """We must convert _id into "id"."""
         if not data:
             return data
-        id = data.pop("_id", None) if not id_str else str(
-            data.pop("_id", None))
+        id = data.pop("_id", None) if not id_str else str(data.pop("_id", None))
         return cls(**dict(data, id=id))
 
     def to_mongo(self, **kwargs):
@@ -71,18 +70,17 @@ class SearchRequest(BaseModel):
 class CustomDocument:
     @classmethod
     def from_mongo(cls, data: dict, id_str=False):
-        """We must convert _id into "id". """
+        """We must convert _id into "id"."""
         if not data:
             return data
-        id = data.pop("_id", None) if not id_str else str(
-            data.pop("_id", None))
+        id = data.pop("_id", None) if not id_str else str(data.pop("_id", None))
         if "_cls" in data:
             data.pop("_cls", None)
         return cls(**dict(data, id=id))
 
 
 class PayloadWithFile:
-    @model_validator(mode='before')
+    @model_validator(mode="before")
     @classmethod
     def validate_to_json(cls, value):
         if isinstance(value, str):

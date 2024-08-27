@@ -28,11 +28,12 @@ class GetDocumentCase(use_case.UseCase):
         self.document_repository = document_repository
 
     def process_request(self, req_object: GetDocumentRequestObject):
-        document: Optional[DocumentModel] = self.document_repository.get_by_id(
-            document_id=req_object.document_id)
+        document: Optional[DocumentModel] = self.document_repository.get_by_id(document_id=req_object.document_id)
         if not document:
             return response_object.ResponseFailure.build_not_found_error(message="Tài liệu không tồn tại")
 
         author: AdminInDB = AdminInDB.model_validate(document.author)
-        return Document(**DocumentInDB.model_validate(document).model_dump(exclude=({"author"})),
-                        author=AdminInDocument(**author.model_dump(), active=author.active()))
+        return Document(
+            **DocumentInDB.model_validate(document).model_dump(exclude=({"author"})),
+            author=AdminInDocument(**author.model_dump(), active=author.active()),
+        )

@@ -23,14 +23,11 @@ class DeleteSeasonRequestObject(request_object.ValidRequestObject):
 
 
 class DeleteSeasonUseCase(use_case.UseCase):
-    def __init__(self,
-                 season_repository: SeasonRepository = Depends(
-                     SeasonRepository)):
+    def __init__(self, season_repository: SeasonRepository = Depends(SeasonRepository)):
         self.season_repository = season_repository
 
     def process_request(self, req_object: DeleteSeasonRequestObject):
-        season: Optional[SeasonModel] = self.season_repository.get_by_id(
-            req_object.id)
+        season: Optional[SeasonModel] = self.season_repository.get_by_id(req_object.id)
         if not season:
             return response_object.ResponseFailure.build_not_found_error("Năm học không tồn tại")
         if season.is_current is True:
