@@ -318,6 +318,22 @@ class TestSubjectApi(unittest.TestCase):
             """  # noqa: E501
             assert len(resp) == 3
 
+    def test_get_all_subjects_short(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.get(
+                "/api/v1/subjects/list-short",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            resp = r.json()
+            assert len(resp) == 3
+            assert "id" in resp[0]
+            assert "code" in resp[0]
+            assert "title" in resp[0]
+
     def test_get_subject_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user2.email)

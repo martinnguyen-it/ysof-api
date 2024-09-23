@@ -53,14 +53,14 @@ async def application_level_exception_handler(request: Request, exc: Application
 
 
 # Set all CORS enabled origins
-# if settings.BACKEND_CORS_ORIGINS:
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+if settings.BACKEND_CORS_ORIGINS:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[str(origin).strip("/") for origin in settings.BACKEND_CORS_ORIGINS],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 # set app router
 app.include_router(api_router, prefix=settings.API_V1_STR)
