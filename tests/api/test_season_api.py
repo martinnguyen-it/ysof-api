@@ -29,7 +29,7 @@ class TestSeasonApi(unittest.TestCase):
             ],
             holy_name="Martin",
             phone_number=["0123456789"],
-            current_season=3,
+            latest_season=3,
             seasons=[3],
             email="user@example.com",
             full_name="Nguyen Thanh Tam",
@@ -42,7 +42,7 @@ class TestSeasonApi(unittest.TestCase):
             ],
             holy_name="Martin",
             phone_number=["0123456789"],
-            current_season=3,
+            latest_season=3,
             seasons=[3],
             email="user2@example.com",
             full_name="Nguyen Thanh Tam",
@@ -101,7 +101,7 @@ class TestSeasonApi(unittest.TestCase):
         doc: SeasonModel = SeasonModel.objects(id=r.json().get("id")).get()
         assert doc.title == self.season.title
 
-    def test_get_current_season(self):
+    def test_get_latest_season(self):
         r = self.client.get(
             "/api/v1/seasons/current",
         )
@@ -123,7 +123,7 @@ class TestSeasonApi(unittest.TestCase):
             doc: SeasonModel = SeasonModel.objects(id=r.json().get("id")).get()
             assert doc.title == "Updated"
 
-    def test_mark_current_season_by_id(self):
+    def test_mark_latest_season_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user.email)
             r = self.client.put(

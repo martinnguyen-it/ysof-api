@@ -22,7 +22,7 @@ class TestAuthAdminStudentApi(unittest.TestCase):
             status="active",
             holy_name="Martin",
             phone_number="0123456789",
-            current_season=3,
+            latest_season=3,
             email="student@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),

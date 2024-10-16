@@ -54,12 +54,12 @@ class CreateAdminUseCase(use_case.UseCase):
 
         current_season = get_current_season_value()
         if existing_admin:
-            if existing_admin.current_season == current_season:
+            if existing_admin.latest_season == current_season:
                 return response_object.ResponseFailure.build_parameters_error(message="Email này đã tồn tại")
             seasons = [*existing_admin.seasons, current_season]
             self.admin_repository.update(
                 id=existing_admin.id,
-                data=AdminInUpdateTime(current_season=current_season, seasons=seasons, roles=admin_in.roles),
+                data=AdminInUpdateTime(latest_season=current_season, seasons=seasons, roles=admin_in.roles),
             )
             existing_admin.reload()
             return Admin(**AdminInDB.model_validate(existing_admin).model_dump())
@@ -69,7 +69,7 @@ class CreateAdminUseCase(use_case.UseCase):
         obj_in: AdminInDB = AdminInDB(
             **admin_in.model_dump(exclude={"password"}),
             password=get_password_hash(password),
-            current_season=current_season,
+            latest_season=current_season,
             seasons=[current_season],
         )
         admin_in_db: AdminInDB = self.admin_repository.create(admin=obj_in)

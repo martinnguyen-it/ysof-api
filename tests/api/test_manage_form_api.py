@@ -39,7 +39,7 @@ class TestManageFormApi(unittest.TestCase):
             ],
             holy_name="Martin",
             phone_number=["0123456789"],
-            current_season=3,
+            latest_season=3,
             seasons=[3],
             email="user@example.com",
             full_name="Nguyen Thanh Tam",
@@ -123,7 +123,8 @@ class TestManageFormApi(unittest.TestCase):
                     "Authorization": "Bearer {}".format("xxx"),
                 },
             )
-            assert r.status_code == 422  # cause init form evaluation or absent must have data.subject_id in payload
+            # cause init form evaluation or absent must have data.subject_id in payload
+            assert r.status_code == 422
 
             r = self.client.post(
                 "/api/v1/manage-form",

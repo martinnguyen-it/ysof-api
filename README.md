@@ -4,7 +4,7 @@
 
 ```
 cd current directory
-virtualenv .venv --python=python3.10
+virtualenv .venv --python=python3.10 or python3.10 -m venv .venv
 ```
 
 ## Install packages

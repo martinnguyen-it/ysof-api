@@ -44,7 +44,7 @@ class ListSubjectsStudentUseCase(use_case.UseCase):
         self.subject_repository = subject_repository
 
     def process_request(self, req_object: ListSubjectsStudentRequestObject):
-        match_pipeline = {"season": req_object.current_student.current_season}
+        match_pipeline = {"season": req_object.current_student.latest_season}
 
         if isinstance(req_object.search, str):
             match_pipeline = {

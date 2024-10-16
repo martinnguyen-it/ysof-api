@@ -35,7 +35,7 @@ class StudentInDB(IDModelMixin, DateTimeModelMixin, StudentBase):
     # https://docs.pydantic.dev/2.4/concepts/models/#arbitrary-class-instances
     model_config = ConfigDict(from_attributes=True)
     status: AccountStatus = AccountStatus.ACTIVE
-    current_season: int
+    latest_season: int
     password: str
 
     _convert_valid_date = field_validator("date_of_birth", mode="before")(convert_valid_date)
@@ -54,7 +54,7 @@ class StudentInDB(IDModelMixin, DateTimeModelMixin, StudentBase):
         Returns:
             _type_: bool
         """
-        return not self.disabled() and self.current_season == get_current_season_value()
+        return not self.disabled() and self.latest_season == get_current_season_value()
 
 
 class StudentInCreate(StudentBase):
@@ -69,7 +69,7 @@ class Student(StudentBase, DateTimeModelMixin):
 
     id: str
     status: AccountStatus = AccountStatus.ACTIVE
-    current_season: int
+    latest_season: int
 
 
 class ManyStudentsInResponse(BaseEntity):

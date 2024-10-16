@@ -22,7 +22,7 @@ class StudentModel(Document):
 
     note = StringField()
 
-    current_season = IntField(required=True)
+    latest_season = IntField(required=True)
     status = StringField(required=True)
     created_at = DateTimeField()
     updated_at = DateTimeField()

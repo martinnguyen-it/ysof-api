@@ -23,7 +23,7 @@ class TestAuthAdminApi(unittest.TestCase):
             ],
             holy_name="Martin",
             phone_number=["0123456789"],
-            current_season=3,
+            latest_season=3,
             seasons=[3],
             email="user@example.com",
             full_name="Nguyen Thanh Tam",

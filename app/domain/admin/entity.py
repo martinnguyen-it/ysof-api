@@ -24,7 +24,7 @@ class AdminBase(BaseEntity):
     address: Optional[Address] = None
     date_of_birth: Optional[date] = None
     facebook: Optional[str] = None
-    current_season: int | None = None
+    latest_season: int | None = None
     seasons: list[int] | None = None
     avatar: Optional[str] = None
     _convert_valid_date = field_validator("date_of_birth", mode="before")(convert_valid_date)
@@ -51,7 +51,7 @@ class AdminInDB(IDModelMixin, DateTimeModelMixin, AdminBase):
             _type_: bool
         """
         return AdminRole.ADMIN in self.roles or (
-            (not self.disabled()) and self.current_season == get_current_season_value()
+            (not self.disabled()) and self.latest_season == get_current_season_value()
         )
 
 

@@ -69,7 +69,7 @@ class CreateStudentUseCase(use_case.UseCase):
         obj_in: StudentInDB = StudentInDB(
             **req_object.student_in.model_dump(),
             password=get_password_hash(password),
-            current_season=current_season,
+            latest_season=current_season,
         )
 
         try:

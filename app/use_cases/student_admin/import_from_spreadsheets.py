@@ -105,11 +105,18 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
                 student_in_db = StudentInDB(
                     **data,
                     password=get_password_hash(password),
-                    current_season=current_season,
+                    latest_season=current_season,
                 )
 
                 exist_std: StudentModel | None = self.student_repository.find_one(
-                    {"numerical_order": student_in_db.numerical_order}
+                    {
+                        "$or": [
+                            {
+                                "numerical_order": student_in_db.numerical_order,
+                            },
+                            {"email": student_in_db.email, "latest_season": current_season},
+                        ]
+                    }
                 )
                 if exist_std:
                     raise NotUniqueError

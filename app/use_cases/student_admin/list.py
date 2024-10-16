@@ -62,7 +62,7 @@ class ListStudentsUseCase(use_case.UseCase):
     def process_request(self, req_object: ListStudentsRequestObject):
         current_season = get_current_season_value()
 
-        match_pipeline: Optional[Dict[str, Any]] = {"current_season": current_season}
+        match_pipeline: Optional[Dict[str, Any]] = {"latest_season": current_season}
 
         if isinstance(req_object.search, str):
             num = None

@@ -29,7 +29,7 @@ class AdminModel(Document):
     address = EmbeddedDocumentField(Address)
     date_of_birth = DateField()
     facebook = StringField()
-    current_season = IntField()
+    latest_season = IntField()
     seasons = ListField(IntField())
 
     avatar = StringField()
@@ -54,7 +54,7 @@ class AdminModel(Document):
 
     meta = {
         "collection": "Admins",
-        "indexes": [{"fields": ["email"], "unique": True}, "status", "current_season", "full_name", "holy_name"],
+        "indexes": [{"fields": ["email"], "unique": True}, "status", "latest_season", "full_name", "holy_name"],
         "allow_inheritance": True,
         "index_cls": False,
     }

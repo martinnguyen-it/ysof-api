@@ -1,7 +1,7 @@
-# Run worker and beat
-# celery -A celery_worker worker -B --loglevel=INFO
+# Run worker and beat // Don't run on Windows
+celery -A celery_worker worker -B --loglevel=INFO
 
 
-celery -A celery_worker worker --loglevel=INFO
-
-celery -A celery_worker beat --loglevel=INFO
+# On windows,run two commands below
+# celery -A celery_worker worker --loglevel=INFO
+# celery -A celery_worker beat --loglevel=INFO

@@ -20,7 +20,7 @@ mongosh -- "$MONGODB_DATABASE" <<EOF
         "password": "\$2b\$12\$bFmH3NeboT6MMMVnFEKxmOUJwDtwxTARykY5bjZLpvQU1M1E1qnhu",
         "created_at": new Date(),
         "updated_at": new Date(),
-        "current_season": 1,
+        "latest_season": 1,
         "seasons": [1]
     });
 EOF

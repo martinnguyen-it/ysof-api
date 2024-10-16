@@ -81,7 +81,7 @@ class ListAdminsUseCase(use_case.UseCase):
             match_pipeline = {
                 **match_pipeline,
                 "seasons": (
-                    req_object.current_admin.current_season
+                    req_object.current_admin.latest_season
                     if AdminRole.ADMIN not in req_object.current_admin.roles
                     else current_season
                 ),

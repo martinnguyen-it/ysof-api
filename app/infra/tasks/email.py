@@ -37,7 +37,7 @@ def send_email_notification_subject_task(subject_id: str):
         subject_registration_repository = SubjectRegistrationRepository()
 
         current_season = get_current_season_value()
-        admins: list[AdminModel] = admin_repository.list(match_pipeline={"current_season": current_season})
+        admins: list[AdminModel] = admin_repository.list(match_pipeline={"latest_season": current_season})
         emails_admin = [admin.email for admin in admins]
 
         subject = subject_repository.get_by_id(subject_id)
@@ -102,7 +102,7 @@ def send_student_evaluation_subject_task(subject_id: str):
         subject_registration_repository = SubjectRegistrationRepository()
 
         current_season = get_current_season_value()
-        admins: list[AdminModel] = admin_repository.list(match_pipeline={"current_season": current_season})
+        admins: list[AdminModel] = admin_repository.list(match_pipeline={"latest_season": current_season})
         emails_admin = [admin.email for admin in admins]
 
         subject = subject_repository.get_by_id(subject_id)

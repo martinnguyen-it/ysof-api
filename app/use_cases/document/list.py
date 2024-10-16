@@ -77,7 +77,7 @@ class ListDocumentsUseCase(use_case.UseCase):
         if req_object.type != DocumentType.STUDENT:
             if (
                 (is_super_admin and req_object.season != 0)
-                or (isinstance(req_object.season, int) and req_object.season <= req_object.current_admin.current_season)
+                or (isinstance(req_object.season, int) and req_object.season <= req_object.current_admin.latest_season)
                 or req_object.season is None
             ):
                 if isinstance(req_object.type, str):
@@ -93,9 +93,9 @@ class ListDocumentsUseCase(use_case.UseCase):
                                         "$lte": (
                                             req_object.season
                                             if req_object.season
-                                            and req_object.season <= req_object.current_admin.current_season
+                                            and req_object.season <= req_object.current_admin.latest_season
                                             else (
-                                                req_object.current_admin.current_season
+                                                req_object.current_admin.latest_season
                                                 if AdminRole.ADMIN not in req_object.current_admin.roles
                                                 else current_season
                                             )
@@ -119,7 +119,7 @@ class ListDocumentsUseCase(use_case.UseCase):
                                                     {
                                                         "season": {
                                                             "$lte": (
-                                                                req_object.current_admin.current_season
+                                                                req_object.current_admin.latest_season
                                                                 if AdminRole.ADMIN not in req_object.current_admin.roles
                                                                 else current_season
                                                             )
@@ -134,7 +134,7 @@ class ListDocumentsUseCase(use_case.UseCase):
                                     "season": (
                                         req_object.season
                                         if req_object.season
-                                        else req_object.current_admin.current_season
+                                        else req_object.current_admin.latest_season
                                     )
                                 },
                             ]
@@ -153,13 +153,13 @@ class ListDocumentsUseCase(use_case.UseCase):
             match_pipeline = {**match_pipeline, "type": req_object.type}
             if (
                 (is_super_admin and req_object.season != 0)
-                or (isinstance(req_object.season, int) and req_object.season <= req_object.current_admin.current_season)
+                or (isinstance(req_object.season, int) and req_object.season <= req_object.current_admin.latest_season)
                 or req_object.season is None
             ):
                 match_pipeline = {
                     **match_pipeline,
                     "season": (
-                        req_object.current_admin.current_season
+                        req_object.current_admin.latest_season
                         if AdminRole.ADMIN not in req_object.current_admin.roles
                         else current_season
                     ),
