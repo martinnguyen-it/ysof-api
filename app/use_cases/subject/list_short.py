@@ -56,7 +56,7 @@ class ListSubjectsShortUseCase(use_case.UseCase):
         if (
             isinstance(req_object.season, int)
             and (
-                req_object.season <= req_object.current_admin.current_season
+                req_object.season <= req_object.current_admin.latest_season
                 or AdminRole.ADMIN in req_object.current_admin.roles
             )
         ) or req_object.season is None:
