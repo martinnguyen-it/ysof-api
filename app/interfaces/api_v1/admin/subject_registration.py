@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from typing import Annotated
+from fastapi import APIRouter, Depends, Query
 
 from app.shared.decorator import response_decorator
 from app.domain.subject.entity import ListSubjectRegistrationInResponse, StudentInSubject
@@ -16,12 +17,18 @@ from app.infra.security.security_service import get_current_active_admin
 router = APIRouter()
 
 
-@router.get("", response_model=ListSubjectRegistrationInResponse, dependencies=[Depends(get_current_active_admin)])
+@router.get(
+    "",
+    response_model=ListSubjectRegistrationInResponse,
+    dependencies=[Depends(get_current_active_admin)],
+)
 @response_decorator()
 def get_subject_registration(
-    list_subject_registration_use_case: ListSubjectRegistrationsUseCase = Depends(ListSubjectRegistrationsUseCase),
+    list_subject_registration_use_case: ListSubjectRegistrationsUseCase = Depends(
+        ListSubjectRegistrationsUseCase
+    ),
     page_index: int = 1,
-    page_size: int = 300,
+    page_size: Annotated[int, Query(title="Page size", le=500)] = 300,
     search: str | None = None,
     group: int | None = None,
     sort: Sort = Sort.ASCE,

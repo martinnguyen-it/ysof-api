@@ -9,7 +9,11 @@ from app.domain.admin.entity import (
     ManyAdminsInResponse,
 )
 from app.domain.shared.enum import Sort
-from app.infra.security.security_service import authorization, get_current_active_admin, get_current_admin
+from app.infra.security.security_service import (
+    authorization,
+    get_current_active_admin,
+    get_current_admin,
+)
 from app.shared.decorator import response_decorator
 from app.use_cases.admin.list import ListAdminsUseCase, ListAdminsRequestObject
 from app.use_cases.admin.update import UpdateAdminUseCase, UpdateAdminRequestObject
@@ -78,7 +82,7 @@ def create_admin(
 def get_list_admins(
     list_admins_use_case: ListAdminsUseCase = Depends(ListAdminsUseCase),
     page_index: Annotated[int, Query(title="Page Index")] = 1,
-    page_size: Annotated[int, Query(title="Page size")] = 100,
+    page_size: Annotated[int, Query(title="Page size", le=300)] = 100,
     search: Optional[str] = Query(None, title="Search"),
     sort: Optional[Sort] = Sort.DESC,
     sort_by: Optional[str] = "id",
@@ -126,26 +130,32 @@ def update_admin(
     update_admin_use_case: UpdateAdminUseCase = Depends(UpdateAdminUseCase),
     current_admin: AdminModel = Depends(get_current_admin),
 ):
-    print("1>>>", payload)
     """_summary_
 
     Args:
-        id (str, optional): _description_. Defaults to Path(..., title="Admin Id").
-        payload (AdminInUpdate, optional): _description_. Defaults to Body(..., title="Admin updated payload").
-        update_admin_use_case (UpdateAdminUseCase, optional): _description_. Defaults to Depends( UpdateAdminUseCase).
-        current_admin (AdminModel, optional): _description_. Defaults to Depends(get_current_admin).
+        id (str, optional):
+            Defaults to Path(..., title="Admin Id").
+        payload (AdminInUpdate, optional):
+            Defaults to Body(..., title="Admin updated payload").
+        update_admin_use_case (UpdateAdminUseCase, optional):
+            Defaults to Depends( UpdateAdminUseCase).
+        current_admin (AdminModel, optional):
+            Defaults to Depends(get_current_admin).
 
     Raises:
         forbidden_exception:
             - If not super admin and not update the owner account
             - If not super admin and update the owner account, but have roles or status in payload
-            - If role BDH and not current season and (not update the owner account or update roles or update status)
+            - If role BDH and not current season and (not update the
+                owner account or update roles or update status)
     Returns:
         _type_: Admin
     """
     if not str(current_admin.id) == id or payload.roles is not None or payload.status is not None:
         authorization(current_admin, SUPER_ADMIN, True)
 
-    req_object = UpdateAdminRequestObject.builder(id=id, payload=payload, current_admin=current_admin)
+    req_object = UpdateAdminRequestObject.builder(
+        id=id, payload=payload, current_admin=current_admin
+    )
     response = update_admin_use_case.execute(request_object=req_object)
     return response

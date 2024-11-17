@@ -15,7 +15,10 @@ from app.use_cases.season.update import UpdateSeasonUseCase, UpdateSeasonRequest
 from app.use_cases.season.get import GetSeasonRequestObject, GetSeasonCase
 from app.use_cases.season.delete import DeleteSeasonRequestObject, DeleteSeasonUseCase
 from app.use_cases.season.get_current import GetCurrentSeasonCase
-from app.use_cases.season.mark_current import MarkCurrentSeasonRequestObject, MarkCurrentSeasonUseCase
+from app.use_cases.season.mark_current import (
+    MarkCurrentSeasonRequestObject,
+    MarkCurrentSeasonUseCase,
+)
 
 router = APIRouter()
 
@@ -44,7 +47,7 @@ def create_season(
 def get_list_seasons(
     list_seasons_use_case: ListSeasonsUseCase = Depends(ListSeasonsUseCase),
     page_index: Annotated[int, Query(title="Page Index")] = 1,
-    page_size: Annotated[int, Query(title="Page size")] = 20,
+    page_size: Annotated[int, Query(title="Page size", le=300)] = 20,
     sort: Optional[Sort] = Sort.DESC,
     sort_by: Optional[str] = "season",
 ):
@@ -55,7 +58,9 @@ def get_list_seasons(
         raise HTTPException(status_code=400, detail=f"Invalid sort_by: {sort_by}")
     sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
 
-    req_object = ListSeasonsRequestObject.builder(sort=sort_query, page_size=page_size, page_index=page_index)
+    req_object = ListSeasonsRequestObject.builder(
+        sort=sort_query, page_size=page_size, page_index=page_index
+    )
     response = list_seasons_use_case.execute(request_object=req_object)
     return response
 

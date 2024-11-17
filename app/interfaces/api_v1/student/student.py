@@ -27,7 +27,7 @@ def get_me(
 def get_list_students(
     list_students_use_case: ListStudentsUseCase = Depends(ListStudentsUseCase),
     page_index: Annotated[int, Query(title="Page Index")] = 1,
-    page_size: Annotated[int, Query(title="Page size")] = 300,
+    page_size: Annotated[int, Query(title="Page size", le=500)] = 300,
     search: Optional[str] = Query(None, title="Search"),
     sort: Optional[Sort] = Sort.ASCE,
     sort_by: Optional[str] = "numerical_order",
@@ -36,7 +36,12 @@ def get_list_students(
     sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
 
     req_object = ListStudentsRequestObject.builder(
-        page_index=page_index, page_size=page_size, search=search, sort=sort_query, group=group, is_student_request=True
+        page_index=page_index,
+        page_size=page_size,
+        search=search,
+        sort=sort_query,
+        group=group,
+        is_student_request=True,
     )
     response = list_students_use_case.execute(request_object=req_object)
     return response

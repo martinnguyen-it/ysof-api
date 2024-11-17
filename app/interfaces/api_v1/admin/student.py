@@ -30,7 +30,10 @@ from app.use_cases.student_admin.import_from_spreadsheets import (
     ImportSpreadsheetsStudentRequestObject,
     ImportSpreadsheetsStudentUseCase,
 )
-from app.use_cases.student_admin.reset_password import ResetPasswordStudentRequestObject, ResetPasswordStudentUseCase
+from app.use_cases.student_admin.reset_password import (
+    ResetPasswordStudentRequestObject,
+    ResetPasswordStudentUseCase,
+)
 
 router = APIRouter()
 
@@ -75,7 +78,7 @@ def create_student(
 def get_list_students(
     list_students_use_case: ListStudentsUseCase = Depends(ListStudentsUseCase),
     page_index: Annotated[int, Query(title="Page Index")] = 1,
-    page_size: Annotated[int, Query(title="Page size")] = 300,
+    page_size: Annotated[int, Query(title="Page size", le=500)] = 300,
     search: Optional[str] = Query(None, title="Search"),
     sort: Optional[Sort] = Sort.ASCE,
     sort_by: Optional[str] = "numerical_order",
@@ -111,7 +114,9 @@ def update_student(
     current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BKL])
-    req_object = UpdateStudentRequestObject.builder(id=id, payload=payload, current_admin=current_admin)
+    req_object = UpdateStudentRequestObject.builder(
+        id=id, payload=payload, current_admin=current_admin
+    )
     response = update_student_use_case.execute(request_object=req_object)
     return response
 
@@ -133,11 +138,15 @@ def delete_student(
 @response_decorator()
 def import_student_from_spreadsheets(
     payload: ImportSpreadsheetsPayload = Body(..., title="Url spreadsheets"),
-    delete_student_use_case: ImportSpreadsheetsStudentUseCase = Depends(ImportSpreadsheetsStudentUseCase),
+    delete_student_use_case: ImportSpreadsheetsStudentUseCase = Depends(
+        ImportSpreadsheetsStudentUseCase
+    ),
     current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BKL])
-    req_object = ImportSpreadsheetsStudentRequestObject.builder(payload=payload, current_admin=current_admin)
+    req_object = ImportSpreadsheetsStudentRequestObject.builder(
+        payload=payload, current_admin=current_admin
+    )
     response = delete_student_use_case.execute(request_object=req_object)
     return response
 
@@ -147,9 +156,13 @@ def import_student_from_spreadsheets(
 def reset_password_student(
     id: str = Path(..., title="Student Id"),
     current_admin: AdminModel = Depends(get_current_active_admin),
-    reset_password_student_use_case: ResetPasswordStudentUseCase = Depends(ResetPasswordStudentUseCase),
+    reset_password_student_use_case: ResetPasswordStudentUseCase = Depends(
+        ResetPasswordStudentUseCase
+    ),
 ):
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BKL])
-    req_object = ResetPasswordStudentRequestObject.builder(student_id=id, current_admin=current_admin)
+    req_object = ResetPasswordStudentRequestObject.builder(
+        student_id=id, current_admin=current_admin
+    )
     response = reset_password_student_use_case.execute(request_object=req_object)
     return response

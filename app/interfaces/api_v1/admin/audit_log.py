@@ -24,7 +24,7 @@ router = APIRouter()
 def get_list_audit_logs(
     list_audit_logs_use_case: ListAuditLogsUseCase = Depends(ListAuditLogsUseCase),
     page_index: Annotated[int, Query(title="Page Index")] = 1,
-    page_size: Annotated[int, Query(title="Page size")] = 100,
+    page_size: Annotated[int, Query(title="Page size", le=300)] = 100,
     search: Optional[str] = Query(None, title="Search"),
     sort: Optional[Sort] = Sort.DESC,
     sort_by: Optional[str] = "created_at",

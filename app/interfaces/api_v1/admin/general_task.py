@@ -8,10 +8,17 @@ from app.domain.general_task.entity import (
     GeneralTaskInUpdate,
 )
 from app.domain.shared.enum import Sort
-from app.infra.security.security_service import authorization, get_current_active_admin, get_current_admin
+from app.infra.security.security_service import (
+    authorization,
+    get_current_active_admin,
+    get_current_admin,
+)
 from app.shared.decorator import response_decorator
 from app.use_cases.general_task.list import ListGeneralTasksUseCase, ListGeneralTasksRequestObject
-from app.use_cases.general_task.update import UpdateGeneralTaskUseCase, UpdateGeneralTaskRequestObject
+from app.use_cases.general_task.update import (
+    UpdateGeneralTaskUseCase,
+    UpdateGeneralTaskRequestObject,
+)
 from app.use_cases.general_task.get import (
     GetGeneralTaskRequestObject,
     GetGeneralTaskCase,
@@ -22,7 +29,10 @@ from app.use_cases.general_task.create import (
 )
 from app.models.admin import AdminModel
 from app.shared.constant import SUPER_ADMIN
-from app.use_cases.general_task.delete import DeleteGeneralTaskRequestObject, DeleteGeneralTaskUseCase
+from app.use_cases.general_task.delete import (
+    DeleteGeneralTaskRequestObject,
+    DeleteGeneralTaskUseCase,
+)
 from app.domain.general_task.enum import GeneralTaskType
 
 router = APIRouter()
@@ -38,7 +48,9 @@ def get_general_task_by_id(
     general_task_id: str = Path(..., title="GeneralTask id"),
     get_general_task_use_case: GetGeneralTaskCase = Depends(GetGeneralTaskCase),
 ):
-    get_general_task_request_object = GetGeneralTaskRequestObject.builder(general_task_id=general_task_id)
+    get_general_task_request_object = GetGeneralTaskRequestObject.builder(
+        general_task_id=general_task_id
+    )
     response = get_general_task_use_case.execute(request_object=get_general_task_request_object)
     return response
 
@@ -55,7 +67,9 @@ def create_general_task(
 ):
     if payload.role not in current_admin.roles:
         authorization(current_admin, SUPER_ADMIN)
-    req_object = CreateGeneralTaskRequestObject.builder(payload=payload, current_admin=current_admin)
+    req_object = CreateGeneralTaskRequestObject.builder(
+        payload=payload, current_admin=current_admin
+    )
     response = create_general_task_use_case.execute(request_object=req_object)
     return response
 
@@ -68,7 +82,7 @@ def create_general_task(
 def get_list_general_tasks(
     list_general_tasks_use_case: ListGeneralTasksUseCase = Depends(ListGeneralTasksUseCase),
     page_index: Annotated[int, Query(title="Page Index")] = 1,
-    page_size: Annotated[int, Query(title="Page size")] = 100,
+    page_size: Annotated[int, Query(title="Page size", le=300)] = 20,
     search: Optional[str] = Query(None, title="Search"),
     label: Optional[list[str]] = Query(None, title="Labels"),
     roles: Optional[list[str]] = Query(None, title="Roles"),
@@ -114,7 +128,9 @@ def update_general_task(
     if payload.role and payload.role not in current_admin.roles:
         authorization(current_admin, SUPER_ADMIN)
 
-    req_object = UpdateGeneralTaskRequestObject.builder(id=id, payload=payload, current_admin=current_admin)
+    req_object = UpdateGeneralTaskRequestObject.builder(
+        id=id, payload=payload, current_admin=current_admin
+    )
     response = update_general_task_use_case.execute(request_object=req_object)
     return response
 
