@@ -3,7 +3,11 @@ from fastapi import APIRouter, Depends, Body, Path
 from app.infra.security.security_service import get_current_student
 from app.shared.decorator import response_decorator
 from app.models.student import StudentModel
-from app.domain.absent.entity import StudentAbsentInCreate, StudentAbsentInResponse, StudentAbsentInUpdate
+from app.domain.absent.entity import (
+    StudentAbsentInCreate,
+    StudentAbsentInResponse,
+    StudentAbsentInUpdate,
+)
 from app.use_cases.absent.create import CreateAbsentRequestObject, CreateAbsentUseCase
 from app.use_cases.absent.get import GetAbsentRequestObject, GetAbsentUseCase
 from app.use_cases.absent.update import UpdateAbsentRequestObject, UpdateAbsentUseCase
@@ -49,7 +53,9 @@ def get_absent_by_subject_id(
     get_absent_use_case: GetAbsentUseCase = Depends(GetAbsentUseCase),
     current_student: StudentModel = Depends(get_current_student),
 ):
-    req_object = GetAbsentRequestObject.builder(subject_id=subject_id, current_student=current_student)
+    req_object = GetAbsentRequestObject.builder(
+        subject_id=subject_id, current_student=current_student
+    )
     response = get_absent_use_case.execute(request_object=req_object)
     return response
 
@@ -61,6 +67,8 @@ def delete_absent_by_subject_id(
     delete_absent_use_case: DeleteAbsentUseCase = Depends(DeleteAbsentUseCase),
     current_student: StudentModel = Depends(get_current_student),
 ):
-    req_object = DeleteAbsentRequestObject.builder(subject_id=subject_id, current_student=current_student)
+    req_object = DeleteAbsentRequestObject.builder(
+        subject_id=subject_id, current_student=current_student
+    )
     response = delete_absent_use_case.execute(request_object=req_object)
     return response

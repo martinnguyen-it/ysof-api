@@ -90,7 +90,9 @@ class CreateAbsentUseCase(use_case.UseCase):
             is_student_request = False
             student = self.student_repository.get_by_id(req_object.current_student)
             if not student:
-                return response_object.ResponseFailure.build_not_found_error(message="Học viên không tồn tại")
+                return response_object.ResponseFailure.build_not_found_error(
+                    message="Học viên không tồn tại"
+                )
             req_object.current_student = student
 
         current_season: int = get_current_season_value()
@@ -105,10 +107,16 @@ class CreateAbsentUseCase(use_case.UseCase):
                 {"type": FormType.SUBJECT_ABSENT}
             )
             if not form_absent or form_absent.status == FormStatus.INACTIVE:
-                return response_object.ResponseFailure.build_parameters_error(message="Form chưa được mở.")
+                return response_object.ResponseFailure.build_parameters_error(
+                    message="Form chưa được mở."
+                )
             if form_absent.status == FormStatus.CLOSED:
-                return response_object.ResponseFailure.build_parameters_error(message="Form đã được đóng.")
-            form_absent: ManageFormEvaluationOrAbsent = ManageFormEvaluationOrAbsent.model_validate(form_absent)
+                return response_object.ResponseFailure.build_parameters_error(
+                    message="Form đã được đóng."
+                )
+            form_absent: ManageFormEvaluationOrAbsent = ManageFormEvaluationOrAbsent.model_validate(
+                form_absent
+            )
             if req_object.subject_id != form_absent.data.subject_id:
                 return response_object.ResponseFailure.build_parameters_error(
                     message="Form hiện tại không mở cho môn học này."
@@ -117,7 +125,10 @@ class CreateAbsentUseCase(use_case.UseCase):
         try:
             absent: AbsentModel = self.absent_repository.create(
                 AbsentInDB(
-                    student=req_object.current_student, subject=subject, reason=req_object.reason, note=req_object.note
+                    student=req_object.current_student,
+                    subject=subject,
+                    reason=req_object.reason,
+                    note=req_object.note,
                 )
             )
             if not is_student_request:
@@ -144,7 +155,9 @@ class CreateAbsentUseCase(use_case.UseCase):
                     ),
                 )
         except NotUniqueError:
-            return response_object.ResponseFailure.build_parameters_error("Đơn nghỉ phép đã được tạo trước đây.")
+            return response_object.ResponseFailure.build_parameters_error(
+                "Đơn nghỉ phép đã được tạo trước đây."
+            )
         except Exception:
             return response_object.ResponseFailure.build_system_error("Something went wrong")
 
@@ -153,7 +166,9 @@ class CreateAbsentUseCase(use_case.UseCase):
                 **AbsentInDB.model_validate(absent).model_dump(exclude={"student", "subject"}),
                 subject=SubjectInEvaluation(
                     **SubjectInDB.model_validate(absent.subject).model_dump(exclude=({"lecturer"})),
-                    lecturer=LecturerInEvaluation(**LecturerInDB.model_validate(absent.subject.lecturer).model_dump()),
+                    lecturer=LecturerInEvaluation(
+                        **LecturerInDB.model_validate(absent.subject.lecturer).model_dump()
+                    ),
                 ),
             )
             if is_student_request
@@ -161,7 +176,9 @@ class CreateAbsentUseCase(use_case.UseCase):
                 **AbsentInDB.model_validate(absent).model_dump(exclude={"student", "subject"}),
                 subject=SubjectInEvaluation(
                     **SubjectInDB.model_validate(absent.subject).model_dump(exclude=({"lecturer"})),
-                    lecturer=LecturerInEvaluation(**LecturerInDB.model_validate(absent.subject.lecturer).model_dump()),
+                    lecturer=LecturerInEvaluation(
+                        **LecturerInDB.model_validate(absent.subject.lecturer).model_dump()
+                    ),
                 ),
                 student=Student(**StudentInDB.model_validate(absent.student).model_dump()),
             )

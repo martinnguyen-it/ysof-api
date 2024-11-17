@@ -30,7 +30,9 @@ class ListSubjectEvaluationByStudentUseCase(use_case.UseCase):
     def __init__(
         self,
         student_repository: StudentRepository = Depends(StudentRepository),
-        subject_evaluation_repository: SubjectEvaluationRepository = Depends(SubjectEvaluationRepository),
+        subject_evaluation_repository: SubjectEvaluationRepository = Depends(
+            SubjectEvaluationRepository
+        ),
     ):
         self.subject_evaluation_repository = subject_evaluation_repository
         self.student_repository = student_repository
@@ -41,7 +43,9 @@ class ListSubjectEvaluationByStudentUseCase(use_case.UseCase):
             is_student_request = False
             student = self.student_repository.get_by_id(req_object.current_student)
             if not student:
-                return response_object.ResponseFailure.build_not_found_error(message="Học viên không tồn tại")
+                return response_object.ResponseFailure.build_not_found_error(
+                    message="Học viên không tồn tại"
+                )
             req_object.current_student = student
 
         docs: SubjectEvaluationModel = self.subject_evaluation_repository.list(
@@ -54,9 +58,13 @@ class ListSubjectEvaluationByStudentUseCase(use_case.UseCase):
                         exclude={"student", "subject"}
                     ),
                     subject=SubjectInEvaluation(
-                        **SubjectInDB.model_validate(subject_evaluation.subject).model_dump(exclude=({"lecturer"})),
+                        **SubjectInDB.model_validate(subject_evaluation.subject).model_dump(
+                            exclude=({"lecturer"})
+                        ),
                         lecturer=LecturerInEvaluation(
-                            **LecturerInDB.model_validate(subject_evaluation.subject.lecturer).model_dump()
+                            **LecturerInDB.model_validate(
+                                subject_evaluation.subject.lecturer
+                            ).model_dump()
                         ),
                     ),
                 )
@@ -66,9 +74,13 @@ class ListSubjectEvaluationByStudentUseCase(use_case.UseCase):
                         exclude={"student", "subject"}
                     ),
                     subject=SubjectInEvaluation(
-                        **SubjectInDB.model_validate(subject_evaluation.subject).model_dump(exclude=({"lecturer"})),
+                        **SubjectInDB.model_validate(subject_evaluation.subject).model_dump(
+                            exclude=({"lecturer"})
+                        ),
                         lecturer=LecturerInEvaluation(
-                            **LecturerInDB.model_validate(subject_evaluation.subject.lecturer).model_dump()
+                            **LecturerInDB.model_validate(
+                                subject_evaluation.subject.lecturer
+                            ).model_dump()
                         ),
                     ),
                     student=StudentInEvaluation(**StudentInDB.model_validate(student).model_dump()),

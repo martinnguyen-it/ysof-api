@@ -12,7 +12,8 @@ router = APIRouter()
 @router.post("", response_model=GoogleDriveAPIRes)
 @response_decorator()
 def upload_file(
-    file: UploadFile = File(...), google_drive_service: GoogleDriveAPIService = Depends(GoogleDriveAPIService)
+    file: UploadFile = File(...),
+    google_drive_service: GoogleDriveAPIService = Depends(GoogleDriveAPIService),
 ):
     response = google_drive_service.create(file=file)
     return response

@@ -61,7 +61,9 @@ class CreateStudentUseCase(use_case.UseCase):
         )
 
         if existing_student:
-            return response_object.ResponseFailure.build_parameters_error(message="Email hoặc mshv đã tồn tại")
+            return response_object.ResponseFailure.build_parameters_error(
+                message="Email hoặc mshv đã tồn tại"
+            )
 
         password = "12345678"
         # password = generate_random_password()
@@ -79,7 +81,9 @@ class CreateStudentUseCase(use_case.UseCase):
         except Exception:
             return response_object.ResponseFailure.build_system_error("Something went wrong")
 
-        send_email_welcome_task.delay(email=student.email, password=password, full_name=student.full_name)
+        send_email_welcome_task.delay(
+            email=student.email, password=password, full_name=student.full_name
+        )
 
         self.background_tasks.add_task(
             self.audit_log_repository.create,
@@ -92,7 +96,9 @@ class CreateStudentUseCase(use_case.UseCase):
                 author_name=req_object.current_admin.full_name,
                 author_roles=req_object.current_admin.roles,
                 description=json.dumps(
-                    req_object.student_in.model_dump(exclude_none=True), default=str, ensure_ascii=False
+                    req_object.student_in.model_dump(exclude_none=True),
+                    default=str,
+                    ensure_ascii=False,
                 ),
             ),
         )

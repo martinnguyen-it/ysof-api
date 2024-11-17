@@ -46,7 +46,9 @@ class ListAbsentUseCase(use_case.UseCase):
                 **AbsentInDB.model_validate(absent).model_dump(exclude={"student", "subject"}),
                 subject=SubjectInEvaluation(
                     **SubjectInDB.model_validate(absent.subject).model_dump(exclude=({"lecturer"})),
-                    lecturer=LecturerInEvaluation(**LecturerInDB.model_validate(absent.subject.lecturer).model_dump()),
+                    lecturer=LecturerInEvaluation(
+                        **LecturerInDB.model_validate(absent.subject.lecturer).model_dump()
+                    ),
                 ),
                 student=Student(**StudentInDB.model_validate(absent.student).model_dump()),
             )

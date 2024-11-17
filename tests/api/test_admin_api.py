@@ -20,10 +20,17 @@ class TestAdminApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
-        connect("mongoenginetest", host="mongodb://localhost:1234", mongo_client_class=mongomock.MongoClient)
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost:1234",
+            mongo_client_class=mongomock.MongoClient,
+        )
         cls.client = TestClient(app)
         cls.season: SeasonModel = SeasonModel(
-            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG", academic_year="2023-2024", season=3, is_current=True
+            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
+            academic_year="2023-2024",
+            season=3,
+            is_current=True,
         ).save()
         cls.user = AdminModel(
             status="active",
@@ -111,7 +118,9 @@ class TestAdminApi(unittest.TestCase):
             assert user.password
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.CREATE, "endpoint": Endpoint.ADMIN})
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.CREATE, "endpoint": Endpoint.ADMIN}
+            )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 
@@ -178,6 +187,8 @@ class TestAdminApi(unittest.TestCase):
             assert r.status_code == 200
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.UPDATE, "endpoint": Endpoint.ADMIN})
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.ADMIN}
+            )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 2

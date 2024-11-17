@@ -6,7 +6,10 @@ import pytest
 from app.models.season import SeasonModel
 from app.models.lecturer import LecturerModel
 from app.models.subject import SubjectModel
-from app.infra.tasks.periodic.manage_form_absent import close_form_absent_task, open_form_absent_task
+from app.infra.tasks.periodic.manage_form_absent import (
+    close_form_absent_task,
+    open_form_absent_task,
+)
 from app.models.manage_form import ManageFormModel
 from app.domain.manage_form.enum import FormStatus, FormType
 from datetime import date, timedelta
@@ -16,9 +19,16 @@ class TestAdminApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
-        connect("mongoenginetest", host="mongodb://localhost:1234", mongo_client_class=mongomock.MongoClient)
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost:1234",
+            mongo_client_class=mongomock.MongoClient,
+        )
         cls.season: SeasonModel = SeasonModel(
-            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG", academic_year="2023-2024", season=3, is_current=True
+            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
+            academic_year="2023-2024",
+            season=3,
+            is_current=True,
         ).save()
         cls.lecturer: LecturerModel = LecturerModel(
             title="Cha",

@@ -14,7 +14,11 @@ class TestAuthAdminStudentApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
-        connect("mongoenginetest", host="mongodb://localhost:1234", mongo_client_class=mongomock.MongoClient)
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost:1234",
+            mongo_client_class=mongomock.MongoClient,
+        )
         cls.client = TestClient(app)
         cls.student: StudentModel = StudentModel(
             numerical_order=1,
@@ -35,7 +39,8 @@ class TestAuthAdminStudentApi(unittest.TestCase):
     @pytest.mark.order(1)
     def test_admin_login(self):
         r = self.client.post(
-            "/api/v1/student/auth/login", json={"email": "student@example.com", "password": "local@local"}
+            "/api/v1/student/auth/login",
+            json={"email": "student@example.com", "password": "local@local"},
         )
         assert r.status_code == 200
         assert r.json().get("access_token")

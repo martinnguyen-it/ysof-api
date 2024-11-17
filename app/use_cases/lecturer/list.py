@@ -29,7 +29,9 @@ class ListLecturersRequestObject(request_object.ValidRequestObject):
         search: Optional[str] = None,
         sort: Optional[dict[str, int]] = None,
     ):
-        return ListLecturersRequestObject(page_index=page_index, page_size=page_size, search=search, sort=sort)
+        return ListLecturersRequestObject(
+            page_index=page_index, page_size=page_size, search=search, sort=sort
+        )
 
 
 class ListLecturersUseCase(use_case.UseCase):
@@ -58,7 +60,9 @@ class ListLecturersUseCase(use_case.UseCase):
 
         return ManyLecturersInResponse(
             pagination=Pagination(
-                total=total, page_index=req_object.page_index, total_pages=math.ceil(total / req_object.page_size)
+                total=total,
+                page_index=req_object.page_index,
+                total_pages=math.ceil(total / req_object.page_size),
             ),
             data=[Lecturer(**LecturerInDB.model_validate(doc).model_dump()) for doc in lecturers],
         )

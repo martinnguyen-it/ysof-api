@@ -12,7 +12,9 @@ class GeneralTaskRepository:
     def __init__(self):
         pass
 
-    def create(self, general_task: GeneralTaskInDB, attachments: Optional[List[str]] = []) -> GeneralTaskModel:
+    def create(
+        self, general_task: GeneralTaskInDB, attachments: Optional[List[str]] = []
+    ) -> GeneralTaskModel:
         """
         Create new general_task in db
         :param general_task:
@@ -110,7 +112,9 @@ class GeneralTaskRepository:
         except Exception:
             return False
 
-    def find_one(self, conditions: Dict[str, Union[str, bool, ObjectId]]) -> Optional[GeneralTaskModel]:
+    def find_one(
+        self, conditions: Dict[str, Union[str, bool, ObjectId]]
+    ) -> Optional[GeneralTaskModel]:
         try:
             doc = GeneralTaskModel._get_collection().find_one(conditions)
             return GeneralTaskModel.from_mongo(doc) if doc else None

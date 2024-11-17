@@ -38,7 +38,9 @@ class DeleteSubjectUseCase(use_case.UseCase):
         self,
         background_tasks: BackgroundTasks,
         subject_repository: SubjectRepository = Depends(SubjectRepository),
-        subject_registration_repository: SubjectRegistrationRepository = Depends(SubjectRegistrationRepository),
+        subject_registration_repository: SubjectRegistrationRepository = Depends(
+            SubjectRegistrationRepository
+        ),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
     ):
         self.subject_repository = subject_repository
@@ -51,14 +53,18 @@ class DeleteSubjectUseCase(use_case.UseCase):
         if not subject:
             return response_object.ResponseFailure.build_not_found_error("Môn học không tồn tại")
 
-        subject_registration = self.subject_registration_repository.find_one({"subject": subject.id})
+        subject_registration = self.subject_registration_repository.find_one(
+            {"subject": subject.id}
+        )
         if subject_registration:
             return response_object.ResponseFailure.build_parameters_error(
                 "Không thể xóa môn học đã có học viên đăng ký"
             )
 
         current_season = get_current_season_value()
-        if subject.season != current_season and not any(role in req_object.current_admin.roles for role in SUPER_ADMIN):
+        if subject.season != current_season and not any(
+            role in req_object.current_admin.roles for role in SUPER_ADMIN
+        ):
             raise forbidden_exception
 
         try:

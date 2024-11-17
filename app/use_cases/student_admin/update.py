@@ -54,7 +54,9 @@ class UpdateStudentUseCase(use_case.UseCase):
 
         current_season = get_current_season_value()
 
-        self.student_repository.update(id=student.id, data=StudentInUpdateTime(**req_object.obj_in.model_dump()))
+        self.student_repository.update(
+            id=student.id, data=StudentInUpdateTime(**req_object.obj_in.model_dump())
+        )
         student.reload()
 
         self.background_tasks.add_task(

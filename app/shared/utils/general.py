@@ -58,7 +58,9 @@ def get_quarter(quarter: int, year: int) -> Tuple[date, date]:
     first_month_of_quarter = 3 * quarter - 2
     last_month_of_quarter = 3 * quarter
     date_of_first_day_of_quarter = date(year, first_month_of_quarter, 1)
-    date_of_last_day_of_quarter = date(year, last_month_of_quarter, calendar.monthrange(year, last_month_of_quarter)[1])
+    date_of_last_day_of_quarter = date(
+        year, last_month_of_quarter, calendar.monthrange(year, last_month_of_quarter)[1]
+    )
     return (date_of_first_day_of_quarter, date_of_last_day_of_quarter)
 
 

@@ -28,7 +28,9 @@ class SubjectEvaluationQuestionRepository:
 
         return new_doc
 
-    def get_by_subject_id(self, subject_id: Union[str, ObjectId]) -> Optional[SubjectEvaluationQuestionModel]:
+    def get_by_subject_id(
+        self, subject_id: Union[str, ObjectId]
+    ) -> Optional[SubjectEvaluationQuestionModel]:
         """
         Get doc in db from subject_id
         :param subject_id:
@@ -43,10 +45,14 @@ class SubjectEvaluationQuestionRepository:
         except DoesNotExist:
             return None
 
-    def update(self, id: ObjectId, data: Union[SubjectEvaluationQuestionInUpdateTime, Dict[str, Any]]) -> bool:
+    def update(
+        self, id: ObjectId, data: Union[SubjectEvaluationQuestionInUpdateTime, Dict[str, Any]]
+    ) -> bool:
         try:
             data = (
-                data.model_dump(exclude_none=True) if isinstance(data, SubjectEvaluationQuestionInUpdateTime) else data
+                data.model_dump(exclude_none=True)
+                if isinstance(data, SubjectEvaluationQuestionInUpdateTime)
+                else data
             )
             SubjectEvaluationQuestionModel.objects(id=id).update_one(**data, upsert=False)
             return True

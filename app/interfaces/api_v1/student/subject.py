@@ -5,8 +5,14 @@ from app.domain.subject.entity import Subject, SubjectInStudent
 from app.domain.shared.enum import Sort
 from app.infra.security.security_service import get_current_student
 from app.shared.decorator import response_decorator
-from app.use_cases.student_endpoint.subject.get import GetSubjectStudentCase, GetSubjectStudentRequestObject
-from app.use_cases.student_endpoint.subject.list import ListSubjectsStudentRequestObject, ListSubjectsStudentUseCase
+from app.use_cases.student_endpoint.subject.get import (
+    GetSubjectStudentCase,
+    GetSubjectStudentRequestObject,
+)
+from app.use_cases.student_endpoint.subject.list import (
+    ListSubjectsStudentRequestObject,
+    ListSubjectsStudentUseCase,
+)
 from app.models.student import StudentModel
 from app.domain.subject.enum import StatusSubjectEnum
 
@@ -47,7 +53,11 @@ def get_list_subjects(
     sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
 
     req_object = ListSubjectsStudentRequestObject.builder(
-        search=search, sort=sort_query, subdivision=subdivision, current_student=current_student, status=status
+        search=search,
+        sort=sort_query,
+        subdivision=subdivision,
+        current_student=current_student,
+        status=status,
     )
     response = list_subjects_use_case.execute(request_object=req_object)
     return response

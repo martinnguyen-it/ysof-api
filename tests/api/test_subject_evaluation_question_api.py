@@ -28,10 +28,17 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
-        connect("mongoenginetest", host="mongodb://localhost:1234", mongo_client_class=mongomock.MongoClient)
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost:1234",
+            mongo_client_class=mongomock.MongoClient,
+        )
         cls.client = TestClient(app)
         cls.season: SeasonModel = SeasonModel(
-            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG", academic_year="2023-2024", season=3, is_current=True
+            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
+            academic_year="2023-2024",
+            season=3,
+            is_current=True,
         ).save()
         cls.user: AdminModel = AdminModel(
             status="active",
@@ -101,10 +108,12 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
-        cls.subject_evaluation_question: SubjectEvaluationQuestionModel = SubjectEvaluationQuestionModel(
-            subject=cls.subject2,
-            questions=[{"title": "Hình ảnh Thiên Chúa", "type": "text", "answers": []}],
-        ).save()
+        cls.subject_evaluation_question: SubjectEvaluationQuestionModel = (
+            SubjectEvaluationQuestionModel(
+                subject=cls.subject2,
+                questions=[{"title": "Hình ảnh Thiên Chúa", "type": "text", "answers": []}],
+            ).save()
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -147,7 +156,9 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
             mock_token.return_value = TokenData(email=self.user2.email)
             r = self.client.patch(
                 f"/api/v1/subjects/evaluation-questions/{self.subject.id}",
-                json={"questions": [{"title": "Đâu là hình ảnh của Thiên Chúa 2?", "type": "text"}]},
+                json={
+                    "questions": [{"title": "Đâu là hình ảnh của Thiên Chúa 2?", "type": "text"}]
+                },
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -157,7 +168,9 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
             mock_token.return_value = TokenData(email=self.user.email)
             r = self.client.patch(
                 f"/api/v1/subjects/evaluation-questions/{self.subject.id}",
-                json={"questions": [{"title": "Đâu là hình ảnh của Thiên Chúa 2?", "type": "text"}]},
+                json={
+                    "questions": [{"title": "Đâu là hình ảnh của Thiên Chúa 2?", "type": "text"}]
+                },
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -185,7 +198,10 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
             )
             assert r.status_code == 200
             resp = r.json()
-            assert resp["questions"][0]["title"] == self.subject_evaluation_question.questions[0]["title"]
+            assert (
+                resp["questions"][0]["title"]
+                == self.subject_evaluation_question.questions[0]["title"]
+            )
 
             mock_token.return_value = TokenData(email=self.student.email)
             r = self.client.get(
@@ -196,4 +212,7 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
             )
             assert r.status_code == 200
             resp = r.json()
-            assert resp["questions"][0]["title"] == self.subject_evaluation_question.questions[0]["title"]
+            assert (
+                resp["questions"][0]["title"]
+                == self.subject_evaluation_question.questions[0]["title"]
+            )

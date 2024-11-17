@@ -82,14 +82,20 @@ class UpdateSubjectUseCase(use_case.UseCase):
                     )
                 attachments.append(doc)
 
-        if subject.season != current_season and not any(role in req_object.current_admin.roles for role in SUPER_ADMIN):
+        if subject.season != current_season and not any(
+            role in req_object.current_admin.roles for role in SUPER_ADMIN
+        ):
             raise forbidden_exception
 
         lecturer: Optional[LecturerModel] = None
         if isinstance(req_object.obj_in.lecturer, str):
-            lecturer: Optional[LecturerModel] = self.lecturer_repository.get_by_id(req_object.obj_in.lecturer)
+            lecturer: Optional[LecturerModel] = self.lecturer_repository.get_by_id(
+                req_object.obj_in.lecturer
+            )
             if not lecturer:
-                return response_object.ResponseFailure.build_not_found_error("Giảng viên không tồn tại")
+                return response_object.ResponseFailure.build_not_found_error(
+                    "Giảng viên không tồn tại"
+                )
 
         self.subject_repository.update(
             id=subject.id,

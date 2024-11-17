@@ -22,14 +22,20 @@ def close_form_evaluation_task():
         )
         if isinstance(subjects, list) and len(subjects) > 0:
             subject_repository.bulk_update(
-                data={"status": StatusSubjectEnum.CLOSE_EVALUATION, "updated_at": datetime.now(timezone.utc)},
+                data={
+                    "status": StatusSubjectEnum.CLOSE_EVALUATION,
+                    "updated_at": datetime.now(timezone.utc),
+                },
                 entities=subjects,
             )
 
-        form: ManageFormModel | None = manage_form_repository.find_one({"type": FormType.SUBJECT_EVALUATION})
+        form: ManageFormModel | None = manage_form_repository.find_one(
+            {"type": FormType.SUBJECT_EVALUATION}
+        )
         if form and form.status == FormStatus.ACTIVE:
             manage_form_repository.update(
-                id=form.id, data={"status": FormStatus.CLOSED, "updated_at": datetime.now(timezone.utc)}
+                id=form.id,
+                data={"status": FormStatus.CLOSED, "updated_at": datetime.now(timezone.utc)},
             )
     except Exception as ex:
         logger.exception(ex)

@@ -34,7 +34,9 @@ router = APIRouter()
 def create_subject_evaluation(
     subject_id: str = Path(..., title="Subject id"),
     payload: SubjectEvaluationInCreate = Body(..., title="Subject evaluation In Create payload"),
-    create_subject_evaluation_use_case: CreateSubjectEvaluationUseCase = Depends(CreateSubjectEvaluationUseCase),
+    create_subject_evaluation_use_case: CreateSubjectEvaluationUseCase = Depends(
+        CreateSubjectEvaluationUseCase
+    ),
     current_student: StudentModel = Depends(get_current_student),
 ):
     req_object = CreateSubjectEvaluationRequestObject.builder(
@@ -49,7 +51,9 @@ def create_subject_evaluation(
 def update_subject_evaluation(
     subject_id: str = Path(..., title="Subject id"),
     payload: SubjectEvaluationInUpdate = Body(..., title="Subject evaluation In update payload"),
-    update_subject_evaluation_use_case: UpdateSubjectEvaluationUseCase = Depends(UpdateSubjectEvaluationUseCase),
+    update_subject_evaluation_use_case: UpdateSubjectEvaluationUseCase = Depends(
+        UpdateSubjectEvaluationUseCase
+    ),
     current_student: StudentModel = Depends(get_current_student),
 ):
     req_object = UpdateSubjectEvaluationRequestObject.builder(
@@ -63,10 +67,14 @@ def update_subject_evaluation(
 @response_decorator()
 def get_subject_evaluation(
     subject_id: str = Path(..., title="Subject id"),
-    get_subject_evaluation_use_case: GetSubjectEvaluationUseCase = Depends(GetSubjectEvaluationUseCase),
+    get_subject_evaluation_use_case: GetSubjectEvaluationUseCase = Depends(
+        GetSubjectEvaluationUseCase
+    ),
     current_student: StudentModel = Depends(get_current_student),
 ):
-    req_object = GetSubjectEvaluationRequestObject.builder(subject_id=subject_id, current_student=current_student)
+    req_object = GetSubjectEvaluationRequestObject.builder(
+        subject_id=subject_id, current_student=current_student
+    )
     response = get_subject_evaluation_use_case.execute(request_object=req_object)
     return response
 
@@ -79,6 +87,8 @@ def get_all_subject_evaluation_me(
     ),
     current_student: StudentModel = Depends(get_current_student),
 ):
-    req_object = ListSubjectEvaluationByStudentRequestObject.builder(current_student=current_student)
+    req_object = ListSubjectEvaluationByStudentRequestObject.builder(
+        current_student=current_student
+    )
     response = list_subject_evaluation_use_case.execute(request_object=req_object)
     return response

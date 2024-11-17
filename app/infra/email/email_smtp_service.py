@@ -10,7 +10,9 @@ logger = get_logger()
 
 
 class EmailSMTPService:
-    def _send(self, emails_to: list[str] | str, subject: str, plain_text: str, html: str | None = None):
+    def _send(
+        self, emails_to: list[str] | str, subject: str, plain_text: str, html: str | None = None
+    ):
         try:
             msg = MIMEMultipart("alternative")
             msg["From"] = f"YSOF <{settings.YSOF_EMAIL_SENDER}>"

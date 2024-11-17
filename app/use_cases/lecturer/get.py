@@ -27,8 +27,12 @@ class GetLecturerCase(use_case.UseCase):
         self.lecturer_repository = lecturer_repository
 
     def process_request(self, req_object: GetLecturerRequestObject):
-        lecturer: Optional[LecturerModel] = self.lecturer_repository.get_by_id(lecturer_id=req_object.lecturer_id)
+        lecturer: Optional[LecturerModel] = self.lecturer_repository.get_by_id(
+            lecturer_id=req_object.lecturer_id
+        )
         if not lecturer:
-            return response_object.ResponseFailure.build_not_found_error(message="Giảng viên không tồn tại")
+            return response_object.ResponseFailure.build_not_found_error(
+                message="Giảng viên không tồn tại"
+            )
 
         return Lecturer(**LecturerInDB.model_validate(lecturer).model_dump())

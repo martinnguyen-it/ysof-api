@@ -61,8 +61,12 @@ class DeleteDocumentUseCase(use_case.UseCase):
         ):
             return response_object.ResponseFailure.build_auth_error("Bạn không có quyền sửa")
 
-        general_task = self.general_task_repository.find_one(conditions={"attachments": {"$in": [document.id]}})
-        subject = self.subject_repository.find_one(conditions={"attachments": {"$in": [document.id]}})
+        general_task = self.general_task_repository.find_one(
+            conditions={"attachments": {"$in": [document.id]}}
+        )
+        subject = self.subject_repository.find_one(
+            conditions={"attachments": {"$in": [document.id]}}
+        )
 
         if general_task is not None:
             return response_object.ResponseFailure.build_parameters_error(

@@ -14,7 +14,9 @@ class BrevoService:
         configuration = sib_api_v3_sdk.Configuration()
         configuration.api_key["api-key"] = settings.BREVO_API_KEY
 
-        self.api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+        self.api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
+            sib_api_v3_sdk.ApiClient(configuration)
+        )
         self.contact = sib_api_v3_sdk.ContactsApi(sib_api_v3_sdk.ApiClient(configuration))
 
     def _send(
@@ -42,7 +44,9 @@ class BrevoService:
                 if sender:
                     email_sender = sib_api_v3_sdk.SendSmtpEmailSender(email=sender, name=name)
                 else:
-                    email_sender = sib_api_v3_sdk.SendSmtpEmailSender(email=settings.YSOF_EMAIL_SENDER, name=name)
+                    email_sender = sib_api_v3_sdk.SendSmtpEmailSender(
+                        email=settings.YSOF_EMAIL_SENDER, name=name
+                    )
 
             to = [sib_api_v3_sdk.SendSmtpEmailTo(email=to) for to in emails_to]
             send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(

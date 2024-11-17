@@ -12,7 +12,9 @@ def connect() -> None:
     """
     print(settings.ENVIRONMENT)
     if settings.ENVIRONMENT == "testing":
-        return mongo_engine_connect(settings.MONGODB_DATABASE, host=settings.MONGODB_HOST, port=settings.MONGODB_PORT)
+        return mongo_engine_connect(
+            settings.MONGODB_DATABASE, host=settings.MONGODB_HOST, port=settings.MONGODB_PORT
+        )
     else:
         config = dict(
             host=settings.MONGODB_HOST,

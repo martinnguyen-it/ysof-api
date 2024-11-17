@@ -27,10 +27,17 @@ class TestDocumentApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
-        connect("mongoenginetest", host="mongodb://localhost:1234", mongo_client_class=mongomock.MongoClient)
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost:1234",
+            mongo_client_class=mongomock.MongoClient,
+        )
         cls.client = TestClient(app)
         cls.season: SeasonModel = SeasonModel(
-            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG", academic_year="2023-2024", season=3, is_current=True
+            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
+            academic_year="2023-2024",
+            season=3,
+            is_current=True,
         ).save()
         cls.user = AdminModel(
             status="active",
@@ -156,7 +163,9 @@ class TestDocumentApi(unittest.TestCase):
             mock_upload_to_drive.assert_called_once()
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.CREATE, "endpoint": Endpoint.DOCUMENT})
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.CREATE, "endpoint": Endpoint.DOCUMENT}
+            )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 
@@ -252,7 +261,9 @@ class TestDocumentApi(unittest.TestCase):
             assert doc.name == "Updated"
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.UPDATE, "endpoint": Endpoint.DOCUMENT})
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.DOCUMENT}
+            )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 
@@ -307,6 +318,8 @@ class TestDocumentApi(unittest.TestCase):
             assert r.status_code == 404
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.DELETE, "endpoint": Endpoint.DOCUMENT})
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.DELETE, "endpoint": Endpoint.DOCUMENT}
+            )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1

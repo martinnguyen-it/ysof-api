@@ -19,10 +19,17 @@ class TestStudentAdminApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
-        connect("mongoenginetest", host="mongodb://localhost:1234", mongo_client_class=mongomock.MongoClient)
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost:1234",
+            mongo_client_class=mongomock.MongoClient,
+        )
         cls.client = TestClient(app)
         cls.season: SeasonModel = SeasonModel(
-            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG", academic_year="2023-2024", season=3, is_current=True
+            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
+            academic_year="2023-2024",
+            season=3,
+            is_current=True,
         ).save()
         cls.admin: AdminModel = AdminModel(
             status="active",
@@ -151,7 +158,9 @@ class TestStudentAdminApi(unittest.TestCase):
             assert student.password
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.CREATE, "endpoint": Endpoint.STUDENT})
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.CREATE, "endpoint": Endpoint.STUDENT}
+            )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 
@@ -197,7 +206,9 @@ class TestStudentAdminApi(unittest.TestCase):
             assert doc.full_name == "Updated"
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.UPDATE, "endpoint": Endpoint.STUDENT})
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.STUDENT}
+            )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 2
 
@@ -221,7 +232,9 @@ class TestStudentAdminApi(unittest.TestCase):
             assert r.status_code == 404
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.DELETE, "endpoint": Endpoint.STUDENT})
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.DELETE, "endpoint": Endpoint.STUDENT}
+            )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 
@@ -323,7 +336,9 @@ class TestStudentAdminApi(unittest.TestCase):
             mock_get_data_spreadsheet.assert_called_once()
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.IMPORT, "endpoint": Endpoint.STUDENT})
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.IMPORT, "endpoint": Endpoint.STUDENT}
+            )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 
@@ -355,6 +370,8 @@ class TestStudentAdminApi(unittest.TestCase):
             mock_generate_random_password.assert_called_once()
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.UPDATE, "endpoint": Endpoint.STUDENT})
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.STUDENT}
+            )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1

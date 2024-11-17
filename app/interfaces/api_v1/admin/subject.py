@@ -2,9 +2,18 @@ from app.shared import response_object
 from fastapi import APIRouter, Body, Depends, Query, HTTPException, Path
 from typing import Optional
 
-from app.domain.subject.entity import Subject, SubjectInCreate, SubjectInUpdate, SubjectShortResponse
+from app.domain.subject.entity import (
+    Subject,
+    SubjectInCreate,
+    SubjectInUpdate,
+    SubjectShortResponse,
+)
 from app.domain.shared.enum import AdminRole, Sort
-from app.infra.security.security_service import authorization, get_current_active_admin, get_current_admin
+from app.infra.security.security_service import (
+    authorization,
+    get_current_active_admin,
+    get_current_admin,
+)
 from app.shared.decorator import response_decorator
 from app.use_cases.subject.list import ListSubjectsUseCase, ListSubjectsRequestObject
 from app.use_cases.subject.update import UpdateSubjectUseCase, UpdateSubjectRequestObject
@@ -23,9 +32,18 @@ from app.domain.subject.enum import StatusSubjectEnum
 from app.use_cases.subject.get_next_most_recent import GetSubjectNextMostRecentUseCase
 from app.use_cases.subject.get_last_sent_evaluation import GetSubjectLastSentEvaluationUseCase
 from app.use_cases.subject.get_last_sent_notification import GetSubjectLastSentNotificationUseCase
-from app.use_cases.subject.send_notification import SubjectSendNotificationRequestObject, SubjectSendNotificationUseCase
-from app.use_cases.subject.send_evaluation import SubjectSendEvaluationRequestObject, SubjectSendEvaluationUseCase
-from app.use_cases.subject.list_short import ListSubjectsShortRequestObject, ListSubjectsShortUseCase
+from app.use_cases.subject.send_notification import (
+    SubjectSendNotificationRequestObject,
+    SubjectSendNotificationUseCase,
+)
+from app.use_cases.subject.send_evaluation import (
+    SubjectSendEvaluationRequestObject,
+    SubjectSendEvaluationUseCase,
+)
+from app.use_cases.subject.list_short import (
+    ListSubjectsShortRequestObject,
+    ListSubjectsShortUseCase,
+)
 
 router = APIRouter()
 
@@ -37,7 +55,9 @@ router = APIRouter()
 )
 @response_decorator()
 def get_subject_next_most_recent(
-    get_subject_next_most_recent_use_case: GetSubjectNextMostRecentUseCase = Depends(GetSubjectNextMostRecentUseCase),
+    get_subject_next_most_recent_use_case: GetSubjectNextMostRecentUseCase = Depends(
+        GetSubjectNextMostRecentUseCase
+    ),
 ):
     response = get_subject_next_most_recent_use_case.process_request()
     return response
@@ -81,13 +101,17 @@ def get_subject_last_sent_evaluation(
 def send_subject_notification(
     subject_id: str = Path(..., title="Subject id"),
     current_admin: AdminModel = Depends(get_current_active_admin),
-    subject_send_notification_use_case: SubjectSendNotificationUseCase = Depends(SubjectSendNotificationUseCase),
+    subject_send_notification_use_case: SubjectSendNotificationUseCase = Depends(
+        SubjectSendNotificationUseCase
+    ),
 ):
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV])
     subject_send_notification_request_object = SubjectSendNotificationRequestObject.builder(
         subject_id=subject_id, current_admin=current_admin
     )
-    response = subject_send_notification_use_case.execute(request_object=subject_send_notification_request_object)
+    response = subject_send_notification_use_case.execute(
+        request_object=subject_send_notification_request_object
+    )
     return response
 
 
@@ -99,13 +123,17 @@ def send_subject_notification(
 def get_subject_evaluation(
     subject_id: str = Path(..., title="Subject id"),
     current_admin: AdminModel = Depends(get_current_active_admin),
-    subject_send_evaluation_use_case: SubjectSendEvaluationUseCase = Depends(SubjectSendEvaluationUseCase),
+    subject_send_evaluation_use_case: SubjectSendEvaluationUseCase = Depends(
+        SubjectSendEvaluationUseCase
+    ),
 ):
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV])
     subject_send_evaluation_request_object = SubjectSendEvaluationRequestObject.builder(
         subject_id=subject_id, current_admin=current_admin
     )
-    response = subject_send_evaluation_use_case.execute(request_object=subject_send_evaluation_request_object)
+    response = subject_send_evaluation_use_case.execute(
+        request_object=subject_send_evaluation_request_object
+    )
     return response
 
 
@@ -216,9 +244,13 @@ def update_subject(
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV, AdminRole.BKT])
     if AdminRole.BKT in current_admin.roles and AdminRole.BHV not in current_admin.roles:
         if payload.zoom is None:
-            return response_object.ResponseFailure.build_parameters_error(message="Vui lòng điền thông tin zoom")
+            return response_object.ResponseFailure.build_parameters_error(
+                message="Vui lòng điền thông tin zoom"
+            )
         payload = SubjectInUpdate(zoom=payload.zoom)
-    req_object = UpdateSubjectRequestObject.builder(id=id, payload=payload, current_admin=current_admin)
+    req_object = UpdateSubjectRequestObject.builder(
+        id=id, payload=payload, current_admin=current_admin
+    )
     response = update_subject_use_case.execute(request_object=req_object)
     return response
 

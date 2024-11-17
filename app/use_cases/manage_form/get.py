@@ -35,7 +35,9 @@ class GetManageFormCommonUseCase(use_case.UseCase):
         self.audit_log_repository = audit_log_repository
 
     def process_request(self, req_object: GetManageFormCommonRequestObject):
-        doc: ManageFormModel | None = self.manage_form_repository.find_one({"type": req_object.type})
+        doc: ManageFormModel | None = self.manage_form_repository.find_one(
+            {"type": req_object.type}
+        )
 
         if doc:
             return CommonResponse.model_validate(doc)

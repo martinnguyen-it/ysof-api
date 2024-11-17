@@ -28,7 +28,10 @@ if not settings.ENVIRONMENT == "testing":
     celery_app.conf.worker_prefetch_multiplier = 4
 
 celery_app.conf.beat_schedule = {
-    "add-every-2-minute": {"task": "app.infra.tasks.periodic.test.test", "schedule": crontab(minute="*/2")},
+    "add-every-2-minute": {
+        "task": "app.infra.tasks.periodic.test.test",
+        "schedule": crontab(minute="*/2"),
+    },
     "check-open-form-absent-every-sunday": {
         "task": "app.infra.tasks.periodic.manage_form_absent.open_form_absent_task",
         "schedule": crontab(minute="00", hour=12, day_of_week=0, month_of_year="1-5,9-12"),

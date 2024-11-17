@@ -6,7 +6,9 @@ from app.domain.subject.subject_evaluation.entity import (
     SubjectEvaluationQuestion,
     SubjectEvaluationQuestionInDB,
 )
-from app.infra.subject.subject_evaluation_question_repository import SubjectEvaluationQuestionRepository
+from app.infra.subject.subject_evaluation_question_repository import (
+    SubjectEvaluationQuestionRepository,
+)
 from app.models.subject_evaluation import SubjectEvaluationQuestionModel
 
 
@@ -30,11 +32,15 @@ class GetSubjectEvaluationQuestionUseCase(use_case.UseCase):
 
     def process_request(self, req_object: GetSubjectEvaluationQuestionRequestObject):
         subject_evaluation_question: SubjectEvaluationQuestionModel = (
-            self.subject_evaluation_question_repository.get_by_subject_id(subject_id=req_object.subject_id)
+            self.subject_evaluation_question_repository.get_by_subject_id(
+                subject_id=req_object.subject_id
+            )
         )
 
         if not subject_evaluation_question:
-            return response_object.ResponseFailure.build_not_found_error(message="Câu hỏi lượng giá chưa được thêm.")
+            return response_object.ResponseFailure.build_not_found_error(
+                message="Câu hỏi lượng giá chưa được thêm."
+            )
 
         return SubjectEvaluationQuestion(
             **SubjectEvaluationQuestionInDB.model_validate(subject_evaluation_question).model_dump(

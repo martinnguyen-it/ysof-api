@@ -135,7 +135,9 @@ def authorization(admin: AdminModel, roles: list[AdminRole], require_active: boo
         forbidden_exception: _description_
     """
     admin_in_db: AdminInDB = AdminInDB.model_validate(admin)
-    if not any(role in admin.roles for role in roles) or (require_active and not admin_in_db.active()):
+    if not any(role in admin.roles for role in roles) or (
+        require_active and not admin_in_db.active()
+    ):
         raise forbidden_exception
 
 

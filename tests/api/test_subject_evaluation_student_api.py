@@ -25,10 +25,17 @@ class TestSubjectEvaluationStudentApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
-        connect("mongoenginetest", host="mongodb://localhost:1234", mongo_client_class=mongomock.MongoClient)
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost:1234",
+            mongo_client_class=mongomock.MongoClient,
+        )
         cls.client = TestClient(app)
         cls.season: SeasonModel = SeasonModel(
-            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG", academic_year="2023-2024", season=3, is_current=True
+            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
+            academic_year="2023-2024",
+            season=3,
+            is_current=True,
         ).save()
         cls.admin: AdminModel = AdminModel(
             status="active",
@@ -84,10 +91,12 @@ class TestSubjectEvaluationStudentApi(unittest.TestCase):
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
-        cls.subject_evaluation_question: SubjectEvaluationQuestionModel = SubjectEvaluationQuestionModel(
-            subject=cls.subject,
-            questions=[{"title": "Hình ảnh Thiên Chúa", "type": "text", "answers": []}],
-        ).save()
+        cls.subject_evaluation_question: SubjectEvaluationQuestionModel = (
+            SubjectEvaluationQuestionModel(
+                subject=cls.subject,
+                questions=[{"title": "Hình ảnh Thiên Chúa", "type": "text", "answers": []}],
+            ).save()
+        )
         cls.subject_evaluation: SubjectEvaluationModel = SubjectEvaluationModel(
             quality={
                 "focused_right_topic": "Trung lập",

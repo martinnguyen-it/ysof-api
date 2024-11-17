@@ -24,7 +24,9 @@ class UploadImageRequestObject(request_object.ValidRequestObject):
 
 
 class UploadImageUseCase(use_case.UseCase):
-    def __init__(self, google_drive_service: GoogleDriveAPIService = Depends(GoogleDriveAPIService)):
+    def __init__(
+        self, google_drive_service: GoogleDriveAPIService = Depends(GoogleDriveAPIService)
+    ):
         self.google_drive_service = google_drive_service
 
     def process_request(self, req_object: UploadImageRequestObject):

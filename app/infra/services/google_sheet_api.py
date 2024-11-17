@@ -29,16 +29,26 @@ class GoogleSheetAPIService:
 
         file_id = spreadsheet.get("spreadsheetId")
 
-        file_info = self.google_drive_api_service.get(file_id=file_id, fields="id,mimeType,name,parents")
+        file_info = self.google_drive_api_service.get(
+            file_id=file_id, fields="id,mimeType,name,parents"
+        )
         previous_parents = ",".join(file_info.get("parents"))
-        self.google_drive_api_service.change_file_folder_parents(file_id=file_id, previous_parents=previous_parents)
+        self.google_drive_api_service.change_file_folder_parents(
+            file_id=file_id, previous_parents=previous_parents
+        )
 
         permissions = [
             AddPermissionDriveFile(
-                email_address=email_owner, role=RolePermissionGoogleEnum.WRITER, type=TypePermissionGoogleEnum.USER
+                email_address=email_owner,
+                role=RolePermissionGoogleEnum.WRITER,
+                type=TypePermissionGoogleEnum.USER,
             ),
-            AddPermissionDriveFile(role=RolePermissionGoogleEnum.READER, type=TypePermissionGoogleEnum.ANYONE),
+            AddPermissionDriveFile(
+                role=RolePermissionGoogleEnum.READER, type=TypePermissionGoogleEnum.ANYONE
+            ),
         ]
-        self.background_tasks.add_task(self.google_drive_api_service.add_multi_permissions, file_id, permissions)
+        self.background_tasks.add_task(
+            self.google_drive_api_service.add_multi_permissions, file_id, permissions
+        )
 
         return GoogleDriveAPIRes.model_validate(file_info)

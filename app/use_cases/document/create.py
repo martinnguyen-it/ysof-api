@@ -52,7 +52,9 @@ class CreateDocumentUseCase(use_case.UseCase):
         current_season = get_current_season_value()
 
         obj_in: DocumentInDB = DocumentInDB(
-            **req_object.document_in.model_dump(), season=current_season, author=req_object.current_admin
+            **req_object.document_in.model_dump(),
+            season=current_season,
+            author=req_object.current_admin,
         )
         document: DocumentModel = self.document_repository.create(document=obj_in)
 
@@ -67,7 +69,9 @@ class CreateDocumentUseCase(use_case.UseCase):
                 author_name=req_object.current_admin.full_name,
                 author_roles=req_object.current_admin.roles,
                 description=json.dumps(
-                    req_object.document_in.model_dump(exclude_none=True), default=str, ensure_ascii=False
+                    req_object.document_in.model_dump(exclude_none=True),
+                    default=str,
+                    ensure_ascii=False,
                 ),
             ),
         )

@@ -37,11 +37,17 @@ class LoginStudentUseCase(use_case.UseCase):
         if student:
             checker = verify_password(req_object.login_payload.password, student.password)
         if not student or not checker:
-            return response_object.ResponseFailure.build_parameters_error(message="Sai email hoặc mật khẩu")
+            return response_object.ResponseFailure.build_parameters_error(
+                message="Sai email hoặc mật khẩu"
+            )
 
         student_in_db = StudentInDB.model_validate(student)
         if student_in_db.disabled():
-            return response_object.ResponseFailure.build_parameters_error(message="Tài khoản của bạn đã bị khóa")
+            return response_object.ResponseFailure.build_parameters_error(
+                message="Tài khoản của bạn đã bị khóa"
+            )
 
         access_token = create_access_token(data=TokenData(email=student.email, id=str(student.id)))
-        return AuthStudentInfoInResponse(access_token=access_token, user=Student(**student_in_db.model_dump()))
+        return AuthStudentInfoInResponse(
+            access_token=access_token, user=Student(**student_in_db.model_dump())
+        )

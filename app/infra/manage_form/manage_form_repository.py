@@ -22,7 +22,11 @@ class ManageFormRepository:
 
     def update(self, id: ObjectId, data: ManageFormUpdateWithTime | dict[str, Any]) -> bool:
         try:
-            data = data.model_dump(exclude_none=True) if isinstance(data, ManageFormUpdateWithTime) else data
+            data = (
+                data.model_dump(exclude_none=True)
+                if isinstance(data, ManageFormUpdateWithTime)
+                else data
+            )
             ManageFormModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception:

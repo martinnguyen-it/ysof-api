@@ -47,7 +47,11 @@ class ListSubjectEvaluationRequestObject(request_object.ValidRequestObject):
         search: str | None = None,
     ) -> request_object.RequestObject:
         return ListSubjectEvaluationRequestObject(
-            page_index=page_index, page_size=page_size, search=search, sort=sort, subject_id=subject_id
+            page_index=page_index,
+            page_size=page_size,
+            search=search,
+            sort=sort,
+            subject_id=subject_id,
         )
 
 
@@ -55,7 +59,9 @@ class ListSubjectEvaluationUseCase(use_case.UseCase):
     def __init__(
         self,
         student_repository: StudentRepository = Depends(StudentRepository),
-        subject_evaluation_repository: SubjectEvaluationRepository = Depends(SubjectEvaluationRepository),
+        subject_evaluation_repository: SubjectEvaluationRepository = Depends(
+            SubjectEvaluationRepository
+        ),
         subject_repository: SubjectRepository = Depends(SubjectRepository),
     ):
         self.subject_evaluation_repository = subject_evaluation_repository
@@ -86,7 +92,10 @@ class ListSubjectEvaluationUseCase(use_case.UseCase):
                 },
                 page_size=100,
             )
-            match_pipeline = {**match_pipeline, "student": {"$in": [student.id for student in students]}}
+            match_pipeline = {
+                **match_pipeline,
+                "student": {"$in": [student.id for student in students]},
+            }
 
         docs: list[SubjectEvaluationModel] = self.subject_evaluation_repository.list(
             match_pipeline=match_pipeline,
@@ -99,7 +108,9 @@ class ListSubjectEvaluationUseCase(use_case.UseCase):
 
         return ManySubjectEvaluationAdminInResponse(
             pagination=Pagination(
-                total=total, page_index=req_object.page_index, total_pages=math.ceil(total / req_object.page_size)
+                total=total,
+                page_index=req_object.page_index,
+                total_pages=math.ceil(total / req_object.page_size),
             ),
             data=[
                 SubjectEvaluationAdmin(
@@ -107,12 +118,18 @@ class ListSubjectEvaluationUseCase(use_case.UseCase):
                         exclude={"student", "subject"}
                     ),
                     subject=SubjectInEvaluation(
-                        **SubjectInDB.model_validate(subject_evaluation.subject).model_dump(exclude=({"lecturer"})),
+                        **SubjectInDB.model_validate(subject_evaluation.subject).model_dump(
+                            exclude=({"lecturer"})
+                        ),
                         lecturer=LecturerInEvaluation(
-                            **LecturerInDB.model_validate(subject_evaluation.subject.lecturer).model_dump()
+                            **LecturerInDB.model_validate(
+                                subject_evaluation.subject.lecturer
+                            ).model_dump()
                         ),
                     ),
-                    student=StudentInEvaluation(**StudentInDB.model_validate(subject_evaluation.student).model_dump()),
+                    student=StudentInEvaluation(
+                        **StudentInDB.model_validate(subject_evaluation.student).model_dump()
+                    ),
                 )
                 for subject_evaluation in docs
             ],

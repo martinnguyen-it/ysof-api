@@ -32,7 +32,9 @@ class SubjectSendNotificationRequestObject(request_object.ValidRequestObject):
         if invalid_req.has_errors():
             return invalid_req
 
-        return SubjectSendNotificationRequestObject(subject_id=subject_id, current_admin=current_admin)
+        return SubjectSendNotificationRequestObject(
+            subject_id=subject_id, current_admin=current_admin
+        )
 
 
 class SubjectSendNotificationUseCase(use_case.UseCase):
@@ -49,16 +51,22 @@ class SubjectSendNotificationUseCase(use_case.UseCase):
         self.audit_log_repository = audit_log_repository
 
     def process_request(self, req_object: SubjectSendNotificationRequestObject):
-        subject: Optional[SubjectModel] = self.subject_repository.get_by_id(subject_id=req_object.subject_id)
+        subject: Optional[SubjectModel] = self.subject_repository.get_by_id(
+            subject_id=req_object.subject_id
+        )
         manage_form: ManageFormModel | None = self.manage_form_repository.find_one(
             {"type": FormType.SUBJECT_EVALUATION}
         )
 
         if not subject:
-            return response_object.ResponseFailure.build_not_found_error(message="Môn học không tồn tại")
+            return response_object.ResponseFailure.build_not_found_error(
+                message="Môn học không tồn tại"
+            )
 
         if not subject.zoom.link or not subject.zoom.meeting_id or not subject.zoom.pass_code:
-            return response_object.ResponseFailure.build_parameters_error(message="Môn học chưa có thông tin zoom.")
+            return response_object.ResponseFailure.build_parameters_error(
+                message="Môn học chưa có thông tin zoom."
+            )
 
         res = self.subject_repository.update(
             subject.id, data=SubjectInUpdateTime(status=StatusSubjectEnum.SENT_NOTIFICATION)
@@ -94,7 +102,11 @@ class SubjectSendNotificationUseCase(use_case.UseCase):
                 author_name=req_object.current_admin.full_name,
                 author_roles=req_object.current_admin.roles,
                 description=json.dumps(
-                    {"name": "Send email notification", "subject_id": req_object.subject_id, "subject": subject.title},
+                    {
+                        "name": "Send email notification",
+                        "subject_id": req_object.subject_id,
+                        "subject": subject.title,
+                    },
                     default=str,
                     ensure_ascii=False,
                 ),

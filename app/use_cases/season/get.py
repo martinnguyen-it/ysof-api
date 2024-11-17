@@ -27,8 +27,12 @@ class GetSeasonCase(use_case.UseCase):
         self.season_repository = season_repository
 
     def process_request(self, req_object: GetSeasonRequestObject):
-        season: Optional[SeasonModel] = self.season_repository.get_by_id(season_id=req_object.season_id)
+        season: Optional[SeasonModel] = self.season_repository.get_by_id(
+            season_id=req_object.season_id
+        )
         if not season:
-            return response_object.ResponseFailure.build_not_found_error(message="Năm học không tồn tại")
+            return response_object.ResponseFailure.build_not_found_error(
+                message="Năm học không tồn tại"
+            )
 
         return Season(**SeasonInDB.model_validate(season).model_dump())

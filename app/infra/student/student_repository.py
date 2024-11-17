@@ -141,7 +141,9 @@ class StudentRepository:
         sort: Optional[Dict[str, int]] = None,
     ):
         total = self.count_list(match_pipeline=match_pipeline)
-        resp = ListSubjectRegistrationInResponse(data=[], pagination=Pagination(total_pages=0, total=total))
+        resp = ListSubjectRegistrationInResponse(
+            data=[], pagination=Pagination(total_pages=0, total=total)
+        )
         total_pages = 0
 
         pipeline = []
@@ -171,10 +173,14 @@ class StudentRepository:
             total_pages = total_pages + 1
             total_regis = len(record.get("subject_registrations"))
             subject_registrations = (
-                [str(doc["subject"]) for doc in record.get("subject_registrations")] if total_regis > 0 else []
+                [str(doc["subject"]) for doc in record.get("subject_registrations")]
+                if total_regis > 0
+                else []
             )
             record.pop("subject_registrations")
-            student = StudentInSubject(**StudentInDB.model_validate(StudentModel.from_mongo(record)).model_dump())
+            student = StudentInSubject(
+                **StudentInDB.model_validate(StudentModel.from_mongo(record)).model_dump()
+            )
             resp.data.append(
                 _SubjectRegistrationInResponse(
                     student=student, subject_registrations=subject_registrations, total=total_regis

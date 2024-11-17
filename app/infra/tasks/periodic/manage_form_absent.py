@@ -25,13 +25,17 @@ def open_form_absent_task():
                 manage_form_repository.update(
                     id=form.id,
                     data=ManageFormUpdateWithTime(
-                        data={"subject_id": str(subject.id)}, status=FormStatus.ACTIVE, type=FormType.SUBJECT_ABSENT
+                        data={"subject_id": str(subject.id)},
+                        status=FormStatus.ACTIVE,
+                        type=FormType.SUBJECT_ABSENT,
                     ),
                 )
             else:
                 manage_form_repository.create(
                     ManageFormInDB(
-                        data={"subject_id": str(subject.id)}, status=FormStatus.ACTIVE, type=FormType.SUBJECT_ABSENT
+                        data={"subject_id": str(subject.id)},
+                        status=FormStatus.ACTIVE,
+                        type=FormType.SUBJECT_ABSENT,
                     )
                 )
 
@@ -44,10 +48,13 @@ def close_form_absent_task():
     logger.info("[close_form_absent_task] running...")
     try:
         manage_form_repository = ManageFormRepository()
-        form: ManageFormModel | None = manage_form_repository.find_one({"type": FormType.SUBJECT_ABSENT})
+        form: ManageFormModel | None = manage_form_repository.find_one(
+            {"type": FormType.SUBJECT_ABSENT}
+        )
         if form and form.status == FormStatus.ACTIVE:
             manage_form_repository.update(
-                id=form.id, data={"status": FormStatus.CLOSED, "updated_at": datetime.now(timezone.utc)}
+                id=form.id,
+                data={"status": FormStatus.CLOSED, "updated_at": datetime.now(timezone.utc)},
             )
     except Exception as ex:
         logger.exception(ex)

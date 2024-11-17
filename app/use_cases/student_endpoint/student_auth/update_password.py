@@ -33,7 +33,9 @@ class UpdateStudentPasswordUseCase(use_case.UseCase):
         self.student_repository = student_repository
 
     def process_request(self, req_object: UpdateStudentPasswordRequestObject):
-        checker = verify_password(req_object.payload.old_password, req_object.current_student.password)
+        checker = verify_password(
+            req_object.payload.old_password, req_object.current_student.password
+        )
         if not checker:
             return response_object.ResponseFailure.build_parameters_error(message="Sai mật khẩu")
 
@@ -47,4 +49,6 @@ class UpdateStudentPasswordUseCase(use_case.UseCase):
         if res:
             return {"success": True}
         else:
-            return response_object.ResponseFailure.build_system_error(message="Something went wrong")
+            return response_object.ResponseFailure.build_system_error(
+                message="Something went wrong"
+            )

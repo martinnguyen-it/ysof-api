@@ -116,7 +116,9 @@ def _deco_retry(
     return f_retry  # true decorator
 
 
-def retry_decorator(exc=Exception, tries=10, timeout_secs=1.0, logger=None, callback_by_exception=None):
+def retry_decorator(
+    exc=Exception, tries=10, timeout_secs=1.0, logger=None, callback_by_exception=None
+):
     """
     Retry calling the decorated function using an exponential backoff.
     :param exc: catch all exceptions, a specific exception, or an iterable of exceptions

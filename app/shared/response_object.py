@@ -101,7 +101,10 @@ class ResponseFailure:
         """
 
         message = "\n".join(
-            ["{}: {}".format(err["parameter"], err["message"]) for err in invalid_request_object.errors]
+            [
+                "{}: {}".format(err["parameter"], err["message"])
+                for err in invalid_request_object.errors
+            ]
         )
 
         return cls.build_parameters_error(message)

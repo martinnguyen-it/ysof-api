@@ -33,7 +33,9 @@ class UpdateAdminPasswordUseCase(use_case.UseCase):
         self.admin_repository = admin_repository
 
     def process_request(self, req_object: UpdateAdminPasswordRequestObject):
-        checker = verify_password(req_object.payload.old_password, req_object.current_admin.password)
+        checker = verify_password(
+            req_object.payload.old_password, req_object.current_admin.password
+        )
         if not checker:
             return response_object.ResponseFailure.build_parameters_error(message="Sai mật khẩu")
 
@@ -47,4 +49,6 @@ class UpdateAdminPasswordUseCase(use_case.UseCase):
         if res:
             return {"success": True}
         else:
-            return response_object.ResponseFailure.build_system_error(message="Something went wrong")
+            return response_object.ResponseFailure.build_system_error(
+                message="Something went wrong"
+            )

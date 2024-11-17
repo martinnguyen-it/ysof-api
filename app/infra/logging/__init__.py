@@ -71,7 +71,9 @@ class CustomizeLogger:
         format_string = LOGURU_FORMAT
 
         if record["extra"].get("payload") is not None:
-            record["extra"]["payload"] = pformat(record["extra"]["payload"], indent=4, compact=True, width=88)
+            record["extra"]["payload"] = pformat(
+                record["extra"]["payload"], indent=4, compact=True, width=88
+            )
             format_string += "\n<level>{extra[payload]}</level>"
 
         format_string += "{exception}\n"

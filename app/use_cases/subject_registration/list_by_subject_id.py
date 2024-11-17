@@ -25,17 +25,25 @@ class ListSubjectRegistrationsBySubjectIdUseCase(use_case.UseCase):
     def __init__(
         self,
         subject_repository: SubjectRepository = Depends(SubjectRepository),
-        subject_registration_repository: SubjectRegistrationRepository = Depends(SubjectRegistrationRepository),
+        subject_registration_repository: SubjectRegistrationRepository = Depends(
+            SubjectRegistrationRepository
+        ),
     ):
         self.subject_repository = subject_repository
         self.subject_registration_repository = subject_registration_repository
 
     def process_request(self, req_object: ListSubjectRegistrationsBySubjectIdRequestObject):
-        subject: Optional[SubjectModel] = self.subject_repository.get_by_id(subject_id=req_object.subject_id)
+        subject: Optional[SubjectModel] = self.subject_repository.get_by_id(
+            subject_id=req_object.subject_id
+        )
         if not subject:
-            return response_object.ResponseFailure.build_not_found_error(message="Môn học không tồn tại")
-        docs: list[SubjectRegistrationModel] = self.subject_registration_repository.get_by_subject_id(
-            subject_id=subject.id
+            return response_object.ResponseFailure.build_not_found_error(
+                message="Môn học không tồn tại"
+            )
+        docs: list[SubjectRegistrationModel] = (
+            self.subject_registration_repository.get_by_subject_id(subject_id=subject.id)
         )
 
-        return [StudentInSubject(**StudentInDB.model_validate(doc.student).model_dump()) for doc in docs]
+        return [
+            StudentInSubject(**StudentInDB.model_validate(doc.student).model_dump()) for doc in docs
+        ]

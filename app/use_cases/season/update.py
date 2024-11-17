@@ -13,7 +13,9 @@ class UpdateSeasonRequestObject(request_object.ValidRequestObject):
         self.obj_in = obj_in
 
     @classmethod
-    def builder(cls, id: str, payload: Optional[SeasonInUpdate] = None) -> request_object.RequestObject:
+    def builder(
+        cls, id: str, payload: Optional[SeasonInUpdate] = None
+    ) -> request_object.RequestObject:
         invalid_req = request_object.InvalidRequestObject()
         if id is None:
             invalid_req.add_error("id", "Invalid id")
@@ -36,7 +38,9 @@ class UpdateSeasonUseCase(use_case.UseCase):
         if not season:
             return response_object.ResponseFailure.build_not_found_error("Năm học không tồn tại")
 
-        self.season_repository.update(id=season.id, data=SeasonInUpdateTime(**req_object.obj_in.model_dump()))
+        self.season_repository.update(
+            id=season.id, data=SeasonInUpdateTime(**req_object.obj_in.model_dump())
+        )
         season.reload()
 
         return Season(**SeasonInDB.model_validate(season).model_dump())

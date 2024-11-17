@@ -42,7 +42,11 @@ class LecturerRepository:
 
     def update(self, id: ObjectId, data: Union[LecturerInUpdateTime, Dict[str, Any]]) -> bool:
         try:
-            data = data.model_dump(exclude_none=True) if isinstance(data, LecturerInUpdateTime) else data
+            data = (
+                data.model_dump(exclude_none=True)
+                if isinstance(data, LecturerInUpdateTime)
+                else data
+            )
             LecturerModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception:
@@ -102,7 +106,9 @@ class LecturerRepository:
         except Exception:
             return False
 
-    def find_one(self, conditions: Dict[str, Union[str, bool, ObjectId]]) -> Optional[LecturerModel]:
+    def find_one(
+        self, conditions: Dict[str, Union[str, bool, ObjectId]]
+    ) -> Optional[LecturerModel]:
         try:
             doc = LecturerModel._get_collection().find_one(conditions)
             return LecturerModel.from_mongo(doc) if doc else None

@@ -8,7 +8,10 @@ from app.infra.season.season_repository import SeasonRepository
 
 class ListSeasonsRequestObject(request_object.ValidRequestObject):
     def __init__(
-        self, page_index: int | None = None, page_size: int | None = None, sort: Optional[dict[str, int]] = None
+        self,
+        page_index: int | None = None,
+        page_size: int | None = None,
+        sort: Optional[dict[str, int]] = None,
     ):
         self.sort = sort
         self.page_index = page_index
@@ -16,7 +19,10 @@ class ListSeasonsRequestObject(request_object.ValidRequestObject):
 
     @classmethod
     def builder(
-        cls, page_index: int | None = None, page_size: int | None = None, sort: Optional[dict[str, int]] = None
+        cls,
+        page_index: int | None = None,
+        page_size: int | None = None,
+        sort: Optional[dict[str, int]] = None,
     ):
         return ListSeasonsRequestObject(sort=sort, page_index=page_index, page_size=page_size)
 

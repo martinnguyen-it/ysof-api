@@ -110,7 +110,9 @@ class SubjectEvaluationQuestionBase(BaseEntity):
     questions: list[Question]
 
 
-class SubjectEvaluationQuestionInDB(IDModelMixin, DateTimeModelMixin, SubjectEvaluationQuestionBase):
+class SubjectEvaluationQuestionInDB(
+    IDModelMixin, DateTimeModelMixin, SubjectEvaluationQuestionBase
+):
     subject: PydanticSubjectType
     # https://docs.pydantic.dev/2.4/concepts/models/#arbitrary-class-instances
     model_config = ConfigDict(from_attributes=True)

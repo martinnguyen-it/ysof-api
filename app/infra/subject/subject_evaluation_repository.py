@@ -27,16 +27,24 @@ class SubjectEvaluationRepository:
 
         return new_doc
 
-    def find_one(self, conditions: list[str, str | bool | ObjectId]) -> SubjectEvaluationModel | None:
+    def find_one(
+        self, conditions: list[str, str | bool | ObjectId]
+    ) -> SubjectEvaluationModel | None:
         try:
             doc = SubjectEvaluationModel._get_collection().find_one(conditions)
             return SubjectEvaluationModel.from_mongo(doc) if doc else None
         except Exception:
             return None
 
-    def update(self, id: ObjectId, data: Union[SubjectEvaluationInUpdateTime, Dict[str, Any]]) -> bool:
+    def update(
+        self, id: ObjectId, data: Union[SubjectEvaluationInUpdateTime, Dict[str, Any]]
+    ) -> bool:
         try:
-            data = data.model_dump(exclude_none=True) if isinstance(data, SubjectEvaluationInUpdateTime) else data
+            data = (
+                data.model_dump(exclude_none=True)
+                if isinstance(data, SubjectEvaluationInUpdateTime)
+                else data
+            )
             SubjectEvaluationModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception:

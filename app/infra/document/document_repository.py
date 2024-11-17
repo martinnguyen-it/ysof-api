@@ -42,7 +42,11 @@ class DocumentRepository:
 
     def update(self, id: ObjectId, data: Union[DocumentInUpdateTime, Dict[str, Any]]) -> bool:
         try:
-            data = data.model_dump(exclude_none=True) if isinstance(data, DocumentInUpdateTime) else data
+            data = (
+                data.model_dump(exclude_none=True)
+                if isinstance(data, DocumentInUpdateTime)
+                else data
+            )
             DocumentModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception:

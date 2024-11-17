@@ -32,7 +32,9 @@ class SubjectSendEvaluationRequestObject(request_object.ValidRequestObject):
         if invalid_req.has_errors():
             return invalid_req
 
-        return SubjectSendEvaluationRequestObject(subject_id=subject_id, current_admin=current_admin)
+        return SubjectSendEvaluationRequestObject(
+            subject_id=subject_id, current_admin=current_admin
+        )
 
 
 class SubjectSendEvaluationUseCase(use_case.UseCase):
@@ -49,13 +51,17 @@ class SubjectSendEvaluationUseCase(use_case.UseCase):
         self.audit_log_repository = audit_log_repository
 
     def process_request(self, req_object: SubjectSendEvaluationRequestObject):
-        subject: Optional[SubjectModel] = self.subject_repository.get_by_id(subject_id=req_object.subject_id)
+        subject: Optional[SubjectModel] = self.subject_repository.get_by_id(
+            subject_id=req_object.subject_id
+        )
         manage_form: ManageFormModel | None = self.manage_form_repository.find_one(
             {"type": FormType.SUBJECT_EVALUATION}
         )
 
         if not subject:
-            return response_object.ResponseFailure.build_not_found_error(message="Môn học không tồn tại")
+            return response_object.ResponseFailure.build_not_found_error(
+                message="Môn học không tồn tại"
+            )
         res = self.subject_repository.update(
             subject.id, data=SubjectInUpdateTime(status=StatusSubjectEnum.SENT_EVALUATION)
         )

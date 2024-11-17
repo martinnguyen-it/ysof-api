@@ -43,7 +43,11 @@ class SubjectRepository:
 
     def update(self, id: ObjectId, data: Union[SubjectInUpdateTime, Dict[str, Any]]) -> bool:
         try:
-            data = data.model_dump(exclude_none=True) if isinstance(data, SubjectInUpdateTime) else data
+            data = (
+                data.model_dump(exclude_none=True)
+                if isinstance(data, SubjectInUpdateTime)
+                else data
+            )
             SubjectModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception:
@@ -111,14 +115,18 @@ class SubjectRepository:
         except Exception:
             return None
 
-    def find(self, conditions: Dict[str, Union[str, bool, ObjectId]]) -> List[Optional[SubjectModel]]:
+    def find(
+        self, conditions: Dict[str, Union[str, bool, ObjectId]]
+    ) -> List[Optional[SubjectModel]]:
         try:
             docs = SubjectModel._get_collection().find(conditions)
             return [SubjectModel.from_mongo(doc) for doc in docs] if docs else []
         except Exception:
             return []
 
-    def bulk_update(self, data: Union[SubjectInUpdateTime, Dict[str, Any]], entities: List[SubjectModel]) -> bool:
+    def bulk_update(
+        self, data: Union[SubjectInUpdateTime, Dict[str, Any]], entities: List[SubjectModel]
+    ) -> bool:
         try:
             if len(entities) == 0:
                 return False

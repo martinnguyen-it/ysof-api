@@ -16,10 +16,14 @@ class GetSubjectRegistrationStudentRequestObject(request_object.ValidRequestObje
 class GetSubjectRegistrationStudentCase(use_case.UseCase):
     def __init__(
         self,
-        subject_registration_repository: SubjectRegistrationRepository = Depends(SubjectRegistrationRepository),
+        subject_registration_repository: SubjectRegistrationRepository = Depends(
+            SubjectRegistrationRepository
+        ),
     ):
         self.subject_registration_repository = subject_registration_repository
 
     def process_request(self, req_object: GetSubjectRegistrationStudentRequestObject):
-        res = self.subject_registration_repository.get_by_student_id(student_id=req_object.student_id)
+        res = self.subject_registration_repository.get_by_student_id(
+            student_id=req_object.student_id
+        )
         return res

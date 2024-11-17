@@ -31,7 +31,9 @@ class GoogleDriveAPIService:
     def _get_oauth_token(self):
         creds = None
         try:
-            creds, _ = google.auth.load_credentials_from_file(settings.KEY_PATH_GCLOUD, scopes=SCOPES)
+            creds, _ = google.auth.load_credentials_from_file(
+                settings.KEY_PATH_GCLOUD, scopes=SCOPES
+            )
         except Exception:
             logger.error("Failed to retrieve default credentials gcloud.")
             raise HTTPException(status_code=400, detail="Hệ thống Cloud bị lỗi.")
@@ -43,18 +45,29 @@ class GoogleDriveAPIService:
     def create(self, file: UploadFile, name: Optional[str] = None) -> GoogleDriveAPIRes:
         try:
             # Creating file metadata
-            file_metadata = {"name": name if name else file.filename, "parents": [settings.FOLDER_GCLOUD_ID]}
+            file_metadata = {
+                "name": name if name else file.filename,
+                "parents": [settings.FOLDER_GCLOUD_ID],
+            }
 
             # Creating media upload object
-            media = MediaIoBaseUpload(io.BytesIO(file.file.read()), mimetype=file.content_type, resumable=True)
+            media = MediaIoBaseUpload(
+                io.BytesIO(file.file.read()), mimetype=file.content_type, resumable=True
+            )
 
             # Uploading the file
-            res = self.service.files().create(body=file_metadata, media_body=media, fields="id,mimeType,name").execute()
+            res = (
+                self.service.files()
+                .create(body=file_metadata, media_body=media, fields="id,mimeType,name")
+                .execute()
+            )
             data = GoogleDriveAPIRes.model_validate(res)
 
             # Add permission for file
             self.add_permission(
-                file_id=data.id, role=RolePermissionGoogleEnum.READER, type=TypePermissionGoogleEnum.ANYONE
+                file_id=data.id,
+                role=RolePermissionGoogleEnum.READER,
+                type=TypePermissionGoogleEnum.ANYONE,
             )
 
             return data
@@ -72,7 +85,9 @@ class GoogleDriveAPIService:
 
         except HttpError as error:
             if "File not found" in str(error):
-                logger.error(f"Parent folder with ID {settings.FOLDER_GCLOUD_ID} not found. >> {error}")
+                logger.error(
+                    f"Parent folder with ID {settings.FOLDER_GCLOUD_ID} not found. >> {error}"
+                )
                 raise HTTPException(status_code=400, detail="Không tìm thấy file.")
             else:
                 logger.error(f"An error occurred when deleting the file: {error}")
@@ -86,7 +101,9 @@ class GoogleDriveAPIService:
 
         except HttpError as error:
             if "File not found" in str(error):
-                logger.error(f"Parent folder with ID {settings.FOLDER_GCLOUD_ID} not found. >> {error}")
+                logger.error(
+                    f"Parent folder with ID {settings.FOLDER_GCLOUD_ID} not found. >> {error}"
+                )
                 raise HTTPException(status_code=400, detail="Không tìm thấy file.")
             else:
                 logger.error(f"An error occurred when deleting the file: {error}")
@@ -99,7 +116,9 @@ class GoogleDriveAPIService:
 
         except HttpError as error:
             if "File not found" in str(error):
-                logger.error(f"Parent folder with ID {settings.FOLDER_GCLOUD_ID} not found. >> {error}")
+                logger.error(
+                    f"Parent folder with ID {settings.FOLDER_GCLOUD_ID} not found. >> {error}"
+                )
                 raise HTTPException(status_code=400, detail="Không tìm thấy file.")
             else:
                 logger.error(f"An error occurred when get the file: {error}")

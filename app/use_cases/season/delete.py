@@ -31,7 +31,9 @@ class DeleteSeasonUseCase(use_case.UseCase):
         if not season:
             return response_object.ResponseFailure.build_not_found_error("Năm học không tồn tại")
         if season.is_current is True:
-            return response_object.ResponseFailure.build_parameters_error("Không thể xóa mùa đang hoạt động")
+            return response_object.ResponseFailure.build_parameters_error(
+                "Không thể xóa mùa đang hoạt động"
+            )
 
         try:
             self.season_repository.delete(id=season.id)

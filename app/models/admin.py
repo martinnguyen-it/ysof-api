@@ -54,7 +54,13 @@ class AdminModel(Document):
 
     meta = {
         "collection": "Admins",
-        "indexes": [{"fields": ["email"], "unique": True}, "status", "latest_season", "full_name", "holy_name"],
+        "indexes": [
+            {"fields": ["email"], "unique": True},
+            "status",
+            "latest_season",
+            "full_name",
+            "holy_name",
+        ],
         "allow_inheritance": True,
         "index_cls": False,
     }

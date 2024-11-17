@@ -42,7 +42,9 @@ class SeasonRepository:
 
     def update(self, id: ObjectId, data: Union[SeasonInUpdateTime, Dict[str, Any]]) -> bool:
         try:
-            data = data.model_dump(exclude_none=True) if isinstance(data, SeasonInUpdateTime) else data
+            data = (
+                data.model_dump(exclude_none=True) if isinstance(data, SeasonInUpdateTime) else data
+            )
             SeasonModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception:
@@ -108,12 +110,18 @@ class SeasonRepository:
         except Exception:
             raise HTTPException(status_code=400, detail="Admin cần khởi tạo mùa")
 
-    def bulk_update(self, data: Union[SeasonInUpdate, Dict[str, Any]], entities: List[SeasonModel]) -> bool:
+    def bulk_update(
+        self, data: Union[SeasonInUpdate, Dict[str, Any]], entities: List[SeasonModel]
+    ) -> bool:
         try:
             if len(entities) == 0:
                 return False
 
-            data = data.model_dump(exclude_none=True, exclude_unset=True) if isinstance(data, SeasonInUpdate) else data
+            data = (
+                data.model_dump(exclude_none=True, exclude_unset=True)
+                if isinstance(data, SeasonInUpdate)
+                else data
+            )
             operations = [
                 pymongo.UpdateOne(
                     {"_id": season.id},

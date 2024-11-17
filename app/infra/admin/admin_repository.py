@@ -57,7 +57,9 @@ class AdminRepository:
 
     def update(self, id: ObjectId, data: Union[AdminInUpdateTime, Dict[str, Any]]) -> bool:
         try:
-            data = data.model_dump(exclude_none=True) if isinstance(data, AdminInUpdateTime) else data
+            data = (
+                data.model_dump(exclude_none=True) if isinstance(data, AdminInUpdateTime) else data
+            )
             AdminModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception:

@@ -62,7 +62,10 @@ class UpdateAbsentRequestObject(request_object.ValidRequestObject):
             return invalid_req
 
         return UpdateAbsentRequestObject(
-            subject_id=subject_id, payload=payload, current_student=current_student, current_admin=current_admin
+            subject_id=subject_id,
+            payload=payload,
+            current_student=current_student,
+            current_admin=current_admin,
         )
 
 
@@ -89,7 +92,9 @@ class UpdateAbsentUseCase(use_case.UseCase):
             is_student_request = False
             student = self.student_repository.get_by_id(req_object.current_student)
             if not student:
-                return response_object.ResponseFailure.build_not_found_error(message="Học viên không tồn tại")
+                return response_object.ResponseFailure.build_not_found_error(
+                    message="Học viên không tồn tại"
+                )
             req_object.current_student = student
 
         current_season: int = get_current_season_value()
@@ -103,23 +108,33 @@ class UpdateAbsentUseCase(use_case.UseCase):
             {"student": req_object.current_student.id, "subject": ObjectId(req_object.subject_id)}
         )
         if not absent:
-            return response_object.ResponseFailure.build_not_found_error(message="Đơn nghỉ phép không tồn tại")
+            return response_object.ResponseFailure.build_not_found_error(
+                message="Đơn nghỉ phép không tồn tại"
+            )
 
         if is_student_request:
             form_absent: ManageFormModel | None = self.manage_form_repository.find_one(
                 {"type": FormType.SUBJECT_ABSENT}
             )
             if not form_absent or form_absent.status == FormStatus.INACTIVE:
-                return response_object.ResponseFailure.build_system_error(message="Form chưa được mở.")
+                return response_object.ResponseFailure.build_system_error(
+                    message="Form chưa được mở."
+                )
             if form_absent.status == FormStatus.CLOSED:
-                return response_object.ResponseFailure.build_system_error(message="Form đã được đóng.")
-            form_absent: ManageFormEvaluationOrAbsent = ManageFormEvaluationOrAbsent.model_validate(form_absent)
+                return response_object.ResponseFailure.build_system_error(
+                    message="Form đã được đóng."
+                )
+            form_absent: ManageFormEvaluationOrAbsent = ManageFormEvaluationOrAbsent.model_validate(
+                form_absent
+            )
             if req_object.subject_id != form_absent.data.subject_id:
                 return response_object.ResponseFailure.build_parameters_error(
                     message="Form hiện tại không mở cho môn học này."
                 )
 
-        self.absent_repository.update(id=absent.id, data=AbsentInUpdateTime(**req_object.payload.model_dump()))
+        self.absent_repository.update(
+            id=absent.id, data=AbsentInUpdateTime(**req_object.payload.model_dump())
+        )
         absent.reload()
         if not is_student_request:
             self.background_tasks.add_task(
@@ -149,7 +164,9 @@ class UpdateAbsentUseCase(use_case.UseCase):
                 **AbsentInDB.model_validate(absent).model_dump(exclude={"student", "subject"}),
                 subject=SubjectInEvaluation(
                     **SubjectInDB.model_validate(absent.subject).model_dump(exclude=({"lecturer"})),
-                    lecturer=LecturerInEvaluation(**LecturerInDB.model_validate(absent.subject.lecturer).model_dump()),
+                    lecturer=LecturerInEvaluation(
+                        **LecturerInDB.model_validate(absent.subject.lecturer).model_dump()
+                    ),
                 ),
             )
             if is_student_request
@@ -157,7 +174,9 @@ class UpdateAbsentUseCase(use_case.UseCase):
                 **AbsentInDB.model_validate(absent).model_dump(exclude={"student", "subject"}),
                 subject=SubjectInEvaluation(
                     **SubjectInDB.model_validate(absent.subject).model_dump(exclude=({"lecturer"})),
-                    lecturer=LecturerInEvaluation(**LecturerInDB.model_validate(absent.subject.lecturer).model_dump()),
+                    lecturer=LecturerInEvaluation(
+                        **LecturerInDB.model_validate(absent.subject.lecturer).model_dump()
+                    ),
                 ),
                 student=Student(**StudentInDB.model_validate(absent.student).model_dump()),
             )

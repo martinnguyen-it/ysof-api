@@ -51,7 +51,9 @@ class UpdateAdminUseCase(use_case.UseCase):
         if not admin:
             return response_object.ResponseFailure.build_not_found_error("Admin không tồn tại")
 
-        self.admin_repository.update(id=admin.id, data=AdminInUpdateTime(**req_object.obj_in.model_dump()))
+        self.admin_repository.update(
+            id=admin.id, data=AdminInUpdateTime(**req_object.obj_in.model_dump())
+        )
         admin.reload()
 
         current_season = get_current_season_value()

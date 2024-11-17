@@ -20,7 +20,11 @@ class TestSeasonApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
-        connect("mongoenginetest", host="mongodb://localhost:1234", mongo_client_class=mongomock.MongoClient)
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost:1234",
+            mongo_client_class=mongomock.MongoClient,
+        )
         cls.client = TestClient(app)
         cls.user: AdminModel = AdminModel(
             status="active",
@@ -49,7 +53,10 @@ class TestSeasonApi(unittest.TestCase):
             password=get_password_hash(password="local@local"),
         ).save()
         cls.season: SeasonModel = SeasonModel(
-            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG", academic_year="2023-2024", season=2, is_current=True
+            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
+            academic_year="2023-2024",
+            season=2,
+            is_current=True,
         ).save()
         cls.season2: SeasonModel = SeasonModel(
             title="Truong hoc", academic_year="2022-2023", season=1, is_current=False
@@ -64,7 +71,11 @@ class TestSeasonApi(unittest.TestCase):
             mock_token.return_value = TokenData(email=self.user2.email)
             r = self.client.post(
                 "/api/v1/seasons",
-                json={"title": "CÙNG GIÊSU, NGƯỜI TRẺ DÁM ƯỚC MƠ", "season": 3, "academic_year": "2023-2024"},
+                json={
+                    "title": "CÙNG GIÊSU, NGƯỜI TRẺ DÁM ƯỚC MƠ",
+                    "season": 3,
+                    "academic_year": "2023-2024",
+                },
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -74,7 +85,11 @@ class TestSeasonApi(unittest.TestCase):
             mock_token.return_value = TokenData(email=self.user.email)
             r = self.client.post(
                 "/api/v1/seasons",
-                json={"title": "CÙNG GIÊSU, NGƯỜI TRẺ DÁM ƯỚC MƠ", "season": 3, "academic_year": "2023-2024"},
+                json={
+                    "title": "CÙNG GIÊSU, NGƯỜI TRẺ DÁM ƯỚC MƠ",
+                    "season": 3,
+                    "academic_year": "2023-2024",
+                },
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },

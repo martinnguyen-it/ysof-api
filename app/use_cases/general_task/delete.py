@@ -43,7 +43,9 @@ class DeleteGeneralTaskUseCase(use_case.UseCase):
         self.audit_log_repository = audit_log_repository
 
     def process_request(self, req_object: DeleteGeneralTaskRequestObject):
-        general_task: Optional[GeneralTaskModel] = self.general_task_repository.get_by_id(req_object.id)
+        general_task: Optional[GeneralTaskModel] = self.general_task_repository.get_by_id(
+            req_object.id
+        )
         if not general_task:
             return response_object.ResponseFailure.build_not_found_error("Tài liệu không tồn tại")
         if general_task.role not in req_object.current_admin.roles and not any(

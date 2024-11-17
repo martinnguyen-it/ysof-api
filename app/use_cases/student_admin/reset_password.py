@@ -42,13 +42,19 @@ class ResetPasswordStudentUseCase(use_case.UseCase):
         self.audit_log_repository = audit_log_repository
 
     def process_request(self, req_object: ResetPasswordStudentRequestObject):
-        student: Optional[StudentModel] = self.student_repository.get_by_id(student_id=req_object.student_id)
+        student: Optional[StudentModel] = self.student_repository.get_by_id(
+            student_id=req_object.student_id
+        )
         if not student:
-            return response_object.ResponseFailure.build_not_found_error(message="Học viên không tồn tại")
+            return response_object.ResponseFailure.build_not_found_error(
+                message="Học viên không tồn tại"
+            )
         current_season = get_current_season_value()
 
         password = generate_random_password()
-        self.student_repository.update(id=student.id, data={"password": get_password_hash(password)})
+        self.student_repository.update(
+            id=student.id, data={"password": get_password_hash(password)}
+        )
 
         self.background_tasks.add_task(
             self.audit_log_repository.create,
@@ -61,7 +67,9 @@ class ResetPasswordStudentUseCase(use_case.UseCase):
                 author_name=req_object.current_admin.full_name,
                 author_roles=req_object.current_admin.roles,
                 description=json.dumps(
-                    {"id": student.id, "message": "Updated password"}, default=str, ensure_ascii=False
+                    {"id": student.id, "message": "Updated password"},
+                    default=str,
+                    ensure_ascii=False,
                 ),
             ),
         )

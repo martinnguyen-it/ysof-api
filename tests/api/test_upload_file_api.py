@@ -21,10 +21,17 @@ class TestUploadFileApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
-        connect("mongoenginetest", host="mongodb://localhost:1234", mongo_client_class=mongomock.MongoClient)
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost:1234",
+            mongo_client_class=mongomock.MongoClient,
+        )
         cls.client = TestClient(app)
         cls.season: SeasonModel = SeasonModel(
-            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG", academic_year="2023-2024", season=3, is_current=True
+            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
+            academic_year="2023-2024",
+            season=3,
+            is_current=True,
         ).save()
         cls.user = AdminModel(
             status="active",
@@ -130,7 +137,9 @@ class TestUploadFileApi(unittest.TestCase):
     def test_delete_file(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
             "app.infra.services.google_drive_api.GoogleDriveAPIService.delete"
-        ), patch("app.infra.services.google_drive_api.GoogleDriveAPIService._get_oauth_token") as mock_get_oauth_token:
+        ), patch(
+            "app.infra.services.google_drive_api.GoogleDriveAPIService._get_oauth_token"
+        ) as mock_get_oauth_token:
             mock_token.return_value = TokenData(email=self.user.email)
             mock_get_oauth_token.return_value = Credentials(
                 token="<access_token>",

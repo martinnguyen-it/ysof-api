@@ -19,7 +19,9 @@ class GetAbsentRequestObject(request_object.ValidRequestObject):
         self.subject_id = subject_id
 
     @classmethod
-    def builder(cls, subject_id: str, current_student: StudentModel | str) -> request_object.RequestObject:
+    def builder(
+        cls, subject_id: str, current_student: StudentModel | str
+    ) -> request_object.RequestObject:
         invalid_req = request_object.InvalidRequestObject()
         if not subject_id:
             invalid_req.add_error("subject_id", "Miss subject id")
@@ -47,29 +49,41 @@ class GetAbsentUseCase(use_case.UseCase):
             is_student_request = False
             student = self.student_repository.get_by_id(req_object.current_student)
             if not student:
-                return response_object.ResponseFailure.build_not_found_error(message="Học viên không tồn tại")
+                return response_object.ResponseFailure.build_not_found_error(
+                    message="Học viên không tồn tại"
+                )
             req_object.current_student = student
 
         absent: AbsentModel = self.absent_repository.find_one(
             {"student": req_object.current_student.id, "subject": ObjectId(req_object.subject_id)}
         )
         if not absent:
-            return response_object.ResponseFailure.build_not_found_error(message="Đơn nghỉ phép không tồn tại")
+            return response_object.ResponseFailure.build_not_found_error(
+                message="Đơn nghỉ phép không tồn tại"
+            )
 
         return (
             StudentAbsentInResponse(
                 **AbsentInDB.model_validate(absent).model_dump(exclude={"student", "subject"}),
                 subject=SubjectInEvaluation(
-                    **SubjectInDB.model_validate(absent.subject).model_dump(exclude=({"lecturer", "attachments"})),
-                    lecturer=LecturerInEvaluation(**LecturerInDB.model_validate(absent.subject.lecturer).model_dump()),
+                    **SubjectInDB.model_validate(absent.subject).model_dump(
+                        exclude=({"lecturer", "attachments"})
+                    ),
+                    lecturer=LecturerInEvaluation(
+                        **LecturerInDB.model_validate(absent.subject.lecturer).model_dump()
+                    ),
                 ),
             )
             if is_student_request
             else AdminAbsentInResponse(
                 **AbsentInDB.model_validate(absent).model_dump(exclude={"student", "subject"}),
                 subject=SubjectInEvaluation(
-                    **SubjectInDB.model_validate(absent.subject).model_dump(exclude=({"lecturer", "attachments"})),
-                    lecturer=LecturerInEvaluation(**LecturerInDB.model_validate(absent.subject.lecturer).model_dump()),
+                    **SubjectInDB.model_validate(absent.subject).model_dump(
+                        exclude=({"lecturer", "attachments"})
+                    ),
+                    lecturer=LecturerInEvaluation(
+                        **LecturerInDB.model_validate(absent.subject.lecturer).model_dump()
+                    ),
                 ),
                 student=Student(**StudentInDB.model_validate(absent.student).model_dump()),
             )

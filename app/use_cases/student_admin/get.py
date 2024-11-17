@@ -27,8 +27,12 @@ class GetStudentCase(use_case.UseCase):
         self.student_repository = student_repository
 
     def process_request(self, req_object: GetStudentRequestObject):
-        student: Optional[StudentModel] = self.student_repository.get_by_id(student_id=req_object.student_id)
+        student: Optional[StudentModel] = self.student_repository.get_by_id(
+            student_id=req_object.student_id
+        )
         if not student:
-            return response_object.ResponseFailure.build_not_found_error(message="Học viên không tồn tại")
+            return response_object.ResponseFailure.build_not_found_error(
+                message="Học viên không tồn tại"
+            )
 
         return Student(**StudentInDB.model_validate(student).model_dump())

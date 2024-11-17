@@ -34,8 +34,12 @@ router = APIRouter()
 @response_decorator()
 def create_subject_evaluation_question(
     subject_id: str = Path(..., title="Subject id"),
-    payload: SubjectEvaluationQuestionInCreate = Body(..., title="Subject Evaluation Question In Create payload"),
-    create_subject_use_case: CreateSubjectEvaluationQuestionUseCase = Depends(CreateSubjectEvaluationQuestionUseCase),
+    payload: SubjectEvaluationQuestionInCreate = Body(
+        ..., title="Subject Evaluation Question In Create payload"
+    ),
+    create_subject_use_case: CreateSubjectEvaluationQuestionUseCase = Depends(
+        CreateSubjectEvaluationQuestionUseCase
+    ),
     current_admin: AdminModel = Depends(get_current_active_admin),
 ):
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV])
@@ -70,7 +74,9 @@ def get_subject_evaluation_question(
 @response_decorator()
 def update_subject_evaluation_question(
     subject_id: str = Path(..., title="Subject id"),
-    payload: SubjectEvaluationQuestionInUpdate = Body(..., title="Subject Evaluation Question In Create payload"),
+    payload: SubjectEvaluationQuestionInUpdate = Body(
+        ..., title="Subject Evaluation Question In Create payload"
+    ),
     update_subject_evaluation_question_use_case: UpdateSubjectEvaluationQuestionUseCase = Depends(
         UpdateSubjectEvaluationQuestionUseCase
     ),

@@ -56,7 +56,9 @@ class SubjectRegistrationRepository:
         except Exception:
             return []
 
-    def find_one(self, conditions: list[str, str | bool | ObjectId]) -> SubjectRegistrationModel | None:
+    def find_one(
+        self, conditions: list[str, str | bool | ObjectId]
+    ) -> SubjectRegistrationModel | None:
         try:
             doc = SubjectRegistrationModel._get_collection().find_one(conditions)
             return SubjectRegistrationModel.from_mongo(doc) if doc else None

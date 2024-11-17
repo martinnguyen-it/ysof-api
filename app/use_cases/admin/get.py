@@ -29,6 +29,8 @@ class GetAdminCase(use_case.UseCase):
     def process_request(self, req_object: GetAdminRequestObject):
         admin: Optional[AdminModel] = self.admin_repository.get_by_id(admin_id=req_object.admin_id)
         if not admin:
-            return response_object.ResponseFailure.build_not_found_error(message="Admin không tồn tại")
+            return response_object.ResponseFailure.build_not_found_error(
+                message="Admin không tồn tại"
+            )
 
         return Admin(**AdminInDB.model_validate(admin).model_dump())

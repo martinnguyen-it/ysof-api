@@ -16,7 +16,9 @@ class GetCurrentSeasonCase(use_case.UseCase):
         if "season-detail" not in cache:
             season: Optional[SeasonModel] = self.season_repository.get_current_season()
             if not season:
-                return response_object.ResponseFailure.build_not_found_error(message="Không tồn tại")
+                return response_object.ResponseFailure.build_not_found_error(
+                    message="Không tồn tại"
+                )
 
             cache["season-detail"] = json.dumps(
                 Season(**SeasonInDB.model_validate(season).model_dump()).model_dump(), default=str

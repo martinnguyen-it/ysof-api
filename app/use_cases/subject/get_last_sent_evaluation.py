@@ -31,7 +31,9 @@ class GetSubjectLastSentEvaluationUseCase(use_case.UseCase):
             return {"message": "Không có buổi học nào cũ chưa hoàn thành"}
 
         return Subject(
-            **SubjectInDB.model_validate(subjects[0]).model_dump(exclude=({"lecturer", "attachments"})),
+            **SubjectInDB.model_validate(subjects[0]).model_dump(
+                exclude=({"lecturer", "attachments"})
+            ),
             lecturer=Lecturer(**LecturerInDB.model_validate(subjects[0].lecturer).model_dump()),
             attachments=[
                 Document(

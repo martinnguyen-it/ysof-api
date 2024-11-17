@@ -29,15 +29,23 @@ class GetSubjectStudentCase(use_case.UseCase):
         self.subject_repository = subject_repository
 
     def process_request(self, req_object: GetSubjectStudentRequestObject):
-        subject: Optional[SubjectModel] = self.subject_repository.get_by_id(subject_id=req_object.subject_id)
+        subject: Optional[SubjectModel] = self.subject_repository.get_by_id(
+            subject_id=req_object.subject_id
+        )
         if not subject:
-            return response_object.ResponseFailure.build_not_found_error(message="Môn học không tồn tại")
+            return response_object.ResponseFailure.build_not_found_error(
+                message="Môn học không tồn tại"
+            )
 
         return SubjectInStudent(
             **SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer", "attachments"})),
-            lecturer=LecturerInStudent(**LecturerInDB.model_validate(subject.lecturer).model_dump()),
+            lecturer=LecturerInStudent(
+                **LecturerInDB.model_validate(subject.lecturer).model_dump()
+            ),
             attachments=[
-                DocumentInStudent(**DocumentInDB.model_validate(doc).model_dump(exclude=({"author"})))
+                DocumentInStudent(
+                    **DocumentInDB.model_validate(doc).model_dump(exclude=({"author"}))
+                )
                 for doc in subject.attachments
             ],
         )

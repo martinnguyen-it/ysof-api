@@ -1,5 +1,13 @@
 from datetime import datetime, timezone
-from mongoengine import Document, StringField, DateTimeField, IntField, ReferenceField, ListField, NULLIFY
+from mongoengine import (
+    Document,
+    StringField,
+    DateTimeField,
+    IntField,
+    ReferenceField,
+    ListField,
+    NULLIFY,
+)
 
 
 class AuditLogModel(Document):

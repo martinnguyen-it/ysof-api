@@ -19,8 +19,12 @@ router = APIRouter()
 @router.post("", response_model=SubjectRegistrationInResponse)
 @response_decorator()
 def subject_registration(
-    payload: SubjectRegistrationInCreate = Body(..., title="Subject registration In Create payload"),
-    subject_registration_use_case: SubjectRegistrationStudentCase = Depends(SubjectRegistrationStudentCase),
+    payload: SubjectRegistrationInCreate = Body(
+        ..., title="Subject registration In Create payload"
+    ),
+    subject_registration_use_case: SubjectRegistrationStudentCase = Depends(
+        SubjectRegistrationStudentCase
+    ),
     current_student: StudentModel = Depends(get_current_student),
 ):
     req_object = SubjectRegistrationStudentRequestObject.builder(
@@ -33,7 +37,9 @@ def subject_registration(
 @router.get("")
 @response_decorator()
 def get_subject_registration(
-    get_subject_registration_use_case: GetSubjectRegistrationStudentCase = Depends(GetSubjectRegistrationStudentCase),
+    get_subject_registration_use_case: GetSubjectRegistrationStudentCase = Depends(
+        GetSubjectRegistrationStudentCase
+    ),
     current_student: StudentModel = Depends(get_current_student),
 ):
     req_object = GetSubjectRegistrationStudentRequestObject.builder(student_id=current_student.id)

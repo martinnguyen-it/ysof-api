@@ -4,7 +4,12 @@ from fastapi import Depends, BackgroundTasks
 from app.models.lecturer import LecturerModel
 from app.shared import request_object, use_case, response_object
 
-from app.domain.lecturer.entity import Lecturer, LecturerInDB, LecturerInUpdate, LecturerInUpdateTime
+from app.domain.lecturer.entity import (
+    Lecturer,
+    LecturerInDB,
+    LecturerInUpdate,
+    LecturerInUpdateTime,
+)
 from app.infra.lecturer.lecturer_repository import LecturerRepository
 from app.infra.document.document_repository import DocumentRepository
 from app.models.admin import AdminModel
@@ -55,7 +60,9 @@ class UpdateLecturerUseCase(use_case.UseCase):
         if not lecturer:
             return response_object.ResponseFailure.build_not_found_error("Giảng viên không tồn tại")
 
-        self.lecturer_repository.update(id=lecturer.id, data=LecturerInUpdateTime(**req_object.obj_in.model_dump()))
+        self.lecturer_repository.update(
+            id=lecturer.id, data=LecturerInUpdateTime(**req_object.obj_in.model_dump())
+        )
         lecturer.reload()
 
         current_season = get_current_season_value()
@@ -70,7 +77,9 @@ class UpdateLecturerUseCase(use_case.UseCase):
                 author_name=req_object.current_admin.full_name,
                 author_roles=req_object.current_admin.roles,
                 description=json.dumps(
-                    LecturerInDB.model_validate(lecturer).model_dump(exclude_none=True), default=str, ensure_ascii=False
+                    LecturerInDB.model_validate(lecturer).model_dump(exclude_none=True),
+                    default=str,
+                    ensure_ascii=False,
                 ),
             ),
         )

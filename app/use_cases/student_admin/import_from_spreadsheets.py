@@ -7,7 +7,12 @@ from pydantic import ValidationError
 
 from app.shared import request_object, use_case, response_object
 
-from app.domain.student.entity import ErrorImport, ImportSpreadsheetsInResponse, ImportSpreadsheetsPayload, StudentInDB
+from app.domain.student.entity import (
+    ErrorImport,
+    ImportSpreadsheetsInResponse,
+    ImportSpreadsheetsPayload,
+    StudentInDB,
+)
 from app.infra.student.student_repository import StudentRepository
 from app.infra.lecturer.lecturer_repository import LecturerRepository
 from app.models.admin import AdminModel
@@ -31,7 +36,9 @@ class ImportSpreadsheetsStudentRequestObject(request_object.ValidRequestObject):
         self.current_admin = current_admin
 
     @classmethod
-    def builder(cls, current_admin: AdminModel, payload: ImportSpreadsheetsPayload) -> request_object.RequestObject:
+    def builder(
+        cls, current_admin: AdminModel, payload: ImportSpreadsheetsPayload
+    ) -> request_object.RequestObject:
         invalid_req = request_object.InvalidRequestObject()
         if not isinstance(payload.url, str):
             invalid_req.add_error("url", "Invalid url")
@@ -91,7 +98,9 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
         )
 
         if HEADER_IMPORT_STUDENT != data_import.pop(0):
-            return response_object.ResponseFailure.build_parameters_error("Header của file import không hợp lệ")
+            return response_object.ResponseFailure.build_parameters_error(
+                "Header của file import không hợp lệ"
+            )
 
         inserted_ids: list[str] = []
         errors: list[ErrorImport] = []
@@ -136,7 +145,9 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
                 )
             except ValidationError as e:
                 errs = e.errors()
-                message = [(FieldStudentEnum[err["loc"][0]].value + ": " + err["msg"]) for err in errs]
+                message = [
+                    (FieldStudentEnum[err["loc"][0]].value + ": " + err["msg"]) for err in errs
+                ]
                 message = "\n".join(message)
                 errors.append(ErrorImport(row=idx + 2, detail=message))
             except Exception as e:

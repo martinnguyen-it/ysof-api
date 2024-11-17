@@ -14,21 +14,28 @@ from app.domain.subject.subject_evaluation.entity import (
     SubjectEvaluationQuestionInCreate,
     SubjectEvaluationQuestionInDB,
 )
-from app.infra.subject.subject_evaluation_question_repository import SubjectEvaluationQuestionRepository
+from app.infra.subject.subject_evaluation_question_repository import (
+    SubjectEvaluationQuestionRepository,
+)
 from app.models.subject_evaluation import SubjectEvaluationQuestionModel
 from app.infra.subject.subject_repository import SubjectRepository
 from app.models.subject import SubjectModel
 
 
 class CreateSubjectEvaluationQuestionRequestObject(request_object.ValidRequestObject):
-    def __init__(self, current_admin: AdminModel, obj_in: SubjectEvaluationQuestionInCreate, subject_id=str) -> None:
+    def __init__(
+        self, current_admin: AdminModel, obj_in: SubjectEvaluationQuestionInCreate, subject_id=str
+    ) -> None:
         self.obj_in = obj_in
         self.current_admin = current_admin
         self.subject_id = subject_id
 
     @classmethod
     def builder(
-        cls, current_admin: AdminModel, subject_id: str, payload: Optional[SubjectEvaluationQuestionInCreate] = None
+        cls,
+        current_admin: AdminModel,
+        subject_id: str,
+        payload: Optional[SubjectEvaluationQuestionInCreate] = None,
     ) -> request_object.RequestObject:
         invalid_req = request_object.InvalidRequestObject()
         if payload is None:
@@ -67,8 +74,10 @@ class CreateSubjectEvaluationQuestionUseCase(use_case.UseCase):
             subject=subject,
         )
 
-        existed: SubjectEvaluationQuestionModel | None = self.subject_evaluation_question_repository.get_by_subject_id(
-            subject_id=req_object.subject_id
+        existed: SubjectEvaluationQuestionModel | None = (
+            self.subject_evaluation_question_repository.get_by_subject_id(
+                subject_id=req_object.subject_id
+            )
         )
         if existed:
             self.subject_evaluation_question_repository.delete(id=existed.id)

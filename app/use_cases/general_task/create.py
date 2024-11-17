@@ -6,7 +6,12 @@ from app.domain.admin.entity import AdminInDB
 from app.models.general_task import GeneralTaskModel
 from app.shared import request_object, use_case, response_object
 
-from app.domain.general_task.entity import GeneralTask, GeneralTaskInCreate, GeneralTaskInDB, AdminInGeneralTask
+from app.domain.general_task.entity import (
+    GeneralTask,
+    GeneralTaskInCreate,
+    GeneralTaskInDB,
+    AdminInGeneralTask,
+)
 from app.infra.general_task.general_task_repository import GeneralTaskRepository
 from app.models.admin import AdminModel
 from app.domain.document.entity import AdminInDocument, Document, DocumentInDB
@@ -79,19 +84,25 @@ class CreateGeneralTaskUseCase(use_case.UseCase):
                 author_name=req_object.current_admin.full_name,
                 author_roles=req_object.current_admin.roles,
                 description=json.dumps(
-                    req_object.general_task_in.model_dump(exclude_none=True), default=str, ensure_ascii=False
+                    req_object.general_task_in.model_dump(exclude_none=True),
+                    default=str,
+                    ensure_ascii=False,
                 ),
             ),
         )
 
         author: AdminInDB = AdminInDB.model_validate(general_task.author)
         return GeneralTask(
-            **GeneralTaskInDB.model_validate(general_task).model_dump(exclude=({"author", "attachments"})),
+            **GeneralTaskInDB.model_validate(general_task).model_dump(
+                exclude=({"author", "attachments"})
+            ),
             author=AdminInGeneralTask(**author.model_dump(), active=author.active()),
             attachments=[
                 Document(
                     **DocumentInDB.model_validate(doc).model_dump(exclude=({"author"})),
-                    author=AdminInDocument(**AdminInDB.model_validate(doc.author).model_dump(), active=author.active()),
+                    author=AdminInDocument(
+                        **AdminInDB.model_validate(doc.author).model_dump(), active=author.active()
+                    ),
                 )
                 for doc in general_task.attachments
             ],

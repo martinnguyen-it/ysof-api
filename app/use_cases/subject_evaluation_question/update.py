@@ -15,19 +15,26 @@ from app.domain.subject.subject_evaluation.entity import (
     SubjectEvaluationQuestionInUpdate,
     SubjectEvaluationQuestionInUpdateTime,
 )
-from app.infra.subject.subject_evaluation_question_repository import SubjectEvaluationQuestionRepository
+from app.infra.subject.subject_evaluation_question_repository import (
+    SubjectEvaluationQuestionRepository,
+)
 from app.models.subject_evaluation import SubjectEvaluationQuestionModel
 
 
 class UpdateSubjectEvaluationQuestionRequestObject(request_object.ValidRequestObject):
-    def __init__(self, current_admin: AdminModel, obj_in: SubjectEvaluationQuestionInUpdate, subject_id=str) -> None:
+    def __init__(
+        self, current_admin: AdminModel, obj_in: SubjectEvaluationQuestionInUpdate, subject_id=str
+    ) -> None:
         self.obj_in = obj_in
         self.current_admin = current_admin
         self.subject_id = subject_id
 
     @classmethod
     def builder(
-        cls, current_admin: AdminModel, subject_id: str, payload: Optional[SubjectEvaluationQuestionInUpdate] = None
+        cls,
+        current_admin: AdminModel,
+        subject_id: str,
+        payload: Optional[SubjectEvaluationQuestionInUpdate] = None,
     ) -> request_object.RequestObject:
         invalid_req = request_object.InvalidRequestObject()
         if payload is None:
@@ -56,7 +63,9 @@ class UpdateSubjectEvaluationQuestionUseCase(use_case.UseCase):
 
     def process_request(self, req_object: UpdateSubjectEvaluationQuestionRequestObject):
         subject_evaluation_question: Optional[SubjectEvaluationQuestionModel] = (
-            self.subject_evaluation_question_repository.get_by_subject_id(subject_id=req_object.subject_id)
+            self.subject_evaluation_question_repository.get_by_subject_id(
+                subject_id=req_object.subject_id
+            )
         )
         if not subject_evaluation_question:
             return response_object.ResponseFailure.build_not_found_error("Câu hỏi không tồn tại")
@@ -65,7 +74,9 @@ class UpdateSubjectEvaluationQuestionUseCase(use_case.UseCase):
             **req_object.obj_in.model_dump(),
         )
 
-        self.subject_evaluation_question_repository.update(id=subject_evaluation_question.id, data=obj_in)
+        self.subject_evaluation_question_repository.update(
+            id=subject_evaluation_question.id, data=obj_in
+        )
         subject_evaluation_question.reload()
 
         self.background_tasks.add_task(

@@ -20,14 +20,22 @@ from app.infra.audit_log.audit_log_repository import AuditLogRepository
 
 
 class DeleteAbsentRequestObject(request_object.ValidRequestObject):
-    def __init__(self, subject_id: str, current_student: StudentModel | str, current_admin: AdminModel | None = None):
+    def __init__(
+        self,
+        subject_id: str,
+        current_student: StudentModel | str,
+        current_admin: AdminModel | None = None,
+    ):
         self.subject_id = subject_id
         self.current_student = current_student
         self.current_admin = current_admin
 
     @classmethod
     def builder(
-        cls, subject_id: str, current_student: StudentModel | str, current_admin: AdminModel | None = None
+        cls,
+        subject_id: str,
+        current_student: StudentModel | str,
+        current_admin: AdminModel | None = None,
     ) -> request_object.RequestObject:
         invalid_req = request_object.InvalidRequestObject()
         if subject_id is None:
@@ -67,14 +75,18 @@ class DeleteAbsentUseCase(use_case.UseCase):
             is_student_request = False
             student = self.student_repository.get_by_id(req_object.current_student)
             if not student:
-                return response_object.ResponseFailure.build_not_found_error(message="Học viên không tồn tại")
+                return response_object.ResponseFailure.build_not_found_error(
+                    message="Học viên không tồn tại"
+                )
             req_object.current_student = student
 
         absent: AbsentModel = self.absent_repository.find_one(
             {"student": req_object.current_student.id, "subject": ObjectId(req_object.subject_id)}
         )
         if not absent:
-            return response_object.ResponseFailure.build_not_found_error(message="Đơn nghỉ phép không tồn tại")
+            return response_object.ResponseFailure.build_not_found_error(
+                message="Đơn nghỉ phép không tồn tại"
+            )
 
         current_season: int = get_current_season_value()
         subject: SubjectModel | None = self.subject_repository.get_by_id(req_object.subject_id)
@@ -88,10 +100,16 @@ class DeleteAbsentUseCase(use_case.UseCase):
                 {"type": FormType.SUBJECT_ABSENT}
             )
             if not form_absent or form_absent.status == FormStatus.INACTIVE:
-                return response_object.ResponseFailure.build_parameters_error(message="Form chưa được mở.")
+                return response_object.ResponseFailure.build_parameters_error(
+                    message="Form chưa được mở."
+                )
             if form_absent.status == FormStatus.CLOSED:
-                return response_object.ResponseFailure.build_parameters_error(message="Form đã được đóng.")
-            form_absent: ManageFormEvaluationOrAbsent = ManageFormEvaluationOrAbsent.model_validate(form_absent)
+                return response_object.ResponseFailure.build_parameters_error(
+                    message="Form đã được đóng."
+                )
+            form_absent: ManageFormEvaluationOrAbsent = ManageFormEvaluationOrAbsent.model_validate(
+                form_absent
+            )
             if req_object.subject_id != form_absent.data.subject_id:
                 return response_object.ResponseFailure.build_parameters_error(
                     message="Form hiện tại không mở cho môn học này."

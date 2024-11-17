@@ -68,7 +68,9 @@ class UpdateGeneralTaskUseCase(use_case.UseCase):
                         message="Tài liệu đính kèm không tồn tại"
                     )
 
-        general_task: Optional[GeneralTaskModel] = self.general_task_repository.get_by_id(req_object.id)
+        general_task: Optional[GeneralTaskModel] = self.general_task_repository.get_by_id(
+            req_object.id
+        )
         if not general_task:
             return response_object.ResponseFailure.build_not_found_error("Công việc không tồn tại")
         if general_task.role not in req_object.current_admin.roles and not any(
@@ -100,12 +102,16 @@ class UpdateGeneralTaskUseCase(use_case.UseCase):
 
         author: AdminInDB = AdminInDB.model_validate(general_task.author)
         return GeneralTask(
-            **GeneralTaskInDB.model_validate(general_task).model_dump(exclude=({"author", "attachments"})),
+            **GeneralTaskInDB.model_validate(general_task).model_dump(
+                exclude=({"author", "attachments"})
+            ),
             author=AdminInGeneralTask(**author.model_dump(), active=author.active()),
             attachments=[
                 Document(
                     **DocumentInDB.model_validate(doc).model_dump(exclude=({"author"})),
-                    author=AdminInDocument(**AdminInDB.model_validate(doc.author).model_dump(), active=author.active()),
+                    author=AdminInDocument(
+                        **AdminInDB.model_validate(doc.author).model_dump(), active=author.active()
+                    ),
                 )
                 for doc in general_task.attachments
             ],

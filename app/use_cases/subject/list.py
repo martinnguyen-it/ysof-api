@@ -41,7 +41,12 @@ class ListSubjectsRequestObject(request_object.ValidRequestObject):
         sort: Optional[dict[str, int]] = None,
     ):
         return ListSubjectsRequestObject(
-            season=season, search=search, sort=sort, subdivision=subdivision, current_admin=current_admin, status=status
+            season=season,
+            search=search,
+            sort=sort,
+            subdivision=subdivision,
+            current_admin=current_admin,
+            status=status,
         )
 
 
@@ -60,7 +65,10 @@ class ListSubjectsUseCase(use_case.UseCase):
                 or AdminRole.ADMIN in req_object.current_admin.roles
             )
         ) or req_object.season is None:
-            match_pipeline = {**match_pipeline, "season": req_object.season if req_object.season else current_season}
+            match_pipeline = {
+                **match_pipeline,
+                "season": req_object.season if req_object.season else current_season,
+            }
         else:
             return response_object.ResponseFailure.build_parameters_error(
                 "Bạn không có quyền truy cập "
@@ -79,11 +87,15 @@ class ListSubjectsUseCase(use_case.UseCase):
             match_pipeline = {**match_pipeline, "subdivision": req_object.subdivision}
         if isinstance(req_object.status, list):
             match_pipeline = {**match_pipeline, "status": {"$in": req_object.status}}
-        subjects: List[SubjectModel] = self.subject_repository.list(sort=req_object.sort, match_pipeline=match_pipeline)
+        subjects: List[SubjectModel] = self.subject_repository.list(
+            sort=req_object.sort, match_pipeline=match_pipeline
+        )
 
         return [
             Subject(
-                **SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer", "attachments"})),
+                **SubjectInDB.model_validate(subject).model_dump(
+                    exclude=({"lecturer", "attachments"})
+                ),
                 lecturer=Lecturer(**LecturerInDB.model_validate(subject.lecturer).model_dump()),
                 attachments=[
                     Document(

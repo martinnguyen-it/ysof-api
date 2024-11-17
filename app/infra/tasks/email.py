@@ -24,7 +24,9 @@ def send_email_welcome_task(email: str, password: str, full_name: str, is_admin:
     plain_text = plain_text.replace("{{full_name}}", full_name)
     plain_text = plain_text.replace("{{password}}", password)
     plain_text = plain_text.replace("{{email}}", email)
-    plain_text = plain_text.replace("{{url}}", settings.FE_ADMIN_BASE_URL if is_admin else settings.FE_STUDENT_BASE_URL)
+    plain_text = plain_text.replace(
+        "{{url}}", settings.FE_ADMIN_BASE_URL if is_admin else settings.FE_STUDENT_BASE_URL
+    )
     email_smtp_service.send_email_welcome(email=email, plain_text=plain_text)
 
 
@@ -37,7 +39,9 @@ def send_email_notification_subject_task(subject_id: str):
         subject_registration_repository = SubjectRegistrationRepository()
 
         current_season = get_current_season_value()
-        admins: list[AdminModel] = admin_repository.list(match_pipeline={"latest_season": current_season})
+        admins: list[AdminModel] = admin_repository.list(
+            match_pipeline={"latest_season": current_season}
+        )
         emails_admin = [admin.email for admin in admins]
 
         subject = subject_repository.get_by_id(subject_id)
@@ -54,10 +58,15 @@ def send_email_notification_subject_task(subject_id: str):
         for attachment in subject.attachments:
             if attachment.mimeType == "application/vnd.google-apps.spreadsheet":
                 documents.append(f"https://docs.google.com/spreadsheets/d/{attachment.file_id}")
-            elif attachment.mimeType in ["application/vnd.google-apps.document", "application/vnd.google-apps.kix"]:
+            elif attachment.mimeType in [
+                "application/vnd.google-apps.document",
+                "application/vnd.google-apps.kix",
+            ]:
                 documents.append(f"https://docs.google.com/document/d/{attachment.file_id}")
             else:
-                documents.append(f"https://drive.google.com/file/d/{attachment.file_id}/view?usp=drivesdk")
+                documents.append(
+                    f"https://drive.google.com/file/d/{attachment.file_id}/view?usp=drivesdk"
+                )
         documents.extend(subject.documents_url)
 
         params = dict(
@@ -79,7 +88,9 @@ def send_email_notification_subject_task(subject_id: str):
         emails_to: list[str] = [doc.student.email for doc in docs]
         emails_to.extend(emails_admin)
 
-        job = group([send_email_notification_subject_to_user_task.s(email, params) for email in emails_to])
+        job = group(
+            [send_email_notification_subject_to_user_task.s(email, params) for email in emails_to]
+        )
         job.apply_async()
     except Exception as ex:
         logger.exception(ex)
@@ -102,7 +113,9 @@ def send_student_evaluation_subject_task(subject_id: str):
         subject_registration_repository = SubjectRegistrationRepository()
 
         current_season = get_current_season_value()
-        admins: list[AdminModel] = admin_repository.list(match_pipeline={"latest_season": current_season})
+        admins: list[AdminModel] = admin_repository.list(
+            match_pipeline={"latest_season": current_season}
+        )
         emails_admin = [admin.email for admin in admins]
 
         subject = subject_repository.get_by_id(subject_id)
@@ -128,7 +141,9 @@ def send_student_evaluation_subject_task(subject_id: str):
         emails_to: list[str] = [doc.student.email for doc in docs]
         emails_to.extend(emails_admin)
 
-        job = group([send_student_evaluation_subject_to_user_task.s(email, params) for email in emails_to])
+        job = group(
+            [send_student_evaluation_subject_to_user_task.s(email, params) for email in emails_to]
+        )
         job.apply_async()
     except Exception as ex:
         logger.exception(ex)

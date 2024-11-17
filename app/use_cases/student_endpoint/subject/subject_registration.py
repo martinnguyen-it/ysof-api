@@ -17,7 +17,9 @@ class SubjectRegistrationStudentRequestObject(request_object.ValidRequestObject)
         self.current_student = current_student
 
     @classmethod
-    def builder(cls, subjects: list[str], current_student: StudentModel) -> request_object.RequestObject:
+    def builder(
+        cls, subjects: list[str], current_student: StudentModel
+    ) -> request_object.RequestObject:
         invalid_req = request_object.InvalidRequestObject()
         if not isinstance(subjects, list):
             invalid_req.add_error("id", "Invalid")
@@ -25,7 +27,9 @@ class SubjectRegistrationStudentRequestObject(request_object.ValidRequestObject)
         if invalid_req.has_errors():
             return invalid_req
 
-        return SubjectRegistrationStudentRequestObject(subjects=subjects, current_student=current_student)
+        return SubjectRegistrationStudentRequestObject(
+            subjects=subjects, current_student=current_student
+        )
 
 
 class SubjectRegistrationStudentCase(use_case.UseCase):
@@ -33,7 +37,9 @@ class SubjectRegistrationStudentCase(use_case.UseCase):
         self,
         manage_form_repository: ManageFormRepository = Depends(ManageFormRepository),
         subject_repository: SubjectRepository = Depends(SubjectRepository),
-        subject_registration_repository: SubjectRegistrationRepository = Depends(SubjectRegistrationRepository),
+        subject_registration_repository: SubjectRegistrationRepository = Depends(
+            SubjectRegistrationRepository
+        ),
     ):
         self.subject_registration_repository = subject_registration_repository
         self.subject_repository = subject_repository
@@ -45,9 +51,13 @@ class SubjectRegistrationStudentCase(use_case.UseCase):
         )
 
         if not form_subject_registration or form_subject_registration.status == FormStatus.INACTIVE:
-            return response_object.ResponseFailure.build_parameters_error(message="Form chưa được mở.")
+            return response_object.ResponseFailure.build_parameters_error(
+                message="Form chưa được mở."
+            )
         if form_subject_registration.status == FormStatus.CLOSED:
-            return response_object.ResponseFailure.build_parameters_error(message="Form đã được đóng.")
+            return response_object.ResponseFailure.build_parameters_error(
+                message="Form đã được đóng."
+            )
 
         current_season: int = get_current_season_value()
         for subject_id in req_object.subjects:
@@ -57,7 +67,9 @@ class SubjectRegistrationStudentCase(use_case.UseCase):
                     message="Môn học không tồn tại hoặc thuộc mùa cũ"
                 )
 
-        res = self.subject_registration_repository.delete_by_student_id(id=req_object.current_student.id)
+        res = self.subject_registration_repository.delete_by_student_id(
+            id=req_object.current_student.id
+        )
         assert res, "Something went wrong"
         res = self.subject_registration_repository.insert_many(
             student_id=req_object.current_student.id, subject_ids=req_object.subjects

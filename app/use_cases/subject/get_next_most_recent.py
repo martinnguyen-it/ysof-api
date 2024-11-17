@@ -30,7 +30,9 @@ class GetSubjectNextMostRecentUseCase(use_case.UseCase):
             return {"message": "Không còn buổi học nào tiếp theo"}
 
         return Subject(
-            **SubjectInDB.model_validate(subjects[0]).model_dump(exclude=({"lecturer", "attachments"})),
+            **SubjectInDB.model_validate(subjects[0]).model_dump(
+                exclude=({"lecturer", "attachments"})
+            ),
             lecturer=Lecturer(**LecturerInDB.model_validate(subjects[0].lecturer).model_dump()),
             attachments=[
                 Document(

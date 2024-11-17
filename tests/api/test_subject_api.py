@@ -54,10 +54,17 @@ class TestSubjectApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
-        connect("mongoenginetest", host="mongodb://localhost:1234", mongo_client_class=mongomock.MongoClient)
+        connect(
+            "mongoenginetest",
+            host="mongodb://localhost:1234",
+            mongo_client_class=mongomock.MongoClient,
+        )
         cls.client = TestClient(app)
         cls.season: SeasonModel = SeasonModel(
-            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG", academic_year="2023-2024", season=3, is_current=True
+            title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
+            academic_year="2023-2024",
+            season=3,
+            is_current=True,
         ).save()
         cls.user: AdminModel = AdminModel(
             status="active",
@@ -227,7 +234,9 @@ class TestSubjectApi(unittest.TestCase):
                 },
             )
             assert r.status_code == 404
-            assert r.json()["detail"].startswith("Tài liệu đính kèm không tồn tại hoặc thuộc mùa cũ")
+            assert r.json()["detail"].startswith(
+                "Tài liệu đính kèm không tồn tại hoặc thuộc mùa cũ"
+            )
 
             r = self.client.post(
                 "/api/v1/subjects",
@@ -247,7 +256,9 @@ class TestSubjectApi(unittest.TestCase):
                 },
             )
             assert r.status_code == 400
-            assert r.json()["detail"].startswith("Vui lòng chỉ chọn tài liệu đính kèm dành cho học viên")
+            assert r.json()["detail"].startswith(
+                "Vui lòng chỉ chọn tài liệu đính kèm dành cho học viên"
+            )
 
             r = self.client.post(
                 "/api/v1/subjects",
@@ -296,7 +307,9 @@ class TestSubjectApi(unittest.TestCase):
             assert len(resp["attachments"]) == 1
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.CREATE, "endpoint": Endpoint.SUBJECT})
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.CREATE, "endpoint": Endpoint.SUBJECT}
+            )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 2
 
@@ -372,7 +385,9 @@ class TestSubjectApi(unittest.TestCase):
             assert doc.title == "Updated"
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.UPDATE, "endpoint": Endpoint.SUBJECT})
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.SUBJECT}
+            )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 
@@ -415,7 +430,9 @@ class TestSubjectApi(unittest.TestCase):
             assert r.status_code == 404
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.DELETE, "endpoint": Endpoint.SUBJECT})
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.DELETE, "endpoint": Endpoint.SUBJECT}
+            )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 
@@ -491,7 +508,9 @@ class TestSubjectApi(unittest.TestCase):
             assert subject.status == StatusSubjectEnum.SENT_NOTIFICATION
 
             time.sleep(1)
-            cursor = AuditLogModel._get_collection().find({"type": AuditLogType.OTHER, "endpoint": Endpoint.SUBJECT})
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.OTHER, "endpoint": Endpoint.SUBJECT}
+            )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 

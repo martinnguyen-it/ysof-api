@@ -90,13 +90,17 @@ class ListAuditLogsUseCase(use_case.UseCase):
             data.append(
                 AuditLog(
                     **AuditLogInDB.model_validate(log).model_dump(exclude=({"author"})),
-                    author=Admin(**author.model_dump(), active=author.active()) if author else author,
+                    author=(
+                        Admin(**author.model_dump(), active=author.active()) if author else author
+                    ),
                 )
             )
 
         return ManyAuditLogsInResponse(
             pagination=Pagination(
-                total=total, page_index=req_object.page_index, total_pages=math.ceil(total / req_object.page_size)
+                total=total,
+                page_index=req_object.page_index,
+                total_pages=math.ceil(total / req_object.page_size),
             ),
             data=data,
         )

@@ -96,18 +96,26 @@ class ListStudentsUseCase(use_case.UseCase):
         return (
             ManyStudentsInStudentRequestResponse(
                 pagination=Pagination(
-                    total=total, page_index=req_object.page_index, total_pages=math.ceil(total / req_object.page_size)
+                    total=total,
+                    page_index=req_object.page_index,
+                    total_pages=math.ceil(total / req_object.page_size),
                 ),
                 data=[
-                    StudentInStudentRequestResponse(**StudentInDB.model_validate(model).model_dump())
+                    StudentInStudentRequestResponse(
+                        **StudentInDB.model_validate(model).model_dump()
+                    )
                     for model in students
                 ],
             )
             if req_object.is_student_request
             else ManyStudentsInResponse(
                 pagination=Pagination(
-                    total=total, page_index=req_object.page_index, total_pages=math.ceil(total / req_object.page_size)
+                    total=total,
+                    page_index=req_object.page_index,
+                    total_pages=math.ceil(total / req_object.page_size),
                 ),
-                data=[Student(**StudentInDB.model_validate(model).model_dump()) for model in students],
+                data=[
+                    Student(**StudentInDB.model_validate(model).model_dump()) for model in students
+                ],
             )
         )

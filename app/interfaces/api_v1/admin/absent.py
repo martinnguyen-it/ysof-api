@@ -47,7 +47,10 @@ def update_absent(
 ):
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BKL])
     req_object = UpdateAbsentRequestObject.builder(
-        subject_id=subject_id, payload=payload, current_admin=current_admin, current_student=student_id
+        subject_id=subject_id,
+        payload=payload,
+        current_admin=current_admin,
+        current_student=student_id,
     )
     response = update_absent_use_case.execute(request_object=req_object)
     return response

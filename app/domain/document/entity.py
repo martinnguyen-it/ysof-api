@@ -4,7 +4,13 @@ from pydantic import ConfigDict, validator
 
 from app.domain.admin.field import PydanticAdminType
 from app.domain.document.enum import DocumentType, GoogleFileType
-from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin, Pagination, PayloadWithFile
+from app.domain.shared.entity import (
+    BaseEntity,
+    IDModelMixin,
+    DateTimeModelMixin,
+    Pagination,
+    PayloadWithFile,
+)
 from app.domain.shared.enum import AdminRole
 
 
@@ -46,7 +52,10 @@ class DocumentInStudent(BaseEntity):
     def create_web_link(cls, v, values):
         if values["mimeType"] == "application/vnd.google-apps.spreadsheet":
             return f"https://docs.google.com/spreadsheets/d/{values['file_id']}"
-        if values["mimeType"] in ["application/vnd.google-apps.document", "application/vnd.google-apps.kix"]:
+        if values["mimeType"] in [
+            "application/vnd.google-apps.document",
+            "application/vnd.google-apps.kix",
+        ]:
             return f"https://docs.google.com/document/d/{values['file_id']}"
         return f"https://drive.google.com/file/d/{values['file_id']}/view?usp=drivesdk"
 
@@ -93,7 +102,10 @@ class Document(DocumentBase):
     def create_web_link(cls, v, values):
         if values["mimeType"] == "application/vnd.google-apps.spreadsheet":
             return f"https://docs.google.com/spreadsheets/d/{values['file_id']}"
-        if values["mimeType"] in ["application/vnd.google-apps.document", "application/vnd.google-apps.kix"]:
+        if values["mimeType"] in [
+            "application/vnd.google-apps.document",
+            "application/vnd.google-apps.kix",
+        ]:
             return f"https://docs.google.com/document/d/{values['file_id']}"
         return f"https://drive.google.com/file/d/{values['file_id']}/view?usp=drivesdk"
 

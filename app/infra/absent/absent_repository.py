@@ -32,7 +32,9 @@ class AbsentRepository:
 
     def update(self, id: ObjectId, data: Union[AbsentInUpdateTime, Dict[str, Any]]) -> bool:
         try:
-            data = data.model_dump(exclude_none=True) if isinstance(data, AbsentInUpdateTime) else data
+            data = (
+                data.model_dump(exclude_none=True) if isinstance(data, AbsentInUpdateTime) else data
+            )
             AbsentModel.objects(id=id).update_one(**data, upsert=False)
             return True
         except Exception:

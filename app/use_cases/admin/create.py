@@ -50,16 +50,22 @@ class CreateAdminUseCase(use_case.UseCase):
 
     def process_request(self, req_object: CreateAdminRequestObject):
         admin_in: AdminInCreate = req_object.admin_in
-        existing_admin: Optional[AdminModel] = self.admin_repository.get_by_email(email=admin_in.email)
+        existing_admin: Optional[AdminModel] = self.admin_repository.get_by_email(
+            email=admin_in.email
+        )
 
         current_season = get_current_season_value()
         if existing_admin:
             if existing_admin.latest_season == current_season:
-                return response_object.ResponseFailure.build_parameters_error(message="Email này đã tồn tại")
+                return response_object.ResponseFailure.build_parameters_error(
+                    message="Email này đã tồn tại"
+                )
             seasons = [*existing_admin.seasons, current_season]
             self.admin_repository.update(
                 id=existing_admin.id,
-                data=AdminInUpdateTime(latest_season=current_season, seasons=seasons, roles=admin_in.roles),
+                data=AdminInUpdateTime(
+                    latest_season=current_season, seasons=seasons, roles=admin_in.roles
+                ),
             )
             existing_admin.reload()
             return Admin(**AdminInDB.model_validate(existing_admin).model_dump())
@@ -75,7 +81,10 @@ class CreateAdminUseCase(use_case.UseCase):
         admin_in_db: AdminInDB = self.admin_repository.create(admin=obj_in)
 
         send_email_welcome_task.delay(
-            email=admin_in_db.email, password=password, full_name=admin_in_db.full_name, is_admin=True
+            email=admin_in_db.email,
+            password=password,
+            full_name=admin_in_db.full_name,
+            is_admin=True,
         )
 
         self.background_tasks.add_task(
@@ -89,7 +98,9 @@ class CreateAdminUseCase(use_case.UseCase):
                 author_name=req_object.current_admin.full_name,
                 author_roles=req_object.current_admin.roles,
                 description=json.dumps(
-                    req_object.admin_in.model_dump(exclude_none=True), default=str, ensure_ascii=False
+                    req_object.admin_in.model_dump(exclude_none=True),
+                    default=str,
+                    ensure_ascii=False,
                 ),
             ),
         )

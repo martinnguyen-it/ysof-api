@@ -68,7 +68,9 @@ class ListAdminsUseCase(use_case.UseCase):
         is_super_admin = any(role in req_object.current_admin.roles for role in SUPER_ADMIN)
 
         if req_object.season is not None:
-            if (is_super_admin and req_object.season != 0) or req_object.season in req_object.current_admin.seasons:
+            if (
+                is_super_admin and req_object.season != 0
+            ) or req_object.season in req_object.current_admin.seasons:
                 match_pipeline = {**match_pipeline, "seasons": req_object.season}
             elif is_super_admin and req_object.season == 0:
                 pass
@@ -98,7 +100,9 @@ class ListAdminsUseCase(use_case.UseCase):
         data = [Admin(**AdminInDB.model_validate(model).model_dump()) for model in admins]
         return ManyAdminsInResponse(
             pagination=Pagination(
-                total=total, page_index=req_object.page_index, total_pages=math.ceil(total / req_object.page_size)
+                total=total,
+                page_index=req_object.page_index,
+                total_pages=math.ceil(total / req_object.page_size),
             ),
             data=data,
         )

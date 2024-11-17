@@ -35,7 +35,11 @@ class ListSubjectsStudentRequestObject(request_object.ValidRequestObject):
         sort: Optional[dict[str, int]] = None,
     ):
         return ListSubjectsStudentRequestObject(
-            search=search, sort=sort, subdivision=subdivision, current_student=current_student, status=status
+            search=search,
+            sort=sort,
+            subdivision=subdivision,
+            current_student=current_student,
+            status=status,
         )
 
 
@@ -59,14 +63,22 @@ class ListSubjectsStudentUseCase(use_case.UseCase):
         if isinstance(req_object.status, list):
             match_pipeline = {**match_pipeline, "status": {"$in": req_object.status}}
 
-        subjects: List[SubjectModel] = self.subject_repository.list(sort=req_object.sort, match_pipeline=match_pipeline)
+        subjects: List[SubjectModel] = self.subject_repository.list(
+            sort=req_object.sort, match_pipeline=match_pipeline
+        )
 
         return [
             SubjectInStudent(
-                **SubjectInDB.model_validate(subject).model_dump(exclude=({"lecturer", "attachments"})),
-                lecturer=LecturerInStudent(**LecturerInDB.model_validate(subject.lecturer).model_dump()),
+                **SubjectInDB.model_validate(subject).model_dump(
+                    exclude=({"lecturer", "attachments"})
+                ),
+                lecturer=LecturerInStudent(
+                    **LecturerInDB.model_validate(subject.lecturer).model_dump()
+                ),
                 attachments=[
-                    DocumentInStudent(**DocumentInDB.model_validate(doc).model_dump(exclude=({"author"})))
+                    DocumentInStudent(
+                        **DocumentInDB.model_validate(doc).model_dump(exclude=({"author"}))
+                    )
                     for doc in subject.attachments
                 ],
             )

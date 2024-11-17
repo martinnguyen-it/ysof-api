@@ -30,9 +30,13 @@ class CreateSeasonUseCase(use_case.UseCase):
         self.season_repository = season_repository
 
     def process_request(self, req_object: CreateSeasonRequestObject):
-        existing_season: SeasonModel = self.season_repository.find_one({"season": req_object.season_in.season})
+        existing_season: SeasonModel = self.season_repository.find_one(
+            {"season": req_object.season_in.season}
+        )
         if existing_season:
-            return response_object.ResponseFailure.build_parameters_error(message="Năm học đã tồn tại")
+            return response_object.ResponseFailure.build_parameters_error(
+                message="Năm học đã tồn tại"
+            )
         clear_all_cache()
         current_seasons: list[SeasonModel] = self.season_repository.list(
             match_pipeline={"$match": {"is_current": True}}
