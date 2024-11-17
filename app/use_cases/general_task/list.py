@@ -2,7 +2,12 @@ import math
 from typing import Optional, List, Any
 from fastapi import Depends
 from app.shared import request_object, use_case, response_object
-from app.domain.general_task.entity import AdminInGeneralTask, GeneralTask, GeneralTaskInDB, ManyGeneralTasksInResponse
+from app.domain.general_task.entity import (
+    AdminInGeneralTask,
+    GeneralTask,
+    GeneralTaskInDB,
+    ManyGeneralTasksInResponse,
+)
 from app.domain.shared.entity import Pagination
 from app.models.general_task import GeneralTaskModel
 from app.infra.general_task.general_task_repository import GeneralTaskRepository
@@ -71,18 +76,40 @@ class ListGeneralTasksUseCase(use_case.UseCase):
     ):
         self.general_task_repository = general_task_repository
 
-    def process_request(self, req_object: ListGeneralTasksRequestObject):
-        is_super_admin = any(role in SUPER_ADMIN for role in req_object.current_admin.roles)
-
+    def match_pipeline_helper(
+        self,
+        req_object: ListGeneralTasksRequestObject,
+    ):
         current_season = get_current_season_value()
 
         match_pipeline: dict[str, Any] | None = {}
+        is_super_admin = AdminInDB.model_validate(req_object.current_admin).active() and any(
+            role in SUPER_ADMIN for role in req_object.current_admin.roles
+        )
+        # if season in query is None, then get season_default
+        season_default = (
+            req_object.current_admin.latest_season
+            if AdminRole.ADMIN not in req_object.current_admin.roles
+            else current_season
+        )
+
+        if not is_super_admin and req_object.season == 0:
+            return response_object.ResponseFailure.build_parameters_error(
+                "Bạn không có quyền truy cập tất cả mùa"
+            )
 
         if isinstance(req_object.type, str):
             match_pipeline = {**match_pipeline, "type": req_object.type}
+
+        if is_super_admin and req_object.season == 0:
+            return match_pipeline
+
         if (
-            (is_super_admin and req_object.season != 0)
-            or (isinstance(req_object.season, int) and req_object.season <= req_object.current_admin.latest_season)
+            is_super_admin
+            or (
+                isinstance(req_object.season, int)
+                and req_object.season <= req_object.current_admin.latest_season
+            )
             or req_object.season is None
         ):
             match_pipeline = {
@@ -96,12 +123,12 @@ class ListGeneralTasksUseCase(use_case.UseCase):
                                     "$lte": (
                                         req_object.season
                                         if req_object.season
-                                        and req_object.season <= req_object.current_admin.latest_season
-                                        else (
-                                            req_object.current_admin.latest_season
-                                            if AdminRole.ADMIN not in req_object.current_admin.roles
-                                            else current_season
+                                        and (
+                                            req_object.season
+                                            <= req_object.current_admin.latest_season
+                                            or is_super_admin
                                         )
+                                        else season_default
                                     )
                                 }
                             },
@@ -119,15 +146,6 @@ class ListGeneralTasksUseCase(use_case.UseCase):
                                             "$and": [
                                                 {"type": GeneralTaskType.INTERNAL},
                                                 {"role": {"$in": req_object.current_admin.roles}},
-                                                {
-                                                    "season": {
-                                                        "$lte": (
-                                                            req_object.current_admin.latest_season
-                                                            if AdminRole.ADMIN not in req_object.current_admin.roles
-                                                            else current_season
-                                                        )
-                                                    }
-                                                },
                                             ]
                                         }
                                     ),
@@ -135,20 +153,25 @@ class ListGeneralTasksUseCase(use_case.UseCase):
                             },
                             {
                                 "season": (
-                                    req_object.season if req_object.season else req_object.current_admin.latest_season
+                                    req_object.season if req_object.season else season_default
                                 )
                             },
                         ]
                     },
                 ],
             }
-        elif is_super_admin and req_object.season == 0:
-            pass
-        else:
-            return response_object.ResponseFailure.build_parameters_error(
-                "Bạn không có quyền truy cập "
-                + (f"mùa {req_object.season}" if req_object.season != 0 else "tất cả mùa")
-            )
+            return match_pipeline
+
+        return response_object.ResponseFailure.build_parameters_error(
+            "Bạn không có quyền truy cập " + (f"mùa {req_object.season}")
+        )
+
+    def process_request(self, req_object: ListGeneralTasksRequestObject):
+        match_pipeline = self.match_pipeline_helper(
+            req_object=req_object,
+        )
+        if isinstance(match_pipeline, response_object.ResponseFailure):
+            return match_pipeline
 
         if isinstance(req_object.search, str):
             match_pipeline = {
@@ -159,6 +182,8 @@ class ListGeneralTasksUseCase(use_case.UseCase):
             match_pipeline = {**match_pipeline, "label": {"$in": req_object.label}}
         if isinstance(req_object.roles, list) and len(req_object.roles) > 0:
             match_pipeline = {**match_pipeline, "role": {"$in": req_object.roles}}
+
+        print(match_pipeline)
 
         general_tasks: List[GeneralTaskModel] = self.general_task_repository.list(
             page_size=req_object.page_size,
@@ -174,13 +199,16 @@ class ListGeneralTasksUseCase(use_case.UseCase):
             author: AdminInDB = AdminInDB.model_validate(task.author)
             data.append(
                 GeneralTask(
-                    **GeneralTaskInDB.model_validate(task).model_dump(exclude=({"author", "attachments"})),
+                    **GeneralTaskInDB.model_validate(task).model_dump(
+                        exclude=({"author", "attachments"})
+                    ),
                     author=AdminInGeneralTask(**author.model_dump(), active=author.active()),
                     attachments=[
                         Document(
                             **DocumentInDB.model_validate(doc).model_dump(exclude=({"author"})),
                             author=AdminInDocument(
-                                **AdminInDB.model_validate(doc.author).model_dump(), active=author.active()
+                                **AdminInDB.model_validate(doc.author).model_dump(),
+                                active=author.active(),
                             ),
                         )
                         for doc in task.attachments
@@ -190,7 +218,9 @@ class ListGeneralTasksUseCase(use_case.UseCase):
 
         return ManyGeneralTasksInResponse(
             pagination=Pagination(
-                total=total, page_index=req_object.page_index, total_pages=math.ceil(total / req_object.page_size)
+                total=total,
+                page_index=req_object.page_index,
+                total_pages=math.ceil(total / req_object.page_size),
             ),
             data=data,
         )

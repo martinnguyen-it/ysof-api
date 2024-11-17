@@ -14,7 +14,7 @@ repos:
     hooks:
       - id: black
         exclude: ".json|.vscode/.*"
-        args: [--target-version, py37]
+        args: [--target-version, py37, --line-length, "100"]
         additional_dependencies: ["click==8.0.4"]
 
   - repo: local
@@ -23,7 +23,7 @@ repos:
         name: ruff
         entry: ruff check
         language: system
-        args: [--fix, "--exit-non-zero-on-fix"]
+        args: [--fix, "--exit-non-zero-on-fix", "--line-length", "100"]
         exclude: "Dockerfile|.txt|.env-.*|.example.env|tests/.*|.sh|.json|.yml|.yaml|.*ignore|Pipfile.*|.*.dockerfile|.*.ini|README.md|pylintrc|.*.toml|devops|scripts|.*.xlsx"
       # - id: run-tests
       #   language: script
