@@ -31,6 +31,20 @@ def send_email_welcome_task(email: str, password: str, full_name: str, is_admin:
 
 
 @celery_app.task
+def send_email_welcome_with_exist_account_task(
+    email: str, season: int, full_name: str, is_admin: bool = False
+):
+    plain_text = EMAIL_TEMPLATE[Template.WELCOME_WITH_EXIST_ACCOUNT][TemplateContent.PLAIN_TEXT]
+    plain_text = plain_text.replace("{{full_name}}", full_name)
+    plain_text = plain_text.replace("{{season}}", season)
+    plain_text = plain_text.replace("{{email}}", email)
+    plain_text = plain_text.replace(
+        "{{url}}", settings.FE_ADMIN_BASE_URL if is_admin else settings.FE_STUDENT_BASE_URL
+    )
+    email_smtp_service.send_email_welcome(email=email, plain_text=plain_text)
+
+
+@celery_app.task
 def send_email_notification_subject_task(subject_id: str):
     logger.info(f"[send_email_notification_subject_task subject_id:{subject_id}] running...")
     try:

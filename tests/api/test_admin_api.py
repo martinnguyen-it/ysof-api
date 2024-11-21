@@ -92,7 +92,7 @@ class TestAdminApi(unittest.TestCase):
     def test_create_admin(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
             "app.infra.tasks.email.send_email_welcome_task.delay"
-        ):
+        ), patch("app.infra.tasks.email.send_email_welcome_with_exist_account_task.delay"):
             mock_token.return_value = TokenData(email=self.user.email)
             r = self.client.post(
                 "/api/v1/admins",
@@ -111,7 +111,7 @@ class TestAdminApi(unittest.TestCase):
                 },
             )
             assert r.status_code == 200
-            user = AdminModel.objects(id=r.json().get("id")).get()
+            user: AdminModel = AdminModel.objects(id=r.json().get("id")).get()
             assert user.email == "test@test.com"
             assert user.created_at
             assert user.updated_at

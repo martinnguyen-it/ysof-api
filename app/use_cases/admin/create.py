@@ -12,7 +12,10 @@ from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import Endpoint, AuditLogType
 from app.shared.utils.general import get_current_season_value
-from app.infra.tasks.email import send_email_welcome_task
+from app.infra.tasks.email import (
+    send_email_welcome_task,
+    send_email_welcome_with_exist_account_task,
+)
 
 
 class CreateAdminRequestObject(request_object.ValidRequestObject):
@@ -68,6 +71,12 @@ class CreateAdminUseCase(use_case.UseCase):
                 ),
             )
             existing_admin.reload()
+            send_email_welcome_with_exist_account_task.delay(
+                email=existing_admin.email,
+                season=current_season,
+                full_name=existing_admin.full_name,
+                is_admin=True,
+            )
             return Admin(**AdminInDB.model_validate(existing_admin).model_dump())
 
         password = "12345678"
