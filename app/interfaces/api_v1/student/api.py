@@ -11,18 +11,18 @@ from app.interfaces.api_v1.student import (
 )
 
 api_router = APIRouter()
-api_router.include_router(auth.router, prefix="/auth", tags=["Auth Student"])
-api_router.include_router(student.router, prefix="/students", tags=["Student me"])
+api_router.include_router(auth.router, prefix="/auth", tags=["API Student - Auth"])
+api_router.include_router(student.router, prefix="/students", tags=["API Student - Student by me"])
 api_router.include_router(
-    subject_registration.router, prefix="/subjects/registration", tags=["Subject Student"]
+    subject_registration.router, prefix="/subjects/registration", tags=["API Student - Subject"]
 )
 api_router.include_router(
-    subject_evaluation.router, prefix="/subjects/evaluations", tags=["Subject Student"]
+    subject_evaluation.router, prefix="/subjects/evaluations", tags=["API Student - Subject"]
 )
 api_router.include_router(
     subject_evaluation_question.router,
     prefix="/subjects/evaluation-questions",
-    tags=["Subject Student"],
+    tags=["API Student - Subject"],
 )
-api_router.include_router(subject.router, prefix="/subjects", tags=["Subject Student"])
-api_router.include_router(absent.router, prefix="/absent", tags=["Absent Student"])
+api_router.include_router(subject.router, prefix="/subjects", tags=["API Student - Subject"])
+api_router.include_router(absent.router, prefix="/absent", tags=["API Student - Absent"])
