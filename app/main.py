@@ -1,4 +1,5 @@
 # import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
@@ -18,25 +19,23 @@ docs_paths = (
 )
 
 
+# app startup handler
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup logic
+    database.connect()
+    yield
+    # Shutdown logic
+    database.disconnect()
+
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=docs_paths["openapi_url"],
     docs_url=docs_paths["docs_url"],
     redoc_url=docs_paths["redoc_url"],
+    lifespan=lifespan,
 )
-
-# app startup handler
-
-
-@app.on_event("startup")
-def startup():
-    database.connect()
-
-
-# app shutdown handler
-@app.on_event("shutdown")
-def shutdown():
-    database.disconnect()
 
 
 # override default exception handler
