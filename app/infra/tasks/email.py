@@ -1,4 +1,5 @@
 from app.config import settings
+from app.shared.utils.general import get_current_season_value
 from celery_worker import celery_app, logger
 from static.email.email_template import EMAIL_TEMPLATE
 from static.email.entity import Template, TemplateContent
@@ -8,7 +9,6 @@ from app.models.subject_registration import SubjectRegistrationModel
 from bson import ObjectId
 from app.infra.subject.subject_repository import SubjectRepository
 from app.infra.admin.admin_repository import AdminRepository
-from app.shared.utils.general import get_current_season_value
 from app.models.admin import AdminModel
 from app.infra.email.brevo_service import BrevoService
 from celery import group

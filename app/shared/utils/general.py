@@ -91,7 +91,7 @@ def extract_id_spreadsheet_from_url(url: str) -> str:
     if m1:
         return m1.group(1)
 
-    raise HTTPException(status_code=400, detail="Không thể lấy id spreadsheet từ url đã nhập.")
+    raise HTTPException(status_code=422, detail="Không thể lấy id spreadsheet từ url đã nhập.")
 
 
 def get_current_season_value() -> int:
@@ -117,3 +117,34 @@ def mask_phone_number(phone_number: str | None = None) -> str | None:
     if not phone_number:
         return phone_number
     return (len(phone_number) - 4) * "*" + phone_number[-4:]
+
+
+def copy_dict(data: dict, exclude_keys: list[str] = []) -> dict:
+    """
+    Exclude specific fields from a dictionary.
+
+    :param data: The original dictionary.
+    :param exclude_keys: A list of keys to exclude.
+    :return: A new dictionary with the specified keys excluded.
+    """
+    if not exclude_keys:
+        return data.copy()
+    return {key: value for key, value in data.items() if key not in exclude_keys}
+
+
+def validate_name(name: str) -> str:
+    """
+    Cleans and normalizes a name by:
+    - Stripping extra spaces.
+    - Converting to title case while preserving Vietnamese diacritics.
+
+    :param name: The raw input name.
+    :return: The cleaned and normalized name.
+    """
+    # Strip leading/trailing spaces and split by whitespace
+    parts = name.strip().split()
+
+    # Capitalize each part and join with a single space
+    normalized_name = " ".join(part.capitalize() for part in parts)
+
+    return normalized_name

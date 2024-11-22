@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from pydantic import ConfigDict
 
 from app.domain.shared.entity import BaseEntity, DateTimeModelMixin, IDModelMixin, Pagination
+from app.domain.student.entity import StudentSeason
 from app.domain.student.field import PydanticStudentType
 from app.domain.subject.field import PydanticSubjectType
 from app.domain.subject.subject_evaluation.enum import QualityValueEnum, TypeQuestionEnum
@@ -54,8 +55,7 @@ class SubjectInEvaluation(BaseEntity):
 
 class StudentInEvaluation(BaseEntity):
     id: str
-    group: int
-    numerical_order: int
+    seasons_info: list[StudentSeason]
     holy_name: str
     full_name: str
     email: str

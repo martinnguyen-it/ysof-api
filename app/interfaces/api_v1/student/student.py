@@ -33,6 +33,8 @@ def get_list_students(
     sort_by: Optional[str] = "numerical_order",
     group: Optional[int] = None,
 ):
+    if sort_by in ["numerical_order", "season", "group"]:
+        sort_by = f"seasons_info.{sort_by}"
     sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
 
     req_object = ListStudentsRequestObject.builder(

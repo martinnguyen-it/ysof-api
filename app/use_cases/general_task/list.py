@@ -183,8 +183,6 @@ class ListGeneralTasksUseCase(use_case.UseCase):
         if isinstance(req_object.roles, list) and len(req_object.roles) > 0:
             match_pipeline = {**match_pipeline, "role": {"$in": req_object.roles}}
 
-        print(match_pipeline)
-
         general_tasks: List[GeneralTaskModel] = self.general_task_repository.list(
             page_size=req_object.page_size,
             page_index=req_object.page_index,

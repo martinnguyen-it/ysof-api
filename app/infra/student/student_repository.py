@@ -82,7 +82,6 @@ class StudentRepository:
         match_pipeline: Optional[Dict[str, Any]] = None,
         sort: Optional[Dict[str, int]] = None,
     ) -> List[StudentModel]:
-
         pipeline = []
         if match_pipeline is not None:
             pipeline.append({"$match": match_pipeline})
@@ -160,7 +159,7 @@ class StudentRepository:
                         "as": "subject_registrations",
                     },
                 },
-                {"$sort": sort if sort else {"numerical_order": 1}},
+                {"$sort": sort if sort else {"seasons_info.numerical_order": 1}},
                 {"$skip": page_size * (page_index - 1)},
                 {"$limit": page_size},
             ]

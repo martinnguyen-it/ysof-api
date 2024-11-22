@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Body, Path
 
-from app.infra.security.security_service import get_current_student
+from app.infra.security.security_service import get_current_active_student, get_current_student
 from app.shared.decorator import response_decorator
 from app.models.student import StudentModel
 from app.domain.subject.subject_evaluation.entity import (
@@ -37,7 +37,7 @@ def create_subject_evaluation(
     create_subject_evaluation_use_case: CreateSubjectEvaluationUseCase = Depends(
         CreateSubjectEvaluationUseCase
     ),
-    current_student: StudentModel = Depends(get_current_student),
+    current_student: StudentModel = Depends(get_current_active_student),
 ):
     req_object = CreateSubjectEvaluationRequestObject.builder(
         subject_id=subject_id, payload=payload, current_student=current_student

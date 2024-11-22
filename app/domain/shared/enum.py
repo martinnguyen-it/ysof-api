@@ -4,7 +4,6 @@ from app.shared.utils.general import ExtendedEnum
 class AccountStatus(str, ExtendedEnum):
     ACTIVE = "active"
     INACTIVE = "inactive"
-    DELETED = "deleted"
 
 
 class AdminRole(str, ExtendedEnum):

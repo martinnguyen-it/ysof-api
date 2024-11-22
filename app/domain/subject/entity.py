@@ -5,6 +5,7 @@ from pydantic import ConfigDict, field_validator, ValidationInfo
 from app.domain.shared.entity import BaseEntity, DateTimeModelMixin, IDModelMixin, Pagination
 from app.domain.lecturer.field import PydanticLecturerType
 from app.domain.lecturer.entity import Lecturer, LecturerInStudent
+from app.domain.student.entity import StudentSeason
 from app.domain.student.field import PydanticStudentType
 from app.domain.subject.field import PydanticSubjectType
 from app.domain.subject.enum import StatusSubjectEnum
@@ -125,8 +126,7 @@ class SubjectRegistrationInResponse(BaseEntity):
 
 
 class StudentInSubject(BaseEntity):
-    numerical_order: int
-    group: int
+    seasons_info: list[StudentSeason]
     holy_name: str
     full_name: str
     email: str

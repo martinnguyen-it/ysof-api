@@ -118,7 +118,7 @@ class CreateSubjectEvaluationUseCase(use_case.UseCase):
                     **req_object.payload.model_dump(),
                     student=req_object.current_student,
                     subject=subject,
-                    numerical_order=req_object.current_student.numerical_order,
+                    numerical_order=req_object.current_student.seasons_info[-1].numerical_order,
                 )
             )
         except NotUniqueError:

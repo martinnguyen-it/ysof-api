@@ -3,8 +3,9 @@ from typing import Optional
 from fastapi import Depends, BackgroundTasks
 from app.models.student import StudentModel
 from app.shared import request_object, use_case, response_object
+from mongoengine import NotUniqueError
 
-from app.domain.student.entity import Student, StudentInDB, StudentInUpdate, StudentInUpdateTime
+from app.domain.student.entity import Student, StudentInDB, StudentInUpdate
 from app.infra.student.student_repository import StudentRepository
 from app.models.admin import AdminModel
 from app.infra.audit_log.audit_log_repository import AuditLogRepository
@@ -54,10 +55,28 @@ class UpdateStudentUseCase(use_case.UseCase):
 
         current_season = get_current_season_value()
 
-        self.student_repository.update(
-            id=student.id, data=StudentInUpdateTime(**req_object.obj_in.model_dump())
-        )
-        student.reload()
+        if len(student.seasons_info) and student.seasons_info[-1].season != current_season:
+            return response_object.ResponseFailure.build_parameters_error(
+                message="Không thể cập nhật học viên mùa cũ"
+            )
+
+        if req_object.obj_in.numerical_order:
+            student.seasons_info[-1].numerical_order = req_object.obj_in.numerical_order
+        if req_object.obj_in.group:
+            student.seasons_info[-1].group = req_object.obj_in.group
+
+        for key, value in req_object.obj_in.model_dump(
+            exclude={"numerical_order", "group"}
+        ).items():
+            if value is not None:
+                if hasattr(student, key):
+                    setattr(student, key, value)
+        try:
+            student.save()
+        except NotUniqueError as e:
+            return response_object.ResponseFailure.build_parameters_error(message=e)
+        except Exception as e:
+            raise e
 
         self.background_tasks.add_task(
             self.audit_log_repository.create,

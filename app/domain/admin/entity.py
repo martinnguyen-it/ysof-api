@@ -41,7 +41,7 @@ class AdminInDB(IDModelMixin, DateTimeModelMixin, AdminBase):
         Check user validity
         :return:
         """
-        return self.status is AccountStatus.INACTIVE or self.status is AccountStatus.DELETED
+        return self.status is AccountStatus.INACTIVE
 
     def active(self):
         """_summary_

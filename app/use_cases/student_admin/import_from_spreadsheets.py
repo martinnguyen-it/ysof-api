@@ -5,13 +5,16 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from pydantic import ValidationError
 
+from app.domain.shared.enum import AccountStatus
 from app.shared import request_object, use_case, response_object
 
 from app.domain.student.entity import (
+    AttentionImport,
     ErrorImport,
     ImportSpreadsheetsInResponse,
     ImportSpreadsheetsPayload,
     StudentInDB,
+    StudentSeason,
 )
 from app.infra.student.student_repository import StudentRepository
 from app.infra.lecturer.lecturer_repository import LecturerRepository
@@ -21,11 +24,19 @@ from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.infra.security.security_service import get_password_hash
 from app.infra.services.google_drive_api import GoogleDriveAPIService
-from app.shared.utils.general import extract_id_spreadsheet_from_url, get_current_season_value
+from app.shared.utils.general import (
+    convert_valid_date,
+    copy_dict,
+    extract_id_spreadsheet_from_url,
+    get_current_season_value,
+)
 from app.shared.constant import HEADER_IMPORT_STUDENT
 from app.domain.student.enum import FieldStudentEnum
-from app.models.student import StudentModel
-from app.infra.tasks.email import send_email_welcome_task
+from app.models.student import SeasonInfo, StudentModel
+from app.infra.tasks.email import (
+    send_email_welcome_task,
+    send_email_welcome_with_exist_account_task,
+)
 
 LEN_HEADER_IMPORT_STUDENT = len(HEADER_IMPORT_STUDENT)
 
@@ -78,7 +89,7 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
             if e.resp.status == 404:
                 raise HTTPException(status_code=400, detail="Không tìm thấy spreadsheet hoặc sheet")
             elif e.resp.status == 403:
-                raise HTTPException(status_code=400, detail="Không có quyền truy cập")
+                raise HTTPException(status_code=400, detail="Không có quyền truy cập trang tính")
             else:
                 raise HTTPException(status_code=400, detail=f"An unexpected error occurred: {e}")
         except Exception as e:
@@ -102,45 +113,87 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
                 "Header của file import không hợp lệ"
             )
 
-        inserted_ids: list[str] = []
+        updated: list[str] = []
+        inserteds: list[str] = []
         errors: list[ErrorImport] = []
+        attentions: list[AttentionImport] = []
 
         current_season = get_current_season_value()
         for idx, row in enumerate(data_import):
             data = self.convert_value_spreadsheet_to_dict(row)
             try:
+                data_copy = copy_dict(data)
+                seasons_info = StudentSeason(
+                    season=current_season,
+                    numerical_order=data_copy["numerical_order"],
+                    group=data_copy["group"],
+                )
+                del data_copy["numerical_order"]
+                del data_copy["group"]
                 password = "12345678"
                 # password = generate_random_password()
                 student_in_db = StudentInDB(
-                    **data,
+                    **data_copy,
+                    seasons_info=[seasons_info],
                     password=get_password_hash(password),
-                    latest_season=current_season,
                 )
 
                 exist_std: StudentModel | None = self.student_repository.find_one(
-                    {
-                        "$or": [
-                            {
-                                "numerical_order": student_in_db.numerical_order,
-                            },
-                            {"email": student_in_db.email, "latest_season": current_season},
-                        ]
-                    }
+                    {"email": student_in_db.email}
                 )
                 if exist_std:
-                    raise NotUniqueError
+                    attentions_message = ""
+                    if exist_std.full_name != student_in_db.full_name:
+                        attentions_message += (
+                            f"Họ tên từ {exist_std.full_name} đã thay đổi "
+                            + f"thành {student_in_db.full_name}"
+                        )
+                    if convert_valid_date(exist_std.date_of_birth) != student_in_db.date_of_birth:
+                        attentions_message += ". " if attentions_message else ""
+                        attentions_message += (
+                            f"Ngày sinh từ {convert_valid_date(exist_std.date_of_birth)} "
+                            + f"đã thay đổi thành {student_in_db.date_of_birth}"
+                        )
 
-                inserted_id = self.student_repository.create(student_in_db).id
-                inserted_ids.append(str(inserted_id))
+                    exist_std.status = AccountStatus.ACTIVE
 
-                send_email_welcome_task.delay(
-                    email=student_in_db.email, password=password, full_name=student_in_db.full_name
-                )
+                    exist_std.seasons_info.append(
+                        SeasonInfo(
+                            numerical_order=seasons_info.numerical_order,
+                            group=seasons_info.group,
+                            season=seasons_info.season,
+                        )
+                    )
+
+                    del data_copy["email"]
+                    for key, value in data_copy.items():
+                        if value is not None:
+                            if hasattr(exist_std, key):
+                                setattr(exist_std, key, value)
+
+                    exist_std.save()
+                    updated.append(exist_std.email)
+                    if attentions_message:
+                        attentions.append(AttentionImport(row=idx + 2, detail=attentions_message))
+
+                    # send_email_welcome_with_exist_account_task.delay(
+                    #     email=exist_std.email, season=current_season, full_name=exist_std.full_name
+                    # )
+
+                else:
+                    inserted: StudentInDB = self.student_repository.create(student_in_db)
+                    inserteds.append(inserted.email)
+
+                    # send_email_welcome_task.delay(
+                    #     email=student_in_db.email,
+                    #     password=password,
+                    #     full_name=student_in_db.full_name,
+                    # )
             except NotUniqueError:
                 errors.append(
                     ErrorImport(
                         row=idx + 2,
-                        detail=f"Email hoặc mshv đã tồn tại. ({data.get('numerical_order')} - {data.get('email')})",
+                        detail=f"Email đã tồn tại. ({data.get('email')})",
                     )
                 )
             except ValidationError as e:
@@ -153,7 +206,10 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
             except Exception as e:
                 errors.append(ErrorImport(row=idx + 2, detail=str(e)))
 
-        if len(inserted_ids) > 0:
+        response = ImportSpreadsheetsInResponse(
+            errors=errors, inserteds=inserteds, updated=updated, attentions=attentions
+        )
+        if inserteds or attentions:
             self.background_tasks.add_task(
                 self.audit_log_repository.create,
                 AuditLogInDB(
@@ -164,8 +220,8 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
                     author_email=req_object.current_admin.email,
                     author_name=req_object.current_admin.full_name,
                     author_roles=req_object.current_admin.roles,
-                    description=json.dumps(inserted_ids, default=str, ensure_ascii=False),
+                    description=json.dumps(response, default=str, ensure_ascii=False),
                 ),
             )
 
-        return ImportSpreadsheetsInResponse(errors=errors, inserted_ids=inserted_ids)
+        return response

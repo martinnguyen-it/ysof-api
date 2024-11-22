@@ -1,4 +1,4 @@
-from datetime import datetime, date, timezone
+from datetime import date
 from typing import Optional, List
 from pydantic import ConfigDict, EmailStr, field_validator
 
@@ -11,12 +11,18 @@ from app.shared.utils.general import (
     mask_email,
     mask_phone_number,
     transform_email,
+    validate_name,
 )
 
 
-class StudentBase(BaseEntity):
+class StudentSeason(BaseEntity):
+    model_config = ConfigDict(from_attributes=True)
     numerical_order: int
     group: int
+    season: int
+
+
+class StudentBase(BaseEntity):
     holy_name: str
     full_name: str
     email: EmailStr
@@ -35,17 +41,18 @@ class StudentInDB(IDModelMixin, DateTimeModelMixin, StudentBase):
     # https://docs.pydantic.dev/2.4/concepts/models/#arbitrary-class-instances
     model_config = ConfigDict(from_attributes=True)
     status: AccountStatus = AccountStatus.ACTIVE
-    latest_season: int
+    seasons_info: list[StudentSeason]
     password: str
 
     _convert_valid_date = field_validator("date_of_birth", mode="before")(convert_valid_date)
+    _convert_valid_name = field_validator("full_name", mode="before")(validate_name)
 
     def disabled(self):
         """
         Check user validity
         :return:
         """
-        return self.status is AccountStatus.INACTIVE or self.status is AccountStatus.DELETED
+        return self.status is AccountStatus.INACTIVE
 
     def active(self):
         """_summary_
@@ -54,10 +61,17 @@ class StudentInDB(IDModelMixin, DateTimeModelMixin, StudentBase):
         Returns:
             _type_: bool
         """
-        return not self.disabled() and self.latest_season == get_current_season_value()
+        return (
+            not self.disabled()
+            and len(self.seasons_info) > 0
+            and self.seasons_info[-1].season == get_current_season_value()
+        )
 
 
 class StudentInCreate(StudentBase):
+    numerical_order: int
+    group: int
+
     _extract_email = field_validator("email", mode="before")(transform_email)
     _convert_valid_date = field_validator("date_of_birth", mode="before")(convert_valid_date)
 
@@ -69,7 +83,7 @@ class Student(StudentBase, DateTimeModelMixin):
 
     id: str
     status: AccountStatus = AccountStatus.ACTIVE
-    latest_season: int
+    seasons_info: list[StudentSeason]
 
 
 class ManyStudentsInResponse(BaseEntity):
@@ -78,8 +92,7 @@ class ManyStudentsInResponse(BaseEntity):
 
 
 class StudentInStudentRequestResponse(BaseEntity):
-    numerical_order: int
-    group: int
+    seasons_info: list[StudentSeason]
     holy_name: str
     full_name: str
     email: EmailStr
@@ -97,6 +110,7 @@ class ManyStudentsInStudentRequestResponse(BaseEntity):
 
 
 class StudentInUpdate(BaseEntity):
+    numerical_order: int | None = None
     group: Optional[int] = None
     holy_name: Optional[str] = None
     full_name: Optional[str] = None
@@ -110,13 +124,8 @@ class StudentInUpdate(BaseEntity):
     education: Optional[str] = None
     job: Optional[str] = None
     note: Optional[str] = None
-    status: Optional[AccountStatus] = None
     _extract_email = field_validator("email", mode="before")(transform_email)
     _convert_valid_date = field_validator("date_of_birth", mode="before")(convert_valid_date)
-
-
-class StudentInUpdateTime(StudentInUpdate):
-    updated_at: datetime = datetime.now(timezone.utc)
 
 
 class ImportSpreadsheetsPayload(BaseEntity):
@@ -129,9 +138,15 @@ class ErrorImport(BaseEntity):
     detail: str
 
 
+class AttentionImport(ErrorImport):
+    pass
+
+
 class ImportSpreadsheetsInResponse(BaseEntity):
-    inserted_ids: list[str]
+    updated: list[str]
+    inserteds: list[str]
     errors: list[ErrorImport]
+    attentions: list[AttentionImport]
 
 
 class ResetPasswordResponse(BaseEntity):

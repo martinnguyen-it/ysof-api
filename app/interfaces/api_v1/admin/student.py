@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends, Query, HTTPException, Path
+from fastapi import APIRouter, Body, Depends, Query, Path
 from typing import Optional, Annotated
 
 from app.domain.student.entity import (
@@ -83,12 +83,10 @@ def get_list_students(
     sort: Optional[Sort] = Sort.ASCE,
     sort_by: Optional[str] = "numerical_order",
     group: Optional[int] = None,
+    season: int | None = None,
 ):
-    annotations = {}
-    for base in reversed(Student.__mro__):
-        annotations.update(getattr(base, "__annotations__", {}))
-    if sort_by not in annotations:
-        raise HTTPException(status_code=400, detail=f"Invalid sort_by: {sort_by}")
+    if sort_by in ["numerical_order", "season", "group"]:
+        sort_by = f"seasons_info.{sort_by}"
     sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
 
     req_object = ListStudentsRequestObject.builder(
@@ -97,6 +95,7 @@ def get_list_students(
         search=search,
         sort=sort_query,
         group=group,
+        season=season,
     )
     response = list_students_use_case.execute(request_object=req_object)
     return response

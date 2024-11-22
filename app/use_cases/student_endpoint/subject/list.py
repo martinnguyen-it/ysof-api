@@ -1,6 +1,6 @@
 from typing import Optional, List
 from fastapi import Depends
-from app.shared import request_object, use_case
+from app.shared import request_object, response_object, use_case
 from app.domain.subject.entity import SubjectInDB, SubjectInStudent
 from app.models.subject import SubjectModel
 from app.infra.subject.subject_repository import SubjectRepository
@@ -18,12 +18,14 @@ class ListSubjectsStudentRequestObject(request_object.ValidRequestObject):
         subdivision: Optional[str] = None,
         status: Optional[list[StatusSubjectEnum]] = None,
         sort: Optional[dict[str, int]] = None,
+        season: Optional[int] = None,
     ):
         self.search = search
         self.sort = sort
         self.subdivision = subdivision
         self.current_student = current_student
         self.status = status
+        self.season = season
 
     @classmethod
     def builder(
@@ -33,6 +35,7 @@ class ListSubjectsStudentRequestObject(request_object.ValidRequestObject):
         subdivision: Optional[str] = None,
         status: Optional[list[StatusSubjectEnum]] = None,
         sort: Optional[dict[str, int]] = None,
+        season: Optional[int] = None,
     ):
         return ListSubjectsStudentRequestObject(
             search=search,
@@ -40,6 +43,7 @@ class ListSubjectsStudentRequestObject(request_object.ValidRequestObject):
             subdivision=subdivision,
             current_student=current_student,
             status=status,
+            season=season,
         )
 
 
@@ -48,7 +52,20 @@ class ListSubjectsStudentUseCase(use_case.UseCase):
         self.subject_repository = subject_repository
 
     def process_request(self, req_object: ListSubjectsStudentRequestObject):
-        match_pipeline = {"season": req_object.current_student.latest_season}
+        if req_object.season:
+            exists = any(
+                season.season == req_object.season
+                for season in req_object.current_student.seasons_info
+            )
+            if exists:
+                match_pipeline = {"season": req_object.season}
+
+            else:
+                return response_object.ResponseFailure.build_parameters_error(
+                    "Bạn không có quyền truy cập."
+                )
+        else:
+            match_pipeline = {"season": req_object.current_student.seasons_info[-1].season}
 
         if isinstance(req_object.search, str):
             match_pipeline = {

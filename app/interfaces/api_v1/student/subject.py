@@ -44,6 +44,7 @@ def get_list_subjects(
     status: Optional[list[StatusSubjectEnum]] = Query(None, title="Status"),
     subdivision: Optional[str] = None,
     current_student: StudentModel = Depends(get_current_student),
+    season: Optional[int] = None,
 ):
     annotations = {}
     for base in reversed(Subject.__mro__):
@@ -58,6 +59,7 @@ def get_list_subjects(
         subdivision=subdivision,
         current_student=current_student,
         status=status,
+        season=season,
     )
     response = list_subjects_use_case.execute(request_object=req_object)
     return response

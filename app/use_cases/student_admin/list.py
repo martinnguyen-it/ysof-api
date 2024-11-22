@@ -24,6 +24,7 @@ class ListStudentsRequestObject(request_object.ValidRequestObject):
         group: int | None = None,
         sort: Optional[dict[str, int]] = None,
         is_student_request: bool = False,
+        season: int | None = None,
     ):
         self.page_index = page_index
         self.page_size = page_size
@@ -31,6 +32,7 @@ class ListStudentsRequestObject(request_object.ValidRequestObject):
         self.sort = sort
         self.group = group
         self.is_student_request = is_student_request
+        self.season = season
 
     @classmethod
     def builder(
@@ -41,6 +43,7 @@ class ListStudentsRequestObject(request_object.ValidRequestObject):
         sort: Optional[dict[str, int]] = None,
         group: int | None = None,
         is_student_request: bool = False,
+        season: int | None = None,
     ):
         return ListStudentsRequestObject(
             page_index=page_index,
@@ -49,6 +52,7 @@ class ListStudentsRequestObject(request_object.ValidRequestObject):
             group=group,
             sort=sort,
             is_student_request=is_student_request,
+            season=season,
         )
 
 
@@ -62,7 +66,9 @@ class ListStudentsUseCase(use_case.UseCase):
     def process_request(self, req_object: ListStudentsRequestObject):
         current_season = get_current_season_value()
 
-        match_pipeline: Optional[Dict[str, Any]] = {"latest_season": current_season}
+        match_pipeline: Optional[Dict[str, Any]] = {
+            "seasons_info.season": current_season if not req_object.season else req_object.season
+        }
 
         if isinstance(req_object.search, str):
             num = None

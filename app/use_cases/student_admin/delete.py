@@ -44,7 +44,7 @@ class DeleteStudentUseCase(use_case.UseCase):
     def process_request(self, req_object: DeleteStudentRequestObject):
         student: Optional[StudentModel] = self.student_repository.get_by_id(req_object.id)
         if not student:
-            return response_object.ResponseFailure.build_not_found_error("Môn học không tồn tại")
+            return response_object.ResponseFailure.build_not_found_error("Học viên không tồn tại")
 
         current_season = get_current_season_value()
         try:

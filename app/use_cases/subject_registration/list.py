@@ -41,7 +41,7 @@ class ListSubjectRegistrationsUseCase(use_case.UseCase):
 
     def process_request(self, req_object: ListSubjectRegistrationsRequestObject):
         current_season = get_current_season_value()
-        match_pipeline: Optional[dict[str, Any]] = {"latest_season": current_season}
+        match_pipeline: Optional[dict[str, Any]] = {"seasons_info.season": current_season}
 
         if isinstance(req_object.search, str):
             match_pipeline = {
