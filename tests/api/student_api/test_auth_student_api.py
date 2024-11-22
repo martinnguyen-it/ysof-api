@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 import mongomock
 from app.infra.security.security_service import get_password_hash, verify_password
-from app.models.student import StudentModel
+from app.models.student import SeasonInfo, StudentModel
 import pytest
 from unittest.mock import patch
 from app.domain.auth.entity import TokenData
@@ -21,12 +21,16 @@ class TestAuthAdminStudentApi(unittest.TestCase):
         )
         cls.client = TestClient(app)
         cls.student: StudentModel = StudentModel(
-            numerical_order=1,
-            group=2,
+            seasons_info=[
+                SeasonInfo(
+                    numerical_order=1,
+                    group=2,
+                    season=3,
+                )
+            ],
             status="active",
             holy_name="Martin",
             phone_number="0123456789",
-            latest_season=3,
             email="student@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),

@@ -3,16 +3,34 @@ import unittest
 from unittest.mock import patch
 from mongoengine import connect, disconnect
 from fastapi.testclient import TestClient
+import pytest
 from app.main import app
 import mongomock
 from google.oauth2.credentials import Credentials
 
-from app.models.student import StudentModel
+from app.models.student import SeasonInfo, StudentModel
 from app.models.admin import AdminModel
 from app.infra.security.security_service import get_password_hash, TokenData, verify_password
 from app.models.season import SeasonModel
 from app.models.audit_log import AuditLogModel
 from app.domain.audit_log.enum import AuditLogType, Endpoint
+
+mock_data_student_payload = {
+    "numerical_order": 10,
+    "group": 10,
+    "holy_name": "string",
+    "full_name": "string",
+    "email": "student3@example.com",
+    "sex": "Nam",
+    "date_of_birth": "2024-04-06",
+    "origin_address": "string",
+    "diocese": "string",
+    "phone_number": "string",
+    "avatar": "string",
+    "education": "string",
+    "job": "string",
+    "note": "string",
+}
 
 
 class TestStudentAdminApi(unittest.TestCase):
@@ -25,6 +43,12 @@ class TestStudentAdminApi(unittest.TestCase):
             mongo_client_class=mongomock.MongoClient,
         )
         cls.client = TestClient(app)
+        cls.season: SeasonModel = SeasonModel(
+            title="CÙNG GIÊSU, NGƯỜI TRẺ DÁM ƯỚC MƠ",
+            academic_year="2022-2023",
+            season=2,
+            is_current=False,
+        ).save()
         cls.season: SeasonModel = SeasonModel(
             title="CÙNG GIÁO HỘI, NGƯỜI TRẺ BƯỚC ĐI TRONG HY VỌNG",
             academic_year="2023-2024",
@@ -58,36 +82,78 @@ class TestStudentAdminApi(unittest.TestCase):
             password=get_password_hash(password="local@local"),
         ).save()
         cls.student: StudentModel = StudentModel(
-            numerical_order=1,
-            group=2,
+            seasons_info=[
+                SeasonInfo(
+                    numerical_order=1,
+                    group=2,
+                    season=3,
+                )
+            ],
             status="active",
             holy_name="Martin",
             phone_number="0123456789",
-            latest_season=3,
             email="student@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
         cls.student2: StudentModel = StudentModel(
-            numerical_order=2,
-            group=2,
+            seasons_info=[
+                SeasonInfo(
+                    numerical_order=2,
+                    group=2,
+                    season=3,
+                )
+            ],
             status="active",
             holy_name="Martin",
             phone_number="0123456789",
-            latest_season=3,
             email="student2@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
         cls.student3: StudentModel = StudentModel(
-            numerical_order=3,
-            group=2,
+            seasons_info=[
+                SeasonInfo(
+                    numerical_order=3,
+                    group=2,
+                    season=3,
+                )
+            ],
             status="active",
             holy_name="Martin",
             phone_number="0123456789",
-            latest_season=3,
             email="student4@example.com",
             full_name="Nguyen Thanh Tam",
+            password=get_password_hash(password="local@local"),
+        ).save()
+        cls.student_old_season_1: StudentModel = StudentModel(
+            seasons_info=[
+                SeasonInfo(
+                    numerical_order=1,
+                    group=2,
+                    season=2,
+                )
+            ],
+            status="active",
+            holy_name="Martin",
+            phone_number="0123456789",
+            email="student_old_season_1@example.com",
+            full_name="Nguyen Thanh Tam",
+            password=get_password_hash(password="local@local"),
+        ).save()
+        cls.student_old_season_2: StudentModel = StudentModel(
+            seasons_info=[
+                SeasonInfo(
+                    numerical_order=3,
+                    group=3,
+                    season=2,
+                )
+            ],
+            status="active",
+            holy_name="Martin",
+            phone_number="0123456789",
+            email="student_old_season_2@example.com",
+            full_name="Nguyen Van Tam",
             password=get_password_hash(password="local@local"),
         ).save()
 
@@ -95,56 +161,50 @@ class TestStudentAdminApi(unittest.TestCase):
     def tearDownClass(cls):
         disconnect()
 
-    def test_create_student(self):
+    def test_create_student_with_admin_bkl_old_season(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
             "app.infra.tasks.email.send_email_welcome_task.delay"
         ):
-            mock_email = "student3@example.com"
-
             mock_token.return_value = TokenData(email=self.admin2.email)
             r = self.client.post(
                 "/api/v1/students",
-                json={
-                    "numerical_order": 10,
-                    "group": 10,
-                    "holy_name": "string",
-                    "full_name": "string",
-                    "email": mock_email,
-                    "sex": "Nam",
-                    "date_of_birth": "2024-04-06",
-                    "origin_address": "string",
-                    "diocese": "string",
-                    "phone_number": "string",
-                    "avatar": "string",
-                    "education": "string",
-                    "job": "string",
-                    "note": "string",
-                },
+                json=mock_data_student_payload,
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
             )
             assert r.status_code == 403
 
+    @pytest.mark.order(1)
+    def test_create_student_with_numerical_order_existed(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
+            "app.infra.tasks.email.send_email_welcome_task.delay"
+        ):
+            mock_token.return_value = TokenData(email=self.admin.email)
+
+            student_payload = mock_data_student_payload.copy()
+            student_payload["numerical_order"] = 3
+
+            r = self.client.post(
+                "/api/v1/students",
+                json=student_payload,
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            resp = r.json()
+            assert r.status_code == 400
+            assert resp["detail"] == "Đã tồn tại một học viên khác có MSHV 3 ở mùa 3."
+
+    @pytest.mark.order(2)
+    def test_create_student_success(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
+            "app.infra.tasks.email.send_email_welcome_task.delay"
+        ):
             mock_token.return_value = TokenData(email=self.admin.email)
             r = self.client.post(
                 "/api/v1/students",
-                json={
-                    "numerical_order": 10,
-                    "group": 10,
-                    "holy_name": "string",
-                    "full_name": "string",
-                    "email": mock_email,
-                    "sex": "Nam",
-                    "date_of_birth": "2024-04-06",
-                    "origin_address": "string",
-                    "diocese": "string",
-                    "phone_number": "string",
-                    "avatar": "string",
-                    "education": "string",
-                    "job": "string",
-                    "note": "string",
-                },
+                json=mock_data_student_payload,
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -152,7 +212,7 @@ class TestStudentAdminApi(unittest.TestCase):
             assert r.status_code == 200
             student: StudentModel = StudentModel.objects(id=r.json().get("id")).get()
             assert "password" not in r.json()
-            assert student.email == mock_email
+            assert student.email == mock_data_student_payload["email"]
             assert student.created_at
             assert student.updated_at
             assert student.password
@@ -164,6 +224,61 @@ class TestStudentAdminApi(unittest.TestCase):
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
 
+    def test_create_student_existed_in_current_season(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
+            "app.infra.tasks.email.send_email_welcome_task.delay"
+        ):
+            mock_token.return_value = TokenData(email=self.admin.email)
+            r = self.client.post(
+                "/api/v1/students",
+                json=mock_data_student_payload,
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            resp = r.json()
+            assert r.status_code == 400
+            assert resp["detail"] == "Học viên này (student3@example.com) đã đăng ký mùa 3."
+
+    @pytest.mark.order(3)
+    def test_create_student_existed_in_old_season(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
+            "app.infra.tasks.email.send_email_welcome_task.delay"
+        ):
+            mock_token.return_value = TokenData(email=self.admin.email)
+
+            student_payload = mock_data_student_payload.copy()
+            student_payload["email"] = self.student_old_season_1.email
+            student_payload["numerical_order"] = 20
+            r = self.client.post(
+                "/api/v1/students",
+                json=student_payload,
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+
+            resp = r.json()
+            assert r.status_code == 200
+            student: StudentModel = StudentModel.objects(id=r.json().get("id")).get()
+            assert "password" not in resp
+            assert student.email == student_payload["email"]
+
+            assert student.created_at != student.updated_at
+            assert student.password
+
+            assert len(resp["seasons_info"]) == 2
+            assert resp["seasons_info"][-1]["season"] == 3
+            assert resp["seasons_info"][0]["season"] == 2
+
+            time.sleep(1)
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.STUDENT}
+            )
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 1
+
+    @pytest.mark.order(4)
     def test_get_student_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.admin.email)
@@ -178,7 +293,11 @@ class TestStudentAdminApi(unittest.TestCase):
             assert resp.get("full_name") == self.student.full_name
             assert resp.get("email") == self.student.email
 
-    def test_get_all_students(self):
+    @pytest.mark.order(5)
+    def test_get_all_students_without_query_season(self):
+        """_summary_
+        If get without query season, will return all students in current season
+        """
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.admin.email)
             r = self.client.get(
@@ -189,8 +308,24 @@ class TestStudentAdminApi(unittest.TestCase):
             )
             assert r.status_code == 200
             resp = r.json()
-            assert resp["pagination"]["total"] == 3
+            assert resp["pagination"]["total"] == 5
 
+    @pytest.mark.order(6)
+    def test_get_all_students_with_query_season(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.admin.email)
+            r = self.client.get(
+                "/api/v1/students",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+                params={"season": 2},
+            )
+            assert r.status_code == 200
+            resp = r.json()
+            assert resp["pagination"]["total"] == 2
+
+    @pytest.mark.order(7)
     def test_update_student_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.admin.email)
@@ -313,6 +448,20 @@ class TestStudentAdminApi(unittest.TestCase):
                     "Cấp 3",
                     "Đang đi làm",
                 ],
+                [
+                    "13",
+                    "1",
+                    "Maria",
+                    "Lê Thắm Tiên",
+                    "Nữ",
+                    "22/06/2001",
+                    "Đắk Lắk",
+                    "",
+                    self.student_old_season_2.email,
+                    "0954129822",
+                    "Cấp 3",
+                    "Đang đi làm",
+                ],
             ]
 
             r = self.client.post(
@@ -331,8 +480,21 @@ class TestStudentAdminApi(unittest.TestCase):
             # Check error unique numerical_order cause existed another student have numerical_order = 1
             assert len(resp["errors"]) == 1
             assert resp["errors"][0]["row"] == 2
+            assert resp["errors"][0]["detail"] == "Đã tồn tại một học viên khác có MSHV 1 ở mùa 3."
 
-            assert len(resp["inserted_ids"]) == 2
+            assert len(resp["inserteds"]) == 2
+
+            # Updated 1 student from season 2
+            assert len(resp["updated"]) == 1
+
+            # Name and DOB of student updated change
+            assert (
+                resp["attentions"][0]["detail"]
+                == "Họ tên từ Nguyen Van Tam đã thay đổi thành Lê Thắm Tiên."
+                + " Ngày sinh từ None đã thay đổi thành 2001-06-22"
+            )
+            assert len(resp["attentions"]) == 1
+
             mock_get_data_spreadsheet.assert_called_once()
 
             time.sleep(1)
@@ -374,4 +536,4 @@ class TestStudentAdminApi(unittest.TestCase):
                 {"type": AuditLogType.UPDATE, "endpoint": Endpoint.STUDENT}
             )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
-            assert len(audit_logs) == 1
+            assert len(audit_logs) == 3

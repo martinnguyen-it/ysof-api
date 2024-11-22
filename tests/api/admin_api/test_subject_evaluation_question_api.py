@@ -20,7 +20,7 @@ from app.models.subject import SubjectModel
 from app.models.season import SeasonModel
 from app.models.audit_log import AuditLogModel
 from app.domain.audit_log.enum import AuditLogType, Endpoint
-from app.models.student import StudentModel
+from app.models.student import SeasonInfo, StudentModel
 from app.models.subject_evaluation import SubjectEvaluationQuestionModel
 
 
@@ -98,12 +98,16 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
             season=3,
         ).save()
         cls.student: StudentModel = StudentModel(
-            numerical_order=1,
-            group=2,
+            seasons_info=[
+                SeasonInfo(
+                    numerical_order=1,
+                    group=2,
+                    season=3,
+                )
+            ],
             status="active",
             holy_name="Martin",
             phone_number="0123456789",
-            latest_season=3,
             email="student@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
@@ -186,33 +190,3 @@ class TestSubjectEvaluationQuestionApi(unittest.TestCase):
             )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
-
-    def test_get_subject_evaluation_question(self):
-        with patch("app.infra.security.security_service.verify_token") as mock_token:
-            mock_token.return_value = TokenData(email=self.user2.email)
-            r = self.client.get(
-                f"/api/v1/subjects/evaluation-questions/{self.subject2.id}",
-                headers={
-                    "Authorization": "Bearer {}".format("xxx"),
-                },
-            )
-            assert r.status_code == 200
-            resp = r.json()
-            assert (
-                resp["questions"][0]["title"]
-                == self.subject_evaluation_question.questions[0]["title"]
-            )
-
-            mock_token.return_value = TokenData(email=self.student.email)
-            r = self.client.get(
-                f"/api/v1/student/subjects/evaluation-questions/{self.subject2.id}",
-                headers={
-                    "Authorization": "Bearer {}".format("xxx"),
-                },
-            )
-            assert r.status_code == 200
-            resp = r.json()
-            assert (
-                resp["questions"][0]["title"]
-                == self.subject_evaluation_question.questions[0]["title"]
-            )

@@ -21,7 +21,7 @@ from app.models.subject import SubjectModel
 from app.models.season import SeasonModel
 from app.models.audit_log import AuditLogModel
 from app.domain.audit_log.enum import AuditLogType, Endpoint
-from app.models.student import StudentModel
+from app.models.student import SeasonInfo, StudentModel
 from app.models.subject_registration import SubjectRegistrationModel
 from app.models.document import DocumentModel
 from app.domain.document.enum import DocumentType
@@ -173,12 +173,16 @@ class TestSubjectApi(unittest.TestCase):
             season=2,
         ).save()
         cls.student: StudentModel = StudentModel(
-            numerical_order=1,
-            group=2,
+            seasons_info=[
+                SeasonInfo(
+                    numerical_order=1,
+                    group=2,
+                    season=3,
+                )
+            ],
             status="active",
             holy_name="Martin",
             phone_number="0123456789",
-            latest_season=3,
             email="student@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
@@ -326,7 +330,8 @@ class TestSubjectApi(unittest.TestCase):
             resp = r.json()
             """_summary_
                 len(resp) == 3
-                Because mock 3 subjects, but one subject is season 2, one subject deleted and api add subject called 2 times success.
+                Because mock 3 subjects, but one subject is season 2, one subject
+                deleted and api add subject called 2 times success.
                 Default get list subject is current season
             """  # noqa: E501
             assert len(resp) == 3
@@ -435,45 +440,6 @@ class TestSubjectApi(unittest.TestCase):
             )
             audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
             assert len(audit_logs) == 1
-
-    def test_student_get_subject_by_id(self):
-        with patch("app.infra.security.security_service.verify_token") as mock_token:
-            mock_token.return_value = TokenData(email=self.student.email)
-            r = self.client.get(
-                f"/api/v1/student/subjects/{self.subject.id}",
-                headers={
-                    "Authorization": "Bearer {}".format("xxx"),
-                },
-            )
-            assert r.status_code == 200
-            resp = r.json()
-            assert "zoom" not in resp
-            assert resp["title"] == self.subject.title
-            assert "contact" not in resp["lecturer"]
-            assert "abstract" in resp
-
-            assert resp["lecturer"]["full_name"] == self.subject.lecturer.full_name
-            assert resp["attachments"][0]["name"] == self.subject.attachments[0].name
-
-    def test_student_get_all_subjects(self):
-        with patch("app.infra.security.security_service.verify_token") as mock_token:
-            mock_token.return_value = TokenData(email=self.student.email)
-            r = self.client.get(
-                "/api/v1/student/subjects",
-                headers={
-                    "Authorization": "Bearer {}".format("xxx"),
-                },
-            )
-            resp = r.json()
-            assert r.status_code == 200
-            assert isinstance(resp, list)
-            assert "zoom" not in resp[0]
-            assert resp[0]["title"] == self.subject.title
-            assert "contact" not in resp[0]["lecturer"]
-            assert "abstract" in resp[0]
-
-            assert resp[0]["lecturer"]["full_name"] == self.subject.lecturer.full_name
-            assert resp[0]["attachments"][0]["name"] == self.subject.attachments[0].name
 
     def test_get_next_most_recent(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:

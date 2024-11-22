@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 import mongomock
 
-from app.models.student import StudentModel
+from app.models.student import SeasonInfo, StudentModel
 from app.infra.security.security_service import get_password_hash, TokenData
 from app.models.season import SeasonModel
 
@@ -27,23 +27,31 @@ class TestStudentApi(unittest.TestCase):
             is_current=True,
         ).save()
         cls.student: StudentModel = StudentModel(
-            numerical_order=1,
-            group=2,
+            seasons_info=[
+                SeasonInfo(
+                    numerical_order=1,
+                    group=2,
+                    season=3,
+                )
+            ],
             status="active",
             holy_name="Martin",
             phone_number="0123456789",
-            latest_season=3,
             email="student@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
         cls.student2: StudentModel = StudentModel(
-            numerical_order=2,
-            group=2,
+            seasons_info=[
+                SeasonInfo(
+                    numerical_order=2,
+                    group=2,
+                    season=3,
+                )
+            ],
             status="active",
             holy_name="Martin",
             phone_number="0123456789",
-            latest_season=3,
             email="student2@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),

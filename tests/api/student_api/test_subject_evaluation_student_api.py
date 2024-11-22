@@ -15,7 +15,7 @@ from app.infra.security.security_service import (
 from app.models.lecturer import LecturerModel
 from app.models.subject import SubjectModel
 from app.models.season import SeasonModel
-from app.models.student import StudentModel
+from app.models.student import SeasonInfo, StudentModel
 from app.models.subject_evaluation import SubjectEvaluationModel, SubjectEvaluationQuestionModel
 from app.models.manage_form import ManageFormModel
 from app.domain.manage_form.enum import FormStatus, FormType
@@ -70,23 +70,31 @@ class TestSubjectEvaluationStudentApi(unittest.TestCase):
             season=3,
         ).save()
         cls.student: StudentModel = StudentModel(
-            numerical_order=1,
-            group=2,
+            seasons_info=[
+                SeasonInfo(
+                    numerical_order=1,
+                    group=2,
+                    season=3,
+                )
+            ],
             status="active",
             holy_name="Martin",
             phone_number="0123456789",
-            latest_season=3,
             email="student@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
         cls.student2: StudentModel = StudentModel(
-            numerical_order=2,
-            group=2,
+            seasons_info=[
+                SeasonInfo(
+                    numerical_order=2,
+                    group=2,
+                    season=3,
+                )
+            ],
             status="active",
             holy_name="Martin",
             phone_number="0123456789",
-            latest_season=3,
             email="student2@example.com",
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
@@ -113,7 +121,7 @@ class TestSubjectEvaluationStudentApi(unittest.TestCase):
             feedback_admin="Cảm ơn BTC",
             subject=cls.subject,
             student=cls.student2,
-            numerical_order=cls.student2.numerical_order,
+            numerical_order=cls.student2.seasons_info[-1].numerical_order,
         ).save()
 
     @classmethod
