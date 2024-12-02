@@ -109,14 +109,20 @@ def mask_email(email: str | None = None) -> str | None:
     if not email:
         return email
     username, domain = email.split("@")
-    masked_username = username[:4] + "*" * (len(username) - 4)
-    return masked_username + "@" + domain
+    masked_username = username[:4] + "*" * 4
+
+    if domain != "gmail.com":
+        masked_domain = "*" * 4 + "." + domain.split(".")[-1]
+    else:
+        masked_domain = domain
+
+    return masked_username + "@" + masked_domain
 
 
 def mask_phone_number(phone_number: str | None = None) -> str | None:
     if not phone_number:
         return phone_number
-    return (len(phone_number) - 4) * "*" + phone_number[-4:]
+    return phone_number[:3] + 4 * "*" + phone_number[-3:]
 
 
 def copy_dict(data: dict, exclude_keys: list[str] = []) -> dict:

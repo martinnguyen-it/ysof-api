@@ -95,7 +95,7 @@ class BaseStudentInStudentRequestResponse(BaseEntity):
     id: str
     holy_name: str
     full_name: str
-    email: EmailStr
+    email: str
     sex: Optional[SexEnum] = None
     diocese: Optional[str] = None
     phone_number: Optional[str] = None
