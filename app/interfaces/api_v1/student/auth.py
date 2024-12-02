@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Body, Depends
 
-from app.domain.auth.entity import AuthAdminInfoInResponse, LoginRequest, UpdatePassword
+from app.domain.auth.entity import AuthStudentInfoInResponse, LoginRequest, UpdatePassword
 from app.shared.decorator import response_decorator
 from app.use_cases.student_endpoint.student_auth.login import (
     LoginStudentRequestObject,
@@ -16,7 +16,7 @@ from app.use_cases.student_endpoint.student_auth.update_password import (
 router = APIRouter()
 
 
-@router.post("/login", response_model=AuthAdminInfoInResponse)
+@router.post("/login", response_model=AuthStudentInfoInResponse)
 @response_decorator()
 def login(
     payload: LoginRequest = Body(...),

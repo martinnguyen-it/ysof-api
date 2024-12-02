@@ -91,8 +91,8 @@ class ManyStudentsInResponse(BaseEntity):
     data: Optional[List[Student]] = None
 
 
-class StudentInStudentRequestResponse(BaseEntity):
-    seasons_info: list[StudentSeason]
+class BaseStudentInStudentRequestResponse(BaseEntity):
+    id: str
     holy_name: str
     full_name: str
     email: EmailStr
@@ -102,6 +102,14 @@ class StudentInStudentRequestResponse(BaseEntity):
     avatar: Optional[str] = None
     _mask_email = field_validator("email", mode="before")(mask_email)
     _mask_phone_number = field_validator("phone_number", mode="before")(mask_phone_number)
+
+
+class StudentGetMeResponse(BaseStudentInStudentRequestResponse):
+    seasons_info: list[StudentSeason]
+
+
+class StudentInStudentRequestResponse(BaseStudentInStudentRequestResponse):
+    season_info: StudentSeason
 
 
 class ManyStudentsInStudentRequestResponse(BaseEntity):

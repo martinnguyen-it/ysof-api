@@ -10,7 +10,7 @@ from unittest.mock import patch
 from app.domain.auth.entity import TokenData
 
 
-class TestAuthAdminStudentApi(unittest.TestCase):
+class TestAuthStudentApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()

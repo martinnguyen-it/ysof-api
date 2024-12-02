@@ -1,7 +1,7 @@
 from fastapi import Depends
 
 from app.domain.auth.entity import LoginRequest, TokenData, AuthStudentInfoInResponse
-from app.domain.student.entity import Student, StudentInDB
+from app.domain.student.entity import StudentGetMeResponse, StudentInDB
 from app.models.student import StudentModel
 from app.infra.security.security_service import verify_password, create_access_token
 from app.infra.student.student_repository import StudentRepository
@@ -49,5 +49,5 @@ class LoginStudentUseCase(use_case.UseCase):
 
         access_token = create_access_token(data=TokenData(email=student.email, id=str(student.id)))
         return AuthStudentInfoInResponse(
-            access_token=access_token, user=Student(**student_in_db.model_dump())
+            access_token=access_token, user=StudentGetMeResponse(**student_in_db.model_dump())
         )

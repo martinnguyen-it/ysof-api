@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr, field_validator
 
 from app.domain.admin.entity import Admin
 from app.domain.shared.entity import BaseEntity
-from app.domain.student.entity import Student
+from app.domain.student.entity import StudentGetMeResponse
 from app.shared.utils.general import transform_email
 
 
@@ -27,7 +27,7 @@ class AuthAdminInfoInResponse(BaseEntity, Token):
 
 
 class AuthStudentInfoInResponse(BaseEntity, Token):
-    user: Student
+    user: StudentGetMeResponse
 
 
 class UpdatePassword(BaseEntity):
