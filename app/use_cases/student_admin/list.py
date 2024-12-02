@@ -65,24 +65,26 @@ class ListStudentsUseCase(use_case.UseCase):
         }
 
         if isinstance(req_object.search, str):
+            pipeline_search = [
+                {"email": {"$regex": req_object.search, "$options": "i"}},
+                {"full_name": {"$regex": req_object.search, "$options": "i"}},
+                {"holy_name": {"$regex": req_object.search, "$options": "i"}},
+                {"diocese": {"$regex": req_object.search, "$options": "i"}},
+            ]
             num = None
             try:
                 num = int(req_object.search)
+                pipeline_search.append({"seasons_info.numerical_order": num})
             except Exception:
                 pass
+
             match_pipeline = {
                 **match_pipeline,
-                "$or": [
-                    {"email": {"$regex": req_object.search, "$options": "i"}},
-                    {"full_name": {"$regex": req_object.search, "$options": "i"}},
-                    {"holy_name": {"$regex": req_object.search, "$options": "i"}},
-                    {"diocese": {"$regex": req_object.search, "$options": "i"}},
-                    {"numerical_order": num},
-                ],
+                "$or": pipeline_search,
             }
 
         if isinstance(req_object.group, int):
-            match_pipeline = {**match_pipeline, "group": req_object.group}
+            match_pipeline = {**match_pipeline, "seasons_info.group": req_object.group}
 
         students: List[StudentModel] = self.student_repository.list(
             page_size=req_object.page_size,
