@@ -39,8 +39,8 @@ def get_subject_by_id(
 def get_list_subjects(
     list_subjects_use_case: ListSubjectsStudentUseCase = Depends(ListSubjectsStudentUseCase),
     search: Optional[str] = Query(None, title="Search"),
-    sort: Optional[Sort] = Sort.DESC,
-    sort_by: Optional[str] = "id",
+    sort: Optional[Sort] = Sort.ASCE,
+    sort_by: Optional[str] = "start_at",
     status: Optional[list[StatusSubjectEnum]] = Query(None, title="Status"),
     subdivision: Optional[str] = None,
     current_student: StudentModel = Depends(get_current_student),

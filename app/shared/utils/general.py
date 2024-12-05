@@ -32,7 +32,11 @@ def convert_valid_date(my_date: Union[date, datetime, str]) -> Optional[date]:
 
     if isinstance(my_date, str):
         try:
-            return datetime.strptime(my_date, "%d/%m/%Y").date()
+            return (
+                datetime.strptime(my_date, "%d/%m/%Y").date()
+                if "/" in my_date
+                else datetime.strptime(my_date, "%Y-%m-%d").date()
+            )
         except ValueError:
             return None
 
