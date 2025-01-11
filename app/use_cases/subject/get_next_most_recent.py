@@ -1,5 +1,5 @@
 from fastapi import Depends
-from app.shared import use_case
+from app.shared import response_object, use_case
 from app.domain.subject.entity import Subject, SubjectInDB
 from app.infra.subject.subject_repository import SubjectRepository
 from app.models.subject import SubjectModel
@@ -27,7 +27,9 @@ class GetSubjectNextMostRecentUseCase(use_case.UseCase):
             page_size=1,
         )
         if len(subjects) == 0:
-            return {"message": "Không còn buổi học nào tiếp theo"}
+            return response_object.ResponseFailure.build_not_found_error(
+                "Không còn buổi học nào tiếp theo"
+            )
 
         return Subject(
             **SubjectInDB.model_validate(subjects[0]).model_dump(

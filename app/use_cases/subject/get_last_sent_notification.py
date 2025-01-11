@@ -1,5 +1,5 @@
 from fastapi import Depends
-from app.shared import use_case
+from app.shared import response_object, use_case
 from app.domain.subject.entity import Subject, SubjectInDB
 from app.infra.subject.subject_repository import SubjectRepository
 from app.models.subject import SubjectModel
@@ -28,7 +28,9 @@ class GetSubjectLastSentNotificationUseCase(use_case.UseCase):
             page_size=1,
         )
         if len(subjects) == 0:
-            return {"message": "Không có buổi học nào cũ chưa hoàn thành"}
+            return response_object.ResponseFailure.build_not_found_error(
+                "Không có buổi học đã gửi thông báo"
+            )
 
         return Subject(
             **SubjectInDB.model_validate(subjects[0]).model_dump(
