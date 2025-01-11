@@ -19,8 +19,6 @@ class SeasonInfo(EmbeddedDocument):
     group = IntField(required=True)
     season = IntField(required=True)
 
-    meta = {"indexes": [{"fields": ("numerical_order", "season"), "unique": True}]}
-
 
 class StudentModel(Document):
     seasons_info = EmbeddedDocumentListField(SeasonInfo)

@@ -60,7 +60,7 @@ class UpdateStudentUseCase(use_case.UseCase):
                 message="Không thể cập nhật học viên mùa cũ"
             )
 
-        if req_object.obj_in.numerical_order:
+        if isinstance(req_object.obj_in.numerical_order, int):
             student.seasons_info[-1].numerical_order = req_object.obj_in.numerical_order
         if req_object.obj_in.group:
             student.seasons_info[-1].group = req_object.obj_in.group
