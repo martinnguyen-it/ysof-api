@@ -98,3 +98,5 @@ celerybeat-schedule.db
 .env*
 
 *google-credentials*
+
+keyfile

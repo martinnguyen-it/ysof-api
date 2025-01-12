@@ -16,10 +16,19 @@ services:
     mongodb:
         image: mongo:7.0.2-jammy
         restart: always
-        command: mongod
+        healthcheck:
+            test: |
+                mongosh --username ${MONGODB_USERNAME} --password ${MONGODB_PASSWORD} --eval "rs.initiate()"
+            start_period: 0s
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        command: >
+            --bind_ip_all --replSet rs0 --keyFile /keyfile
         volumes:
             - ./scripts/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
             - mongodb_data:/data/db
+            - ./keyfile:/keyfile
         networks:
             - localnet
 

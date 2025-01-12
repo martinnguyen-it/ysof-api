@@ -7,7 +7,7 @@ class SeasonModel(Document):
     season = IntField(required=True, unique=True)
     is_current = BooleanField(required=True)
     description = StringField()
-    academic_year = StringField()
+    academic_year = StringField(required=True, unique=True)
 
     created_at = DateTimeField()
     updated_at = DateTimeField()

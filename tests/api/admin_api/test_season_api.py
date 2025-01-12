@@ -1,4 +1,4 @@
-import app.interfaces.api_v1
+from time import sleep
 import unittest
 from unittest.mock import patch
 
@@ -6,7 +6,6 @@ from mongoengine import connect, disconnect
 from fastapi.testclient import TestClient
 
 from app.main import app
-import mongomock
 
 from app.models.admin import AdminModel
 from app.infra.security.security_service import (
@@ -14,17 +13,16 @@ from app.infra.security.security_service import (
     get_password_hash,
 )
 from app.models.season import SeasonModel
+from app.config import settings
 
 
 class TestSeasonApi(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         disconnect()
-        connect(
-            "mongoenginetest",
-            host="mongodb://localhost:1234",
-            mongo_client_class=mongomock.MongoClient,
-        )
+        cls.db_name = "test_db_" + str(id(cls))
+        cls.db = connect(cls.db_name, host=settings.MONGODB_HOST, port=settings.MONGODB_PORT)
+
         cls.client = TestClient(app)
         cls.user: AdminModel = AdminModel(
             status="active",
@@ -64,9 +62,10 @@ class TestSeasonApi(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        cls.db.drop_database(cls.db_name)
         disconnect()
 
-    def test_create_season(self):
+    def test_create_season_fail_by_user_not_admin(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user2.email)
             r = self.client.post(
@@ -82,6 +81,8 @@ class TestSeasonApi(unittest.TestCase):
             )
             assert r.status_code == 403
 
+    def test_create_season_fail_and_rollback_transaction(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user.email)
             r = self.client.post(
                 "/api/v1/seasons",
@@ -94,11 +95,37 @@ class TestSeasonApi(unittest.TestCase):
                     "Authorization": "Bearer {}".format("xxx"),
                 },
             )
+            resp = r.json()
+            assert r.status_code == 400
+            assert resp["detail"] == "Năm học đã tồn tại"
+
+            # Check still keep old current season when failed
+            doc: SeasonModel = SeasonModel.objects(id=self.season.id).get()
+            assert doc.is_current is True
+
+    def test_create_season_success(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.post(
+                "/api/v1/seasons",
+                json={
+                    "title": "CÙNG GIÊSU, NGƯỜI TRẺ DÁM ƯỚC MƠ",
+                    "season": 4,
+                    "academic_year": "2024-2025",
+                },
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
             assert r.status_code == 200
             doc: SeasonModel = SeasonModel.objects(id=r.json().get("id")).get()
             assert doc.title == "CÙNG GIÊSU, NGƯỜI TRẺ DÁM ƯỚC MƠ"
-            assert doc.season == 3
+            assert doc.season == 4
             assert doc.is_current is True
+
+            # Check old current season
+            doc: SeasonModel = SeasonModel.objects(id=self.season.id).get()
+            assert doc.is_current is False
 
     def test_get_all_seasons(self):
         r = self.client.get(

@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 
 from app.models.season import SeasonModel
 from app.shared import request_object, use_case, response_object
@@ -7,6 +7,10 @@ from app.shared import request_object, use_case, response_object
 from app.domain.season.entity import Season, SeasonInCreate, SeasonInDB
 from app.infra.season.season_repository import SeasonRepository
 from app.shared.utils.general import clear_all_cache
+from mongoengine.connection import get_connection
+
+from pymongo.errors import PyMongoError
+from mongoengine import NotUniqueError
 
 
 class CreateSeasonRequestObject(request_object.ValidRequestObject):
@@ -30,24 +34,44 @@ class CreateSeasonUseCase(use_case.UseCase):
         self.season_repository = season_repository
 
     def process_request(self, req_object: CreateSeasonRequestObject):
-        existing_season: SeasonModel = self.season_repository.find_one(
-            {"season": req_object.season_in.season}
-        )
-        if existing_season:
-            return response_object.ResponseFailure.build_parameters_error(
-                message="Năm học đã tồn tại"
-            )
-        clear_all_cache()
-        current_seasons: list[SeasonModel] = self.season_repository.list(
-            match_pipeline={"$match": {"is_current": True}}
-        )
-        if len(current_seasons) > 0:
-            self.season_repository.bulk_update(data={"is_current": False}, entities=current_seasons)
+        client = get_connection()
+        with client.start_session() as session:
+            with session.start_transaction():
+                try:
+                    current_seasons: list[SeasonModel] = self.season_repository.list(
+                        match_pipeline={"$match": {"is_current": True}}
+                    )
 
-        obj_in: SeasonInDB = SeasonInDB(
-            **req_object.season_in.model_dump(),
-            is_current=True,
-        )
-        season: SeasonModel = self.season_repository.create(season=obj_in)
+                    if len(current_seasons) > 0:
+                        self.season_repository.bulk_update(
+                            data={"is_current": False}, entities=current_seasons, session=session
+                        )
+                    clear_all_cache()
 
-        return Season(**SeasonInDB.model_validate(season).model_dump())
+                    obj_in: SeasonInDB = SeasonInDB(
+                        **req_object.season_in.model_dump(),
+                        is_current=True,
+                    )
+
+                    season: SeasonModel = self.season_repository.create(
+                        season=obj_in, session=session
+                    )
+
+                    # Commit the transaction
+                    session.commit_transaction()
+                    return Season(**SeasonInDB.model_validate(season).model_dump())
+
+                except NotUniqueError:
+                    session.abort_transaction()
+                    return response_object.ResponseFailure.build_parameters_error(
+                        message="Năm học đã tồn tại"
+                    )
+
+                except (PyMongoError, ValueError):
+                    session.abort_transaction()
+                    raise HTTPException(status_code=400, detail=str("Something went wrong"))
+                except Exception:
+                    session.abort_transaction()
+                    raise HTTPException(status_code=400, detail=str("Something went wrong"))
+                finally:
+                    session.end_session()

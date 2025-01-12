@@ -8,7 +8,7 @@ class SeasonBase(BaseEntity):
     title: str
     season: int
     description: str | None = None
-    academic_year: str | None = None
+    academic_year: str
 
 
 class SeasonInDB(IDModelMixin, DateTimeModelMixin, SeasonBase):

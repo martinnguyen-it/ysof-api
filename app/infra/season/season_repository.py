@@ -9,19 +9,25 @@ from fastapi import HTTPException
 from app.models.season import SeasonModel
 from app.domain.season.entity import SeasonInDB, SeasonInUpdate, SeasonInUpdateTime
 
+from pymongo.client_session import ClientSession
+
 
 class SeasonRepository:
     def __init__(self):
         pass
 
-    def create(self, season: SeasonInDB) -> SeasonModel:
+    def create(
+        self,
+        season: SeasonInDB,
+        session: ClientSession | None = None,
+    ) -> SeasonModel:
         """
         Create new season in db
         :param season:
         :return:
         """
         # create season instance
-        new_doc = SeasonModel(**season.model_dump()).save()
+        new_doc = SeasonModel(**season.model_dump()).save(session=session)
         # and save it to db
         return new_doc
 
@@ -111,29 +117,29 @@ class SeasonRepository:
             raise HTTPException(status_code=400, detail="Admin cần khởi tạo mùa")
 
     def bulk_update(
-        self, data: Union[SeasonInUpdate, Dict[str, Any]], entities: List[SeasonModel]
+        self,
+        data: Union[SeasonInUpdate, Dict[str, Any]],
+        entities: List[SeasonModel],
+        session: ClientSession | None = None,
     ) -> bool:
-        try:
-            if len(entities) == 0:
-                return False
-
-            data = (
-                data.model_dump(exclude_none=True, exclude_unset=True)
-                if isinstance(data, SeasonInUpdate)
-                else data
-            )
-            operations = [
-                pymongo.UpdateOne(
-                    {"_id": season.id},
-                    {"$set": data},
-                    upsert=False,
-                )
-                for season in entities
-            ]
-            SeasonModel._get_collection().bulk_write(operations)
-            return True
-        except Exception:
+        if len(entities) == 0:
             return False
+
+        data = (
+            data.model_dump(exclude_none=True, exclude_unset=True)
+            if isinstance(data, SeasonInUpdate)
+            else data
+        )
+        operations = [
+            pymongo.UpdateOne(
+                {"_id": season.id},
+                {"$set": data},
+                upsert=False,
+            )
+            for season in entities
+        ]
+        SeasonModel._get_collection().bulk_write(operations, session=session)
+        return True
 
     def find_one(self, conditions: Dict[str, Union[str, bool, ObjectId]]) -> Optional[SeasonModel]:
         try:

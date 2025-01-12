@@ -9,16 +9,9 @@ if [ -z "$1" ]
     exit 1
 fi
 
-branch=$2
-if [ -z "$2" ]
-  then
-    echo "Param :branch is required as $2"
-    exit 1
-fi
-
-
-echo "Deploying $2 branch to $1"
-git fetch origin && git checkout $2 && git merge origin/$2
+echo "Overwriting .env.$1 to .env"
+rm -rf .env
+cp ".env.$1" .env
 
 if [ ! -f keyfile ]; then
   # If the keyfile does not exist, create it
@@ -31,11 +24,6 @@ else
   # If the keyfile exists, skip the creation process
   echo "Keyfile already exists, skipping creation."
 fi
-
-echo "Overwriting .env.$1 to .env"
-rm -rf .env
-cp ".env.$1" .env
-
 
 echo "Rebuild docker"
 docker compose -p "ysof_$1" -f docker-compose.yml -f "docker-compose.$1.yml" up -d --build
