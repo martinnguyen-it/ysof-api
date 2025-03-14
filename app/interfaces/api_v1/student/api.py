@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.interfaces.api_v1.student import (
     auth,
+    daily_bible,
     subject,
     subject_registration,
     subject_evaluation_question,
@@ -26,3 +27,6 @@ api_router.include_router(
 )
 api_router.include_router(subject.router, prefix="/subjects", tags=["API Student - Subject"])
 api_router.include_router(absent.router, prefix="/absent", tags=["API Student - Absent"])
+api_router.include_router(
+    daily_bible.router, prefix="/daily-bible", tags=["API Student - Daily Bible"]
+)
