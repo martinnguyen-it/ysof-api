@@ -42,7 +42,7 @@ class TestAuthAdminApi(unittest.TestCase):
     def test_admin_login(self):
         r = self.client.post(
             "/api/v1/admin/auth/login",
-            json={"email": "user@example.com", "password": "local@local"},
+            data={"username": "user@example.com", "password": "local@local"},
         )
         assert r.status_code == 200
         assert r.json().get("access_token")

@@ -20,7 +20,12 @@ from app.models.student import StudentModel
 from app.domain.student.entity import StudentInDB
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/admin/auth/login")
+oauth2_scheme_student = OAuth2PasswordBearer(
+    tokenUrl=f"{settings.API_V1_STR}/student/auth/login", scheme_name="Student Oauth2"
+)
+oauth2_scheme_admin = OAuth2PasswordBearer(
+    tokenUrl=f"{settings.API_V1_STR}/admin/auth/login", scheme_name="Admin Oauth2"
+)
 
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -50,7 +55,7 @@ def get_password_hash(password):
 
 
 def _get_current_admin(
-    token: str = Depends(oauth2_scheme),
+    token: str = Depends(oauth2_scheme_admin),
     admin_repository: AdminRepository = Depends(AdminRepository),
 ) -> AdminModel:
     token_data = verify_token(token=token)
@@ -79,7 +84,7 @@ def get_current_admin(
 
 
 def _get_current_student(
-    token: str = Depends(oauth2_scheme),
+    token: str = Depends(oauth2_scheme_student),
     student_repository: StudentRepository = Depends(StudentRepository),
 ) -> StudentModel:
     token_data = verify_token(token=token)

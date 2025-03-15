@@ -44,7 +44,7 @@ class TestAuthStudentApi(unittest.TestCase):
     def test_admin_login(self):
         r = self.client.post(
             "/api/v1/student/auth/login",
-            json={"email": "student@example.com", "password": "local@local"},
+            data={"username": "student@example.com", "password": "local@local"},
         )
         assert r.status_code == 200
         assert r.json().get("access_token")

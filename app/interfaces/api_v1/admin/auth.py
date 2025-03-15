@@ -1,4 +1,6 @@
+from typing import Annotated
 from fastapi import APIRouter, Body, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 
 from app.domain.auth.entity import AuthAdminInfoInResponse, LoginRequest, UpdatePassword
 from app.shared.decorator import response_decorator
@@ -15,8 +17,13 @@ router = APIRouter()
 
 @router.post("/login", response_model=AuthAdminInfoInResponse)
 @response_decorator()
-def login(payload: LoginRequest = Body(...), login_use_case: LoginUseCase = Depends(LoginUseCase)):
-    req_object = LoginRequestObject.builder(login_payload=payload)
+def login(
+    payload: Annotated[OAuth2PasswordRequestForm, Depends()],
+    login_use_case: LoginUseCase = Depends(LoginUseCase),
+):
+    req_object = LoginRequestObject.builder(
+        login_payload=LoginRequest(email=payload.username, password=payload.password)
+    )
     response = login_use_case.execute(req_object)
     return response
 
