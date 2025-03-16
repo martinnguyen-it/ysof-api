@@ -4,10 +4,12 @@ from fastapi import HTTPException
 from typing import Optional, Union, Tuple
 import calendar
 import re
+
+import pytz
 from app.infra.season.season_repository import SeasonRepository
 from cachetools import TTLCache
 
-cache = TTLCache(maxsize=1, ttl=60 * 60 * 24 * 30)  # Cache 1 item for 30 days
+cache = TTLCache(maxsize=10, ttl=60 * 60 * 24 * 30)  # Cache 1 item for 30 days
 
 
 class ExtendedEnum(Enum):
@@ -158,3 +160,15 @@ def validate_name(name: str) -> str:
     normalized_name = " ".join(part.capitalize() for part in parts)
 
     return normalized_name
+
+
+def get_ttl_until_midnight():
+    tz = pytz.timezone("Asia/Ho_Chi_Minh")  # GMT+7 timezone
+    now = datetime.now(tz)
+
+    # Next midnight (23:59:59 of today)
+    midnight = now.replace(hour=23, minute=59, second=59, microsecond=0)
+
+    # Time difference in seconds
+    ttl = (midnight - now).total_seconds()
+    return max(int(ttl), 1)

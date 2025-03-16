@@ -9,11 +9,12 @@ from app.infra.security.security_service import get_password_hash
 from app.main import app
 from app.models.admin import AdminModel
 
-mock_response_valuue_bible = {
+mock_response_value_bible = {
     "data": {
         "mass_reading": [
             {
                 "display_text": "Ngày thường",
+                "date_info": {"season": "EAS", "daily_title": "Thứ Tư Tuần II - Mùa Chay"},
                 "gospel": [
                     {
                         "INDEXING": "Mt 5,20-26",
@@ -65,7 +66,7 @@ class TestDailyBibleApi(unittest.TestCase):
             responses.add(
                 responses.POST,
                 "https://ktcgkpv.org/readings/mass-reading",
-                json=mock_response_valuue_bible,
+                json=mock_response_value_bible,
                 status=200,
             )
 
@@ -80,6 +81,7 @@ class TestDailyBibleApi(unittest.TestCase):
             resp = r.json()
             assert resp["gospel_ref"] == "Hãy đi làm hoà với người anh em ấy đã."
             assert resp["epitomize_text"] == "Mt 5,20-26"
+            assert resp["season"] == "Mùa Chay"
 
 
 if __name__ == "__main__":
