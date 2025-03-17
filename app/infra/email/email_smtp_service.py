@@ -18,7 +18,7 @@ class EmailSMTPService:
             msg["From"] = f"YSOF <{settings.YSOF_EMAIL_SENDER}>"
             msg["To"] = emails_to
             msg["Subject"] = subject
-            current_time = datetime.now(pytz.timezone(settings.CELERY_TIMEZONE))
+            current_time = datetime.now(pytz.timezone(settings.TIMEZONE))
             formatted_date = current_time.strftime("%a, %d %b %Y %H:%M:%S %z")
 
             msg["Date"] = formatted_date

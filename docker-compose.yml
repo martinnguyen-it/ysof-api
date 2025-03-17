@@ -6,6 +6,7 @@ services:
         depends_on:
             - mongodb
             - rabbit
+            - redis
         networks:
             - localnet
         volumes:
@@ -61,6 +62,17 @@ services:
         networks:
             - localnet
 
+    redis:
+        image: redis:6.2
+        ports:
+            - ${REDIS_EXPOSE_PORT}:6379
+        volumes:
+            - redis_data:/data
+        networks:
+            - localnet
+        command:
+            /bin/sh -c "redis-server --requirepass ${REDIS_PASSWORD}"
+
 networks:
     localnet:
         driver: bridge
@@ -69,4 +81,6 @@ volumes:
     mongodb_data:
         driver: local
     rabbit_data:
+        driver: local
+    redis_data:
         driver: local

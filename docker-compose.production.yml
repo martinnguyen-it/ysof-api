@@ -24,8 +24,13 @@ services:
 
     rabbit:
         container_name: ysof_rabbitmq_${ENVIRONMENT}
-
+        env_file:
+            - .env
     celery:
         container_name: ysof_celery_${ENVIRONMENT}
+        env_file:
+            - .env
+    redis:
+        container_name: ysof_redis_${ENVIRONMENT}
         env_file:
             - .env

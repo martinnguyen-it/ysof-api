@@ -31,3 +31,8 @@ services:
         container_name: ysof_celery_${ENVIRONMENT}
         env_file:
             - .env
+
+    redis:
+        container_name: ysof_redis_${ENVIRONMENT}
+        env_file:
+            - .env

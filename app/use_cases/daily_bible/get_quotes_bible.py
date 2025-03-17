@@ -1,12 +1,10 @@
 import json
 import re
-from cachetools import TTLCache
 import requests
+from app.config.redis import RedisDependency
 from app.domain.daily_bible.entity import DailyBibleResponse
 from app.shared import response_object, use_case
 from app.shared.utils.general import get_ttl_until_midnight
-
-cache = TTLCache(maxsize=10, ttl=get_ttl_until_midnight())
 
 URL = "https://ktcgkpv.org/readings/mass-reading"
 HEADERS = {
@@ -17,11 +15,13 @@ PAYLOAD = "seldate="
 
 
 class GetQuotesBibleUseCase(use_case.UseCase):
+    def __init__(self, redis_client: RedisDependency):
+        self.redis_client = redis_client
+
     def process_request(self):
-        if "daily-bible-quotes" not in cache:
+        if not self.redis_client.exists("daily-bible-quotes"):
             try:
                 response = self._fetch_data()
-                print("None cache ⬇️⬇️")
                 if response.status_code == 200:
                     self._cache_response(response.json())
                 else:
@@ -34,7 +34,7 @@ class GetQuotesBibleUseCase(use_case.UseCase):
                 return response_object.ResponseFailure.build_system_error(
                     message="Invalid response format"
                 )
-        return DailyBibleResponse(**json.loads(cache["daily-bible-quotes"]))
+        return DailyBibleResponse(**json.loads(self.redis_client.get("daily-bible-quotes")))
 
     def _fetch_data(self):
         return requests.post(URL, headers=HEADERS, data=PAYLOAD)
@@ -42,7 +42,7 @@ class GetQuotesBibleUseCase(use_case.UseCase):
     def _cache_response(self, data):
         resp = data["data"]["mass_reading"][0]
         season = self._extract_season(resp["date_info"]["daily_title"])
-        cache["daily-bible-quotes"] = json.dumps(
+        cache_data = json.dumps(
             DailyBibleResponse(
                 epitomize_text=resp["gospel"][0]["INDEXING"],
                 gospel_ref=resp["gospel"][0]["EPITOMIZE"],
@@ -50,6 +50,8 @@ class GetQuotesBibleUseCase(use_case.UseCase):
             ).model_dump(),
             default=str,
         )
+        ttl = get_ttl_until_midnight()
+        self.redis_client.setex("daily-bible-quotes", ttl, cache_data)
 
     def _extract_season(self, daily_title):
         pattern = r"Mùa [A-ZÀ-Ỹa-zà-ỹ ]+"

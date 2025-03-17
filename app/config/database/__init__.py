@@ -11,7 +11,7 @@ def connect() -> None:
     :return: None
     """
     print(settings.ENVIRONMENT)
-    if settings.ENVIRONMENT == "testing":
+    if settings.ENVIRONMENT == "testing" or settings.ENVIRONMENT == "local":
         return mongo_engine_connect(
             settings.MONGODB_DATABASE, host=settings.MONGODB_HOST, port=settings.MONGODB_PORT
         )

@@ -6,10 +6,12 @@ import calendar
 import re
 
 import pytz
+from redis import Redis
+from app.config import settings
+from app.config.redis import get_redis_client
 from app.infra.season.season_repository import SeasonRepository
-from cachetools import TTLCache
 
-cache = TTLCache(maxsize=10, ttl=60 * 60 * 24 * 30)  # Cache 1 item for 30 days
+TTL_30_DAYS = 60 * 60 * 24 * 30
 
 
 class ExtendedEnum(Enum):
@@ -101,14 +103,16 @@ def extract_id_spreadsheet_from_url(url: str) -> str:
 
 
 def get_current_season_value() -> int:
-    if "season" not in cache:
+    redis_client: Redis = get_redis_client()
+    if not redis_client.exists("season"):
         season: int = SeasonRepository().get_current_season().season
-        cache["season"] = season
-    return cache["season"]
+        redis_client.setex("season", TTL_30_DAYS, season)
+    return int(redis_client.get("season"))
 
 
 def clear_all_cache():
-    cache.clear()
+    redis_client: Redis = get_redis_client()
+    redis_client.flushdb()
 
 
 def mask_email(email: str | None = None) -> str | None:
@@ -163,7 +167,7 @@ def validate_name(name: str) -> str:
 
 
 def get_ttl_until_midnight():
-    tz = pytz.timezone("Asia/Ho_Chi_Minh")  # GMT+7 timezone
+    tz = pytz.timezone(settings.TIMEZONE)
     now = datetime.now(tz)
 
     # Next midnight (23:59:59 of today)

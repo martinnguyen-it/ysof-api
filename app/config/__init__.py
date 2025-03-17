@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 class Settings(BaseSettings):
-    model_config = ConfigDict(env_file=".env", extra="forbid")
+    model_config = ConfigDict(env_file=".env", extra="ignore")
 
     # env variables
     LOG_LEVEL: str
@@ -78,7 +78,11 @@ class Settings(BaseSettings):
     RABBITMQ_HOST: str
     RABBITMQ_PORT: int
 
-    CELERY_TIMEZONE: str
+    TIMEZONE: str
+
+    REDIS_HOST: str
+    REDIS_PASSWORD: str
+    REDIS_PORT: str
 
 
 # init settings instance

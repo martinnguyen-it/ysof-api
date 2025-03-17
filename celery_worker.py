@@ -20,7 +20,7 @@ celery_app = Celery(
         "app.infra.tasks.periodic.manage_form_evaluation",
     ],
 )
-celery_app.conf.timezone = settings.CELERY_TIMEZONE
+celery_app.conf.timezone = settings.TIMEZONE
 celery_app.conf.accept_content = ["pickle", "json"]
 celery_app.conf.task_serializer = "pickle"
 
