@@ -56,21 +56,24 @@ class UpdateAdminUseCase(use_case.UseCase):
         )
         admin.reload()
 
-        current_season = get_current_season_value()
-        self.background_tasks.add_task(
-            self.audit_log_repository.create,
-            AuditLogInDB(
-                type=AuditLogType.UPDATE,
-                endpoint=Endpoint.ADMIN,
-                season=current_season,
-                author=req_object.current_admin,
-                author_email=req_object.current_admin.email,
-                author_name=req_object.current_admin.full_name,
-                author_roles=req_object.current_admin.roles,
-                description=json.dumps(
-                    req_object.obj_in.model_dump(exclude_none=True), default=str, ensure_ascii=False
+        if req_object.current_admin.id != admin.id:
+            current_season = get_current_season_value()
+            self.background_tasks.add_task(
+                self.audit_log_repository.create,
+                AuditLogInDB(
+                    type=AuditLogType.UPDATE,
+                    endpoint=Endpoint.ADMIN,
+                    season=current_season,
+                    author=req_object.current_admin,
+                    author_email=req_object.current_admin.email,
+                    author_name=req_object.current_admin.full_name,
+                    author_roles=req_object.current_admin.roles,
+                    description=json.dumps(
+                        req_object.obj_in.model_dump(exclude_none=True),
+                        default=str,
+                        ensure_ascii=False,
+                    ),
                 ),
-            ),
-        )
+            )
 
         return Admin(**AdminInDB.model_validate(admin).model_dump())

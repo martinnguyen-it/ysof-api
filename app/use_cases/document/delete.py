@@ -3,6 +3,7 @@ from typing import Optional
 
 from fastapi import Depends, BackgroundTasks
 from app.infra.document.document_repository import DocumentRepository
+from app.infra.tasks.drive_file import delete_file_drive_task
 from app.shared import request_object, response_object, use_case
 from app.shared.constant import SUPER_ADMIN
 from app.models.document import DocumentModel
@@ -79,7 +80,7 @@ class DeleteDocumentUseCase(use_case.UseCase):
 
         try:
             self.document_repository.delete(id=document.id)
-            self.background_tasks.add_task(self.google_drive_api_service.delete, document.file_id)
+            delete_file_drive_task.delay(document.file_id)
 
             current_season = get_current_season_value()
             self.background_tasks.add_task(

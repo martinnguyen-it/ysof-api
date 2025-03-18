@@ -1,6 +1,7 @@
 import json
 from typing import Optional
 from fastapi import Depends, BackgroundTasks
+from app.infra.tasks.drive_file import delete_file_drive_task
 from app.models.document import DocumentModel
 from app.shared import request_object, use_case, response_object
 
@@ -76,7 +77,7 @@ class UpdateDocumentUseCase(use_case.UseCase):
             )
 
         if req_object.obj_in.file_id:
-            self.background_tasks.add_task(self.google_drive_api_service.delete, document.file_id)
+            delete_file_drive_task.delay(document.file_id)
 
         self.document_repository.update(
             id=document.id, data=DocumentInUpdateTime(**req_object.obj_in.model_dump())

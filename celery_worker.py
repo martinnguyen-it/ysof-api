@@ -18,6 +18,7 @@ celery_app = Celery(
         "app.infra.tasks.email",
         "app.infra.tasks.periodic.manage_form_absent",
         "app.infra.tasks.periodic.manage_form_evaluation",
+        "app.infra.tasks.drive_file",
     ],
 )
 celery_app.conf.timezone = settings.TIMEZONE

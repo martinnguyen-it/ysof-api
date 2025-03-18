@@ -42,12 +42,14 @@ class GoogleDriveAPIService:
             raise HTTPException(status_code=400, detail="Hệ thống Cloud bị lỗi.")
         return creds
 
-    def create(self, file: UploadFile, name: Optional[str] = None) -> GoogleDriveAPIRes:
+    def create(
+        self, file: UploadFile, name: Optional[str] = None, folder_id: Optional[str] = None
+    ) -> GoogleDriveAPIRes:
         try:
             # Creating file metadata
             file_metadata = {
                 "name": name if name else file.filename,
-                "parents": [settings.FOLDER_GCLOUD_ID],
+                "parents": [settings.FOLDER_GCLOUD_ID if folder_id is None else folder_id],
             }
 
             # Creating media upload object

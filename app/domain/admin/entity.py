@@ -99,3 +99,4 @@ class AdminInUpdate(AdminInUpdateMe):
 
 class AdminInUpdateTime(AdminInUpdate):
     updated_at: datetime = datetime.now(timezone.utc)
+    avatar: Optional[str] = None

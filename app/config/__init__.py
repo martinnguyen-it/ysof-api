@@ -50,9 +50,8 @@ class Settings(BaseSettings):
     ENVIRONMENT: str
     ROOT_DIR: ClassVar = Path(__file__).parent.parent.parent
 
-    CURRENT_SEASON: int = 1
-
     FOLDER_GCLOUD_ID: str
+    FOLDER_GCLOUD_AVATAR_ID: str
     KEY_PATH_GCLOUD: str = "google-credentials/gcloud-service-credentials-staging.json"
     PREFIX_IMAGE_GCLOUD: str = "https://lh3.googleusercontent.com/d/"
 

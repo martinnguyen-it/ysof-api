@@ -269,26 +269,9 @@ class TestDocumentApi(unittest.TestCase):
 
     def test_delete_document_by_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
-            "app.infra.services.google_drive_api.GoogleDriveAPIService.delete"
-        ) as mock_delete_file_drive, patch(
-            "app.infra.services.google_drive_api.GoogleDriveAPIService._get_oauth_token"
-        ) as mock_get_oauth_token:
+            "app.use_cases.document.delete.delete_file_drive_task.delay"
+        ):
             mock_token.return_value = TokenData(email=self.user.email)
-            mock_get_oauth_token.return_value = Credentials(
-                token="<access_token>",
-                refresh_token="<refresh_token>",
-                client_id="<client_id>",
-                client_secret="<client_secret>",
-                token_uri="<token_uri>",
-                scopes=["https://www.googleapis.com/auth/drive"],
-            )
-            mock_delete_file_drive.return_value = GoogleDriveAPIRes.model_validate(
-                {
-                    "id": "1_YHlcIIE7b6tftTgknPB_freQRJfiOmy",
-                    "mimeType": "application/pdf",
-                    "name": "Updated",
-                }
-            )
 
             r = self.client.delete(
                 f"/api/v1/documents/{self.document2.id}",
