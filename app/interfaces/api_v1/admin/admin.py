@@ -27,7 +27,7 @@ from app.use_cases.admin.create import (
 )
 from app.shared.constant import SUPER_ADMIN
 from app.models.admin import AdminModel
-from app.use_cases.admin.update_avatar import UpdateAvatarRequestObject, UpdateAvatarUseCase
+from app.use_cases.user.update_avatar import UpdateAvatarRequestObject, UpdateAvatarUseCase
 
 router = APIRouter()
 
@@ -127,7 +127,7 @@ def update_avatar(
     upload_avatar_use_case: UpdateAvatarUseCase = Depends(UpdateAvatarUseCase),
     current_admin: AdminModel = Depends(get_current_admin),
 ):
-    req_object = UpdateAvatarRequestObject.builder(image=image, current_admin=current_admin)
+    req_object = UpdateAvatarRequestObject.builder(image=image, user=current_admin)
     response = upload_avatar_use_case.execute(request_object=req_object)
     return response
 

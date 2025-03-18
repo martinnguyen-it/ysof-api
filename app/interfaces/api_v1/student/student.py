@@ -1,5 +1,10 @@
-from fastapi import APIRouter, Depends, Query
-from app.domain.student.entity import ManyStudentsInStudentRequestResponse, Student, StudentInDB
+from fastapi import APIRouter, Body, Depends, File, Query, UploadFile
+from app.domain.student.entity import (
+    ManyStudentsInStudentRequestResponse,
+    Student,
+    StudentInDB,
+    StudentUpdateMePayload,
+)
 from app.models.student import StudentModel
 from app.infra.security.security_service import get_current_student
 from app.shared.decorator import response_decorator
@@ -9,6 +14,11 @@ from app.use_cases.student_endpoint.student.list import (
     ListStudentsInStudentRequestObject,
     ListStudentsInStudentRequestUseCase,
 )
+from app.use_cases.student_endpoint.student.update import (
+    UpdateStudentMeRequestObject,
+    UpdateStudentMeUseCase,
+)
+from app.use_cases.user.update_avatar import UpdateAvatarRequestObject, UpdateAvatarUseCase
 
 router = APIRouter()
 
@@ -19,6 +29,35 @@ def get_me(
     current_student: StudentModel = Depends(get_current_student),
 ):
     return Student(**StudentInDB.model_validate(current_student).model_dump())
+
+
+@router.put(
+    "/me",
+    response_model=Student,
+)
+@response_decorator()
+def update_me(
+    payload: StudentUpdateMePayload = Body(..., title="Student update me payload"),
+    update_student_me_use_case: UpdateStudentMeUseCase = Depends(UpdateStudentMeUseCase),
+    current_student: StudentModel = Depends(get_current_student),
+):
+    req_object = UpdateStudentMeRequestObject.builder(
+        payload=payload, current_student=current_student
+    )
+    response = update_student_me_use_case.execute(request_object=req_object)
+    return response
+
+
+@router.put("/me/avatar")
+@response_decorator()
+def update_avatar(
+    image: UploadFile = File(...),
+    upload_avatar_use_case: UpdateAvatarUseCase = Depends(UpdateAvatarUseCase),
+    current_student: StudentModel = Depends(get_current_student),
+):
+    req_object = UpdateAvatarRequestObject.builder(image=image, user=current_student)
+    response = upload_avatar_use_case.execute(request_object=req_object)
+    return response
 
 
 @router.get("", response_model=ManyStudentsInStudentRequestResponse)

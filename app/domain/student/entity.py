@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timezone
 from typing import Optional, List
 from pydantic import ConfigDict, EmailStr, field_validator
 
@@ -106,6 +106,20 @@ class BaseStudentInStudentRequestResponse(BaseEntity):
 
 class StudentGetMeResponse(BaseStudentInStudentRequestResponse):
     seasons_info: list[StudentSeason]
+
+
+class StudentUpdateMePayload(BaseEntity):
+    sex: Optional[SexEnum] = None
+    diocese: Optional[str] = None
+    phone_number: Optional[str] = None
+    origin_address: Optional[str] = None
+    education: Optional[str] = None
+    job: Optional[str] = None
+
+
+class StudentUpdateMeTime(StudentUpdateMePayload):
+    updated_at: datetime = datetime.now(timezone.utc)
+    avatar: Optional[str] = None
 
 
 class StudentInStudentRequestResponse(BaseStudentInStudentRequestResponse):
