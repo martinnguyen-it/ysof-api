@@ -162,9 +162,7 @@ class TestStudentAdminApi(unittest.TestCase):
         disconnect()
 
     def test_create_student_with_admin_bkl_old_season(self):
-        with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
-            "app.infra.tasks.email.send_email_welcome_task.delay"
-        ):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.admin2.email)
             r = self.client.post(
                 "/api/v1/students",
@@ -177,9 +175,7 @@ class TestStudentAdminApi(unittest.TestCase):
 
     @pytest.mark.order(1)
     def test_create_student_with_numerical_order_existed(self):
-        with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
-            "app.infra.tasks.email.send_email_welcome_task.delay"
-        ):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.admin.email)
 
             student_payload = mock_data_student_payload.copy()
@@ -225,9 +221,7 @@ class TestStudentAdminApi(unittest.TestCase):
             assert len(audit_logs) == 1
 
     def test_create_student_existed_in_current_season(self):
-        with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
-            "app.infra.tasks.email.send_email_welcome_task.delay"
-        ):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.admin.email)
             r = self.client.post(
                 "/api/v1/students",
@@ -243,7 +237,7 @@ class TestStudentAdminApi(unittest.TestCase):
     @pytest.mark.order(3)
     def test_create_student_existed_in_old_season(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token, patch(
-            "app.infra.tasks.email.send_email_welcome_task.delay"
+            "app.infra.tasks.email.send_email_welcome_with_exist_account_task.delay"
         ):
             mock_token.return_value = TokenData(email=self.admin.email)
 

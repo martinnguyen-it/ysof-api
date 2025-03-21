@@ -176,19 +176,19 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
                     if attentions_message:
                         attentions.append(AttentionImport(row=idx + 2, detail=attentions_message))
 
-                    # send_email_welcome_with_exist_account_task.delay(
-                    #     email=exist_std.email, season=current_season, full_name=exist_std.full_name
-                    # )
+                    send_email_welcome_with_exist_account_task.delay(
+                        email=exist_std.email, season=current_season, full_name=exist_std.full_name
+                    )
 
                 else:
                     inserted: StudentInDB = self.student_repository.create(student_in_db)
                     inserteds.append(inserted.email)
 
-                    # send_email_welcome_task.delay(
-                    #     email=student_in_db.email,
-                    #     password=password,
-                    #     full_name=student_in_db.full_name,
-                    # )
+                    send_email_welcome_task.delay(
+                        email=student_in_db.email,
+                        password=password,
+                        full_name=student_in_db.full_name,
+                    )
             except NotUniqueError:
                 errors.append(
                     ErrorImport(

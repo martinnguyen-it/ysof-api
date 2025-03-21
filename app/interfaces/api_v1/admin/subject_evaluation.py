@@ -46,7 +46,7 @@ def get_subject_evaluation(
 @router.get(
     "/{student_id}",
     dependencies=[Depends(get_current_active_admin)],
-    response_model=SubjectEvaluationAdmin,
+    response_model=list[SubjectEvaluationAdmin],
 )
 @response_decorator()
 def get_subject_evaluation_by_student_id(

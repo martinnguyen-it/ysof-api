@@ -3,6 +3,10 @@ from typing import Optional
 from fastapi import Depends, BackgroundTasks
 
 from app.domain.shared.enum import AccountStatus
+from app.infra.tasks.email import (
+    send_email_welcome_task,
+    send_email_welcome_with_exist_account_task,
+)
 from app.models.student import SeasonInfo, StudentModel
 from app.shared import request_object, use_case, response_object
 
@@ -87,9 +91,9 @@ class CreateStudentUseCase(use_case.UseCase):
             except Exception as e:
                 raise e
 
-            # send_email_welcome_with_exist_account_task.delay(
-            #     email=student.email, season=current_season, full_name=student.full_name
-            # )
+            send_email_welcome_with_exist_account_task.delay(
+                email=student.email, season=current_season, full_name=student.full_name
+            )
 
         else:
             password = "12345678"
@@ -108,9 +112,9 @@ class CreateStudentUseCase(use_case.UseCase):
             except Exception as e:
                 raise e
 
-            # send_email_welcome_task.delay(
-            #     email=student.email, password=password, full_name=student.full_name
-            # )
+            send_email_welcome_task.delay(
+                email=student.email, password=password, full_name=student.full_name
+            )
 
         self.background_tasks.add_task(
             self.audit_log_repository.create,

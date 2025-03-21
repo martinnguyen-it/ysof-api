@@ -1,7 +1,10 @@
+import os
+from pathlib import Path
+from typing import ClassVar, List, Optional, Union
+
+from celery.schedules import crontab
 from pydantic import ConfigDict, field_validator
 from pydantic_settings import BaseSettings
-from typing import ClassVar, List, Optional, Union
-from pathlib import Path
 
 
 class Settings(BaseSettings):
@@ -82,6 +85,87 @@ class Settings(BaseSettings):
     REDIS_HOST: str
     REDIS_PASSWORD: str
     REDIS_PORT: str
+
+
+class CeleryConfig(BaseSettings):
+    model_config = ConfigDict(env_file=".env", extra="ignore")
+
+    result_backend: str = "celery_config.celery_mongo_backend.CustomMongoBackend"
+    mongodb_backend_settings: dict[str, Optional[str]] = {
+        "host": os.getenv("MONGODB_HOST"),
+        "port": os.getenv("MONGODB_PORT"),
+        "database": os.getenv("MONGODB_DATABASE"),
+        "taskmeta_collection": os.getenv("MONGO_CELERY_COLLECTION"),
+        **(
+            {
+                "user": os.getenv("MONGODB_USERNAME"),
+                "password": os.getenv("MONGODB_PASSWORD"),
+                "authsource": os.getenv("MONGODB_DATABASE"),
+            }
+            if ["testing", "local"].count(os.getenv("ENVIRONMENT")) == 0
+            and os.getenv("MONGODB_USERNAME")
+            and os.getenv("MONGODB_PASSWORD")
+            else {}
+        ),
+    }
+
+    accept_content: list = ["pickle", "json"]
+    task_serializer: str = "pickle"
+    worker_prefetch_multiplier: int = 4
+
+    # event_serializer = ['pickle']
+    result_serializer: str = "json"
+
+    C_FORCE_ROOT: bool = True
+    # worker_hijack_root_logger = False
+    task_always_eager: bool = False
+
+    timezone: str = os.getenv("TIMEZONE")
+
+    """
+    REGISTER DISTRIBUTED TASKS HERE
+    Ref: http://bit.ly/2xldMEC
+    Gather celery tasks in others modules.
+    Remeber audodiscover_task searches a list of packages for a "tasks.py" module.
+    You have to list here all the task-module you have:
+    """
+    register_tasks: list = []
+
+    """
+    `include` is an important config that loads needed modules to the worker
+    Don't delete rows, only add the new module here.
+    See problem at https://stackoverflow.com/q/55998650/1235074
+    """
+    include: list = register_tasks + [
+        "app",
+        "app.infra.tasks.periodic.test",
+        "app.infra.tasks.email",
+        "app.infra.tasks.periodic.manage_form_absent",
+        "app.infra.tasks.periodic.manage_form_evaluation",
+        "app.infra.tasks.drive_file",
+    ]
+
+    """
+    celery beat schedule tasks
+    """
+    beat_schedule: ClassVar = {
+        "add-every-5-minute": {
+            "task": "app.infra.tasks.periodic.test.test",
+            "schedule": crontab(minute="*/5"),
+        },
+        "check-open-form-absent-every-sunday": {
+            "task": "app.infra.tasks.periodic.manage_form_absent.open_form_absent_task",
+            "schedule": crontab(minute="00", hour=12, day_of_week=0, month_of_year="1-5,9-12"),
+        },
+        "check-close-form-absent-every-saturday": {
+            "task": "app.infra.tasks.periodic.manage_form_absent.close_form_absent_task",
+            "schedule": crontab(minute="00", hour=12, day_of_week=6, month_of_year="1-5,9-12"),
+        },
+        "check-close-form-evaluation-every-monday": {
+            "task": "app.infra.tasks.periodic.manage_form_evaluation.close_form_evaluation_task",
+            "schedule": crontab(minute="59", hour=23, day_of_week=1, month_of_year="1-5,9-12"),
+        },
+    }
 
 
 # init settings instance

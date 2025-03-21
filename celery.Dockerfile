@@ -18,4 +18,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["celery", "-A", "celery_worker",  "worker", "-B", "--loglevel=info" ]
+CMD ["celery", "-A", "celery_config.celery_worker",  "worker", "-B", "--loglevel=info" ]
