@@ -35,7 +35,7 @@ class TestAdminApi(unittest.TestCase):
             season=3,
             is_current=True,
         ).save()
-        cls.user = AdminModel(
+        cls.user: AdminModel = AdminModel(
             status="active",
             roles=[
                 "admin",
@@ -48,7 +48,7 @@ class TestAdminApi(unittest.TestCase):
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
-        cls.user1 = AdminModel(
+        cls.user1: AdminModel = AdminModel(
             status="active",
             roles=[
                 "bdh",
@@ -61,7 +61,7 @@ class TestAdminApi(unittest.TestCase):
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
-        cls.user2 = AdminModel(
+        cls.user2: AdminModel = AdminModel(
             status="active",
             roles=[
                 "bdh",
@@ -74,7 +74,7 @@ class TestAdminApi(unittest.TestCase):
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
-        cls.user3 = AdminModel(
+        cls.user3: AdminModel = AdminModel(
             status="active",
             roles=[
                 "bhv",
@@ -260,6 +260,9 @@ class TestAdminApi(unittest.TestCase):
             )
 
             assert r.status_code == 200
+            resp = r.json()
+            assert resp["avatar"] == "https://lh3.googleusercontent.com/d/{}".format(mock_id)
+            assert resp["email"] == self.user.email
             mock_upload_to_drive.assert_called_once()
             user: AdminModel = AdminModel.objects(id=self.user.id).get()
             assert user.avatar == f"{settings.PREFIX_IMAGE_GCLOUD}{mock_id}"

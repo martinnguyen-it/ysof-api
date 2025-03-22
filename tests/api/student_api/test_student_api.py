@@ -174,6 +174,9 @@ class TestStudentApi(unittest.TestCase):
             )
 
             assert r.status_code == 200
+            resp = r.json()
+            assert resp["avatar"] == "https://lh3.googleusercontent.com/d/{}".format(mock_id)
+            assert resp["email"] == self.student.email
             mock_upload_to_drive.assert_called_once()
             student: StudentModel = StudentModel.objects(id=self.student.id).get()
             assert student.avatar == f"{settings.PREFIX_IMAGE_GCLOUD}{mock_id}"

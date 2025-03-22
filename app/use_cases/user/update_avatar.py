@@ -1,8 +1,8 @@
 from fastapi import Depends, UploadFile
 
 from app.config import settings
-from app.domain.admin.entity import AdminInUpdateTime
-from app.domain.student.entity import StudentUpdateMeTime
+from app.domain.admin.entity import Admin, AdminInDB, AdminInUpdateTime
+from app.domain.student.entity import Student, StudentInDB, StudentUpdateMeTime
 from app.domain.upload.entity import GoogleDriveAPIRes
 from app.infra.admin.admin_repository import AdminRepository
 from app.infra.services.google_drive_api import GoogleDriveAPIService
@@ -77,9 +77,15 @@ class UpdateAvatarUseCase(use_case.UseCase):
             )
 
         if is_updated:
+            req_object.user.reload()
             if old_avatar:
                 delete_file_drive_task.delay(old_avatar.replace(settings.PREFIX_IMAGE_GCLOUD, ""))
-            return {"success": True}
-        return response_object.ResponseFailure.build_system_error(
-            message="Something went wrong, please try again."
-        )
+            return (
+                Admin(**AdminInDB.model_validate(req_object.user).model_dump())
+                if isinstance(req_object.user, AdminModel)
+                else Student(**StudentInDB.model_validate(req_object.user).model_dump())
+            )
+        else:
+            return response_object.ResponseFailure.build_system_error(
+                message="Something went wrong, please try again."
+            )

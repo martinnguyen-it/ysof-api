@@ -374,6 +374,8 @@ class TestStudentAdminApi(unittest.TestCase):
             "app.infra.services.google_drive_api.GoogleDriveAPIService._get_oauth_token"
         ) as mock_get_oauth_token, patch(
             "app.infra.tasks.email.send_email_welcome_task.delay"
+        ), patch(
+            "app.infra.tasks.email.send_email_welcome_with_exist_account_task.delay"
         ):
             mock_token.return_value = TokenData(email=self.admin.email)
             mock_get_oauth_token.return_value = Credentials(

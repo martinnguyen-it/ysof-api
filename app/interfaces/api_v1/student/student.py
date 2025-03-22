@@ -48,7 +48,7 @@ def update_me(
     return response
 
 
-@router.put("/me/avatar")
+@router.put("/me/avatar", response_model=Student)
 @response_decorator()
 def update_avatar(
     image: UploadFile = File(...),
