@@ -1,8 +1,8 @@
 import json
-import re
 import requests
 from app.config.redis import RedisDependency
 from app.domain.daily_bible.entity import DailyBibleResponse
+from app.domain.daily_bible.enum import LiturgicalSeason
 from app.shared import response_object, use_case
 from app.shared.utils.general import get_ttl_until_midnight
 
@@ -41,19 +41,17 @@ class GetQuotesBibleUseCase(use_case.UseCase):
 
     def _cache_response(self, data):
         resp = data["data"]["mass_reading"][0]
-        season = self._extract_season(resp["date_info"]["daily_title"])
+
+        season_key = resp["date_info"]["season"]
+        season_value = LiturgicalSeason[season_key].value  # Map key to value
+
         cache_data = json.dumps(
             DailyBibleResponse(
                 epitomize_text=resp["gospel"][0]["INDEXING"],
                 gospel_ref=resp["gospel"][0]["EPITOMIZE"],
-                season=season,
+                season=season_value,
             ).model_dump(),
             default=str,
         )
         ttl = get_ttl_until_midnight()
         self.redis_client.setex("daily-bible-quotes", ttl, cache_data)
-
-    def _extract_season(self, daily_title):
-        pattern = r"Mùa [A-ZÀ-Ỹa-zà-ỹ ]+"
-        match = re.search(pattern, daily_title)
-        return match.group() if match else "Unknown Season"

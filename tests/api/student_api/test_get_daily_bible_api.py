@@ -14,7 +14,7 @@ mock_response_value_bible = {
         "mass_reading": [
             {
                 "display_text": "Ngày thường",
-                "date_info": {"season": "EAS", "daily_title": "Thứ Tư Tuần II - Mùa Chay"},
+                "date_info": {"season": "LNT", "daily_title": "Thứ Tư Tuần II - Mùa Chay"},
                 "gospel": [
                     {
                         "INDEXING": "Mt 5,20-26",
