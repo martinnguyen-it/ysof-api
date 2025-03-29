@@ -100,12 +100,14 @@ class BaseStudentInStudentRequestResponse(BaseEntity):
     diocese: Optional[str] = None
     phone_number: Optional[str] = None
     avatar: Optional[str] = None
-    _mask_email = field_validator("email", mode="before")(mask_email)
-    _mask_phone_number = field_validator("phone_number", mode="before")(mask_phone_number)
 
 
 class StudentGetMeResponse(BaseStudentInStudentRequestResponse):
     seasons_info: list[StudentSeason]
+    date_of_birth: Optional[date] = None
+    origin_address: Optional[str] = None
+    education: Optional[str] = None
+    job: Optional[str] = None
 
 
 class StudentUpdateMePayload(BaseEntity):
@@ -124,6 +126,8 @@ class StudentUpdateMeTime(StudentUpdateMePayload):
 
 class StudentInStudentRequestResponse(BaseStudentInStudentRequestResponse):
     season_info: StudentSeason
+    _mask_email = field_validator("email", mode="before")(mask_email)
+    _mask_phone_number = field_validator("phone_number", mode="before")(mask_phone_number)
 
 
 class ManyStudentsInStudentRequestResponse(BaseEntity):

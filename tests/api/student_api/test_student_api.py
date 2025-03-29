@@ -80,6 +80,8 @@ class TestStudentApi(unittest.TestCase):
             assert resp["email"] == self.student.email
             assert resp["full_name"] == self.student.full_name
             assert resp["phone_number"] == self.student.phone_number
+            assert "note" not in resp
+            assert isinstance(resp["seasons_info"], list)
 
     def test_student_get_list(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
@@ -95,10 +97,12 @@ class TestStudentApi(unittest.TestCase):
             resp = r.json()
             assert resp["pagination"]["total"] == 2
             assert "password" not in resp["data"][0]
+            assert "seasons_info" not in resp["data"][0]
+            assert "note" not in resp["data"][0]
             assert "*" in resp["data"][0]["email"]
             assert "*" in resp["data"][0]["phone_number"]
 
-    def test_update_admin(self):
+    def test_update_student_me(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.student.email)
             r = self.client.put(

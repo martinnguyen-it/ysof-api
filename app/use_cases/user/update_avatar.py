@@ -2,7 +2,7 @@ from fastapi import Depends, UploadFile
 
 from app.config import settings
 from app.domain.admin.entity import Admin, AdminInDB, AdminInUpdateTime
-from app.domain.student.entity import Student, StudentInDB, StudentUpdateMeTime
+from app.domain.student.entity import StudentGetMeResponse, StudentInDB, StudentUpdateMeTime
 from app.domain.upload.entity import GoogleDriveAPIRes
 from app.infra.admin.admin_repository import AdminRepository
 from app.infra.services.google_drive_api import GoogleDriveAPIService
@@ -83,7 +83,9 @@ class UpdateAvatarUseCase(use_case.UseCase):
             return (
                 Admin(**AdminInDB.model_validate(req_object.user).model_dump())
                 if isinstance(req_object.user, AdminModel)
-                else Student(**StudentInDB.model_validate(req_object.user).model_dump())
+                else StudentGetMeResponse(
+                    **StudentInDB.model_validate(req_object.user).model_dump()
+                )
             )
         else:
             return response_object.ResponseFailure.build_system_error(

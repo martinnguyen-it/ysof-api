@@ -1,7 +1,7 @@
 from typing import Optional
 from fastapi import Depends
 from app.domain.student.entity import (
-    Student,
+    StudentGetMeResponse,
     StudentInDB,
     StudentUpdateMePayload,
     StudentUpdateMeTime,
@@ -48,4 +48,6 @@ class UpdateStudentMeUseCase(use_case.UseCase):
         )
         req_object.current_student.reload()
 
-        return Student(**StudentInDB.model_validate(req_object.current_student).model_dump())
+        return StudentGetMeResponse(
+            **StudentInDB.model_validate(req_object.current_student).model_dump()
+        )

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Body, Depends, File, Query, UploadFile
 from app.domain.student.entity import (
     ManyStudentsInStudentRequestResponse,
-    Student,
+    StudentGetMeResponse,
     StudentInDB,
     StudentUpdateMePayload,
 )
@@ -23,17 +23,17 @@ from app.use_cases.user.update_avatar import UpdateAvatarRequestObject, UpdateAv
 router = APIRouter()
 
 
-@router.get("/me", response_model=Student)
+@router.get("/me", response_model=StudentGetMeResponse)
 @response_decorator()
 def get_me(
     current_student: StudentModel = Depends(get_current_student),
 ):
-    return Student(**StudentInDB.model_validate(current_student).model_dump())
+    return StudentGetMeResponse(**StudentInDB.model_validate(current_student).model_dump())
 
 
 @router.put(
     "/me",
-    response_model=Student,
+    response_model=StudentGetMeResponse,
 )
 @response_decorator()
 def update_me(
@@ -48,7 +48,7 @@ def update_me(
     return response
 
 
-@router.put("/me/avatar", response_model=Student)
+@router.put("/me/avatar", response_model=StudentGetMeResponse)
 @response_decorator()
 def update_avatar(
     image: UploadFile = File(...),
