@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     MONGODB_USERNAME: Optional[str] = None
     MONGODB_PASSWORD: Optional[str] = None
     MONGODB_EXPOSE_PORT: Optional[int] = None
+    MONGO_CELERY_COLLECTION: str
 
     @field_validator("MONGODB_USERNAME", "MONGODB_PASSWORD", "MONGODB_EXPOSE_PORT", mode="before")
     def allow_none(cls, v):

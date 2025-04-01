@@ -27,10 +27,10 @@ class CustomMongoBackend(MongoBackend):
             format_date=False,
         )
         # Add the _id for mongodb
-        meta["_id"] = task_id
+        meta["task_id"] = task_id
 
         try:
-            self.collection.replace_one({"_id": task_id}, meta, upsert=True)
+            self.collection.replace_one({"task_id": task_id}, meta, upsert=True)
         except InvalidDocument as exc:
             raise EncodeError(exc)
 
