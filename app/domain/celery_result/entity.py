@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from pydantic import conlist
+
 from app.domain.celery_result.enum import CeleryResultTag
 from app.domain.shared.entity import BaseEntity, Pagination
 
@@ -19,3 +21,7 @@ class CeleryResultResponse(BaseEntity):
 class ManyCeleryResultsInResponse(BaseEntity):
     pagination: Pagination
     data: list[CeleryResultResponse]
+
+
+class TaskIdsRequest(BaseEntity):
+    task_ids: conlist(str, max_length=20)

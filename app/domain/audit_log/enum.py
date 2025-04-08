@@ -22,3 +22,4 @@ class Endpoint(str, ExtendedEnum):
     STUDENT = "student"
     MANAGE_FORM = "manage_form"
     ABSENT = "absent"
+    CELERY_RESULT = "celery_result"

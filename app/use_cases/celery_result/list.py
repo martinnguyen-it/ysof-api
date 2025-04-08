@@ -20,12 +20,14 @@ class ListCeleryResultsRequestObject(request_object.ValidRequestObject):
         name: Optional[list[str]] = None,
         sort: Optional[dict[str, int]] = None,
         tag: Optional[CeleryResultTag] = None,
+        resolved: Optional[bool] = None,
     ):
         self.page_index = page_index
         self.page_size = page_size
         self.sort = sort
         self.name = name
         self.tag = tag
+        self.resolved = resolved
 
     @classmethod
     def builder(
@@ -35,6 +37,7 @@ class ListCeleryResultsRequestObject(request_object.ValidRequestObject):
         name: Optional[list[str]] = None,
         sort: Optional[dict[str, int]] = None,
         tag: Optional[CeleryResultTag] = None,
+        resolved: Optional[bool] = None,
     ):
         return ListCeleryResultsRequestObject(
             page_index=page_index,
@@ -42,6 +45,7 @@ class ListCeleryResultsRequestObject(request_object.ValidRequestObject):
             sort=sort,
             tag=tag,
             name=name,
+            resolved=resolved,
         )
 
 
@@ -56,10 +60,15 @@ class ListCeleryResultsUseCase(use_case.UseCase):
         match_pipeline: dict[str, Any] = {}
 
         if isinstance(req_object.tag, CeleryResultTag):
-            match_pipeline = {**match_pipeline, "result.tag": req_object.tag}
+            match_pipeline["result.tag"] = req_object.tag
 
         if isinstance(req_object.name, str):
-            match_pipeline = {**match_pipeline, "result.name": {"$regex": req_object.name}}
+            match_pipeline["result.name"] = {"$regex": req_object.name}
+
+        if isinstance(req_object.resolved, bool):
+            match_pipeline["resolved"] = (
+                req_object.resolved if req_object.resolved else {"$in": [False, None]}
+            )
 
         celery_results: List[CeleryResultModel] = self.celery_result_repository.list(
             page_size=req_object.page_size,
@@ -85,7 +94,9 @@ class ListCeleryResultsUseCase(use_case.UseCase):
                     name=model.result.name,
                     description=model.result.description,
                     date_done=model.date_done,
+                    resolved=bool(model.resolved),
                     traceback=model.result.traceback,
+                    updated_at=model.updated_at,
                 )
                 for model in celery_results
             ],

@@ -5,7 +5,9 @@ from unittest.mock import patch
 from mongoengine import connect, disconnect
 from pymongo.results import InsertOneResult
 from fastapi.testclient import TestClient
+import pytest
 
+from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.domain.auth.entity import TokenData
 from app.domain.celery_result.enum import CeleryResultTag
 from app.main import app
@@ -14,6 +16,7 @@ from app.models.admin import AdminModel
 from app.infra.security.security_service import (
     get_password_hash,
 )
+from app.models.audit_log import AuditLogModel
 from app.models.celery_result import CeleryResultModel
 from app.config import settings
 from app.models.season import SeasonModel
@@ -103,24 +106,23 @@ class TestCeleryResultsApi(unittest.TestCase):
 
     def test_get_list_celery_results(self):
         r = self.client.get(
-            "/api/v1/celery-result",
+            "/api/v1/celery-result/failed",
         )
         assert r.status_code == 401
 
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user2.email)
             r = self.client.get(
-                "/api/v1/celery-result",
+                "/api/v1/celery-result/failed",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
             )
-
             assert r.status_code == 403  # Cause only admin can get all
 
             mock_token.return_value = TokenData(email=self.user.email)
             r = self.client.get(
-                "/api/v1/celery-result",
+                "/api/v1/celery-result/failed",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -141,7 +143,7 @@ class TestCeleryResultsApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user.email)
             r = self.client.get(
-                "/api/v1/celery-result",
+                "/api/v1/celery-result/failed",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -158,7 +160,7 @@ class TestCeleryResultsApi(unittest.TestCase):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
             mock_token.return_value = TokenData(email=self.user.email)
             r = self.client.get(
-                "/api/v1/celery-result",
+                "/api/v1/celery-result/failed",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
@@ -169,3 +171,98 @@ class TestCeleryResultsApi(unittest.TestCase):
             resp = r.json()
             assert resp["pagination"]["total"] == 1
             assert resp["data"][0]["task_id"] == mock_data_2["task_id"]
+
+    @pytest.mark.order(1)
+    def test_mark_resolved_failed_celery_results(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.post(
+                "/api/v1/celery-result/mark-resolved-failed",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+                json={"task_ids": [mock_data_1["task_id"]]},
+            )
+            assert r.status_code == 200
+
+            resp = r.json()
+            assert resp["success"] == True
+
+            # Check if the task is marked as resolved
+            celery_results = CeleryResultModel.objects(resolved=True).first()
+            assert celery_results.resolved is True
+            assert celery_results.task_id == mock_data_1["task_id"]
+
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.CELERY_RESULT}
+            )
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 1
+
+    @pytest.mark.order(2)
+    def test_mark_resolved_failed_celery_results_existresolve(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.post(
+                "/api/v1/celery-result/mark-resolved-failed",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+                json={"task_ids": [mock_data_1["task_id"]]},
+            )
+            assert r.status_code == 400
+
+            resp = r.json()
+            assert resp["detail"] == "Task IDs đã được xử lý hoặc không tồn tại"
+
+    @pytest.mark.order(3)
+    def test_undo_mark_resolved_undo_celery_results(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.post(
+                "/api/v1/celery-result/undo-mark-resolved",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+                json={"task_ids": [mock_data_1["task_id"]]},
+            )
+            assert r.status_code == 200
+
+            resp = r.json()
+            assert resp["success"] == True
+
+            # Check if the task is marked as resolved
+            celery_results = CeleryResultModel.objects(resolved=True).first()
+            assert not celery_results
+
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.CELERY_RESULT}
+            )
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 2
+
+    @pytest.mark.order(4)
+    def test_undo_mark_resolved_celery_results_nonresolve(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.user.email)
+            r = self.client.post(
+                "/api/v1/celery-result/undo-mark-resolved",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+                json={"task_ids": [mock_data_1["task_id"]]},
+            )
+            assert r.status_code == 400
+
+            resp = r.json()
+            assert resp["detail"] == "Task IDs đã được xử lý hoặc không tồn tại"
+
+            # Check if the task is marked as resolved
+            celery_results = CeleryResultModel.objects(resolved=True).first()
+            assert not celery_results
+
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.CELERY_RESULT}
+            )
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 2

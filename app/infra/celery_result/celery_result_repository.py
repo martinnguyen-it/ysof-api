@@ -1,6 +1,9 @@
 """CeleryResult repository module"""
 
-from typing import Any
+from datetime import datetime, timezone
+from typing import Any, List
+
+import pymongo
 
 from app.models.celery_result import CeleryResultModel
 
@@ -50,3 +53,18 @@ class CeleryResultRepository:
             return list(docs)[0]["document_count"]
         except Exception:
             return 0
+
+    def mark_resolved_failed(self, task_ids: List[str], is_undo: bool) -> bool:
+        try:
+            operations = [
+                pymongo.UpdateOne(
+                    {"task_id": task_id},
+                    {"$set": {"resolved": not is_undo, "updated_at": datetime.now(timezone.utc)}},
+                    upsert=False,
+                )
+                for task_id in task_ids
+            ]
+            CeleryResultModel._get_collection().bulk_write(operations)
+            return True
+        except Exception:
+            return False
