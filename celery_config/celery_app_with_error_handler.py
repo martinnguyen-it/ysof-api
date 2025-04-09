@@ -1,3 +1,4 @@
+import json
 import traceback
 from functools import wraps
 
@@ -26,7 +27,9 @@ def celery_app_with_error_handler(tag: CeleryResultTag = CeleryResultTag.DEFAULT
                 metadata = {
                     "tag": tag,
                     "name": str(self.name).rsplit(".", maxsplit=1)[-1],  # Task name
-                    "description": str(ex),
+                    "description": str(ex)
+                    + "\n"
+                    + json.dumps({"args": args, "kwargs": kwargs}, default=str),
                     "traceback": str(traceback.format_exc()),
                 }
 
