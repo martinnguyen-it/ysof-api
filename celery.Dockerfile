@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
 
 COPY requirements.txt ./
 RUN python -m pip install --upgrade pip
+RUN pip install --upgrade pip pipenv wheel
 RUN python -m pip install -q -r requirements.txt
 
 COPY . .
