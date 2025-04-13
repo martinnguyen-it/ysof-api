@@ -1,10 +1,14 @@
 import json
+import logging
+import re
 import requests
 from app.config.redis import RedisDependency
 from app.domain.daily_bible.entity import DailyBibleResponse
 from app.domain.daily_bible.enum import LiturgicalSeason
 from app.shared import response_object, use_case
 from app.shared.utils.general import get_ttl_until_midnight
+
+logger = logging.getLogger(__name__)
 
 URL = "https://ktcgkpv.org/readings/mass-reading"
 HEADERS = {
@@ -45,13 +49,52 @@ class GetQuotesBibleUseCase(use_case.UseCase):
         season_key = resp["date_info"]["season"]
         season_value = LiturgicalSeason[season_key].value  # Map key to value
 
-        cache_data = json.dumps(
-            DailyBibleResponse(
-                epitomize_text=resp["gospel"][0]["INDEXING"],
-                gospel_ref=resp["gospel"][0]["EPITOMIZE"],
-                season=season_value,
-            ).model_dump(),
-            default=str,
-        )
+        try:
+            cache_data = json.dumps(
+                DailyBibleResponse(
+                    epitomize_text=resp["gospel"][0]["INDEXING"],
+                    gospel_ref=resp["gospel"][0]["EPITOMIZE"],
+                    season=season_value,
+                ).model_dump(),
+                default=str,
+            )
+        except IndexError as e:
+            if "special_content" in resp:
+                # Regex patterns, split to comply with line length < 100
+                epitomize_pattern = (
+                    r'<div class="gospel reading division">.*?'
+                    r'<div class="division-header"><span>Tin Mừng</span></div>.*?'
+                    r'<p class="gospel\[epitomize\] epitomize">([^<]+)</p>'
+                )
+                reference_pattern = (
+                    r'<div class="gospel reading division">.*?'
+                    r'<div class="division-header"><span>Tin Mừng</span></div>.*?'
+                    r'<div class="gospel\[indexing\] right-indexing sel-transparent dropdown">.*?'
+                    r'<span class="btn dropdown-toggle" data-toggle="dropdown">([^<]+)\s*'
+                    r'<i class="fa fa-caret-down"[^>]*></i></span>'
+                )
+                epitomize_match = re.search(epitomize_pattern, resp["special_content"], re.DOTALL)
+                epitomize_text = (
+                    epitomize_match.group(1).strip().strip("&nbsp;") if epitomize_match else None
+                )
+
+                # Find reference text
+                reference_match = re.search(reference_pattern, resp["special_content"], re.DOTALL)
+                reference_text = (
+                    reference_match.group(1).strip().strip("&nbsp;") if reference_match else None
+                )
+                cache_data = json.dumps(
+                    DailyBibleResponse(
+                        epitomize_text=reference_text,
+                        gospel_ref=epitomize_text,
+                        season=season_value,
+                    ).model_dump(),
+                    default=str,
+                )
+            else:
+                raise (e)
+        except Exception as e:
+            logger.error(f"An error occurred: {e}")
+            return response_object.ResponseFailure.build_system_error(message=str(e))
         ttl = get_ttl_until_midnight()
         self.redis_client.setex("daily-bible-quotes", ttl, cache_data)

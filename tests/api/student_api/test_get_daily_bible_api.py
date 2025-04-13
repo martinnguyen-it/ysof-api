@@ -30,6 +30,31 @@ mock_response_value_bible = {
     }
 }
 
+# Extract special_content
+with open("tests/mocks/mock_daily_bible_special.txt", "r", encoding="utf-8") as file:
+    special_content_read = file.read()
+
+mock_response_value_bible2 = {
+    "data": {
+        "mass_reading": [
+            {
+                "date_info": {
+                    "season": "LNT",
+                    "main_title": "CHÚA NHẬT LỄ LÁ",
+                    "rank": "lễ trọng",
+                },
+                "display_text": "CHÚA NHẬT LỄ LÁ",
+                "introit": [],
+                "reading1": [],
+                "gospel": [],
+                "communion": [],
+                "special_content": special_content_read,
+                "is_special": True,
+            }
+        ],
+    },
+}
+
 
 class TestDailyBibleApi(unittest.TestCase):
     @classmethod
@@ -83,6 +108,30 @@ class TestDailyBibleApi(unittest.TestCase):
             resp = r.json()
             assert resp["gospel_ref"] == "Hãy đi làm hoà với người anh em ấy đã."
             assert resp["epitomize_text"] == "Mt 5,20-26"
+            assert resp["season"] == "Mùa Chay"
+
+    @responses.activate
+    def test_get_daily_quotes_special(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.student.email)
+            responses.add(
+                responses.POST,
+                "https://ktcgkpv.org/readings/mass-reading",
+                json=mock_response_value_bible2,
+                status=200,
+            )
+
+            r = self.client.get(
+                "/api/v1/student/daily-bible/daily-quotes",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+
+            assert r.status_code == 200
+            resp = r.json()
+            assert resp["gospel_ref"] == "Cuộc Thương Khó của Đức Giê-su Ki-tô, Chúa chúng ta."
+            assert resp["epitomize_text"] == "Lc 22,14 – 23,56"
             assert resp["season"] == "Mùa Chay"
 
 
