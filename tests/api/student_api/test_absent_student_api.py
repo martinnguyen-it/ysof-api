@@ -20,6 +20,7 @@ from app.models.student import SeasonInfo, StudentModel
 from app.models.absent import AbsentModel
 from app.models.manage_form import ManageFormModel
 from app.domain.manage_form.enum import FormStatus, FormType
+from app.models.subject_registration import SubjectRegistrationModel
 
 
 class TestAbsentApi(unittest.TestCase):
@@ -100,8 +101,16 @@ class TestAbsentApi(unittest.TestCase):
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
+        cls.registration: SubjectRegistrationModel = SubjectRegistrationModel(
+            student=cls.student.id,
+            subject=cls.subject.id,
+        ).save()
         cls.absent: AbsentModel = AbsentModel(
-            subject=cls.subject, student=cls.student2, reason="Xin phép nghỉ", status=True
+            subject=cls.subject,
+            student=cls.student2,
+            reason="Xin phép nghỉ",
+            status=True,
+            created_by="HV",
         ).save()
 
     @classmethod

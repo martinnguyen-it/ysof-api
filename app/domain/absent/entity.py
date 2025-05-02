@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from pydantic import ConfigDict
 
+from app.domain.absent.enum import AbsentType, CreatedByEnum
 from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin
 from app.domain.student.field import PydanticStudentType
 from app.domain.subject.field import PydanticSubjectType
@@ -22,6 +23,7 @@ class AdminAbsentInCreate(BaseEntity):
     """
 
     reason: str | None = None
+    type: AbsentType | None = AbsentType.NO_ATTEND
     note: str | None = None
 
 
@@ -31,6 +33,8 @@ class AbsentInDB(IDModelMixin, DateTimeModelMixin):
     reason: str | None = None
     note: str | None = None
     status: bool = True
+    type: AbsentType
+    created_by: CreatedByEnum
     # https://docs.pydantic.dev/2.4/concepts/models/#arbitrary-class-instances
     model_config = ConfigDict(from_attributes=True)
 
@@ -39,6 +43,8 @@ class AbsentResponseBase(DateTimeModelMixin):
     id: str
     subject: SubjectInEvaluation
     reason: str | None = None
+    type: AbsentType
+    created_by: CreatedByEnum
 
 
 class StudentAbsentInResponse(AbsentResponseBase):
@@ -58,6 +64,7 @@ class StudentAbsentInUpdate(BaseEntity):
 class AdminAbsentInUpdate(StudentAbsentInUpdate):
     note: str | None = None
     status: bool | None = None
+    type: AbsentType | None = None
 
 
 class AbsentInUpdateTime(AdminAbsentInUpdate):

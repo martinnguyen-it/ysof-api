@@ -21,6 +21,7 @@ from app.models.student import SeasonInfo, StudentModel
 from app.models.absent import AbsentModel
 from app.models.audit_log import AuditLogModel
 from app.domain.audit_log.enum import AuditLogType, Endpoint
+from app.models.subject_registration import SubjectRegistrationModel
 
 
 class TestAdminAbsentApi(unittest.TestCase):
@@ -101,8 +102,35 @@ class TestAdminAbsentApi(unittest.TestCase):
             full_name="Nguyen Thanh Tam",
             password=get_password_hash(password="local@local"),
         ).save()
+        cls.student3: StudentModel = StudentModel(
+            seasons_info=[
+                SeasonInfo(
+                    numerical_order=5,
+                    group=5,
+                    season=3,
+                )
+            ],
+            status="active",
+            holy_name="Martin",
+            phone_number="0123456789",
+            email="student3@example.com",
+            full_name="Nguyen Thanh Tam",
+            password=get_password_hash(password="local@local"),
+        ).save()
+        cls.registration: SubjectRegistrationModel = SubjectRegistrationModel(
+            student=cls.student.id,
+            subject=cls.subject.id,
+        ).save()
+        cls.registration2: SubjectRegistrationModel = SubjectRegistrationModel(
+            student=cls.student2.id,
+            subject=cls.subject.id,
+        ).save()
         cls.absent: AbsentModel = AbsentModel(
-            subject=cls.subject, student=cls.student2, reason="Xin phép nghỉ", status=True
+            subject=cls.subject,
+            student=cls.student2,
+            reason="Xin phép nghỉ",
+            status=True,
+            created_by="HV",
         ).save()
 
     @classmethod
@@ -122,6 +150,17 @@ class TestAdminAbsentApi(unittest.TestCase):
             )
             assert r.status_code == 400
             assert r.json()["detail"] == "Đơn nghỉ phép đã được tạo trước đây."
+
+            mock_token.return_value = TokenData(email=self.admin.email)
+            r = self.client.post(
+                f"/api/v1/absents/subject/{self.subject.id}/student/{self.student3.id}",
+                json={"reason": "Xin phép nghỉ"},
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 404
+            assert r.json()["detail"] == "Học viên không đăng ký môn học này."
 
             r = self.client.post(
                 f"/api/v1/absents/subject/{self.subject.id}/student/{self.student.id}",

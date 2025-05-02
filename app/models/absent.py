@@ -1,5 +1,14 @@
 from datetime import datetime, timezone
-from mongoengine import Document, ReferenceField, StringField, BooleanField, DateTimeField
+from mongoengine import (
+    Document,
+    ReferenceField,
+    StringField,
+    BooleanField,
+    DateTimeField,
+    EnumField,
+)
+
+from app.domain.absent.enum import AbsentType, CreatedByEnum
 
 
 class AbsentModel(Document):
@@ -8,6 +17,8 @@ class AbsentModel(Document):
     reason = StringField()
     note = StringField()
     status = BooleanField(required=True)
+    type = EnumField(AbsentType, default=AbsentType.NO_ATTEND)
+    created_by = EnumField(CreatedByEnum)
 
     created_at = DateTimeField()
     updated_at = DateTimeField()

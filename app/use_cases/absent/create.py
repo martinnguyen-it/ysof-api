@@ -1,6 +1,8 @@
 from fastapi import Depends, BackgroundTasks
 import json
 from mongoengine import NotUniqueError
+from app.domain.absent.enum import AbsentType, CreatedByEnum
+from app.infra.subject.subject_registration_repository import SubjectRegistrationRepository
 from app.shared import request_object, response_object, use_case
 from app.domain.subject.entity import SubjectInDB
 from app.infra.subject.subject_repository import SubjectRepository
@@ -28,6 +30,7 @@ class CreateAbsentRequestObject(request_object.ValidRequestObject):
     def __init__(
         self,
         subject_id: str,
+        type: AbsentType,
         current_student: StudentModel | str,
         reason: str | None,
         note: str | None,
@@ -38,6 +41,7 @@ class CreateAbsentRequestObject(request_object.ValidRequestObject):
         self.reason = reason
         self.note = note
         self.current_admin = current_admin
+        self.type = type
 
     @classmethod
     def builder(
@@ -47,6 +51,7 @@ class CreateAbsentRequestObject(request_object.ValidRequestObject):
         reason: str | None = None,
         note: str | None = None,
         current_admin: AdminModel | None = None,
+        type: AbsentType = AbsentType.NO_ATTEND,
     ) -> request_object.RequestObject:
         invalid_req = request_object.InvalidRequestObject()
         if not subject_id:
@@ -64,6 +69,7 @@ class CreateAbsentRequestObject(request_object.ValidRequestObject):
             reason=reason,
             note=note,
             current_admin=current_admin,
+            type=type,
         )
 
 
@@ -74,6 +80,9 @@ class CreateAbsentUseCase(use_case.UseCase):
         manage_form_repository: ManageFormRepository = Depends(ManageFormRepository),
         subject_repository: SubjectRepository = Depends(SubjectRepository),
         student_repository: StudentRepository = Depends(StudentRepository),
+        subject_registration_repository: SubjectRegistrationRepository = Depends(
+            SubjectRegistrationRepository
+        ),
         absent_repository: AbsentRepository = Depends(AbsentRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
     ):
@@ -81,6 +90,7 @@ class CreateAbsentUseCase(use_case.UseCase):
         self.subject_repository = subject_repository
         self.manage_form_repository = manage_form_repository
         self.student_repository = student_repository
+        self.subject_registration_repository = subject_registration_repository
         self.background_tasks = background_tasks
         self.audit_log_repository = audit_log_repository
 
@@ -100,6 +110,15 @@ class CreateAbsentUseCase(use_case.UseCase):
         if subject is None or subject.season != current_season:
             return response_object.ResponseFailure.build_not_found_error(
                 message="Môn học không tồn tại hoặc thuộc mùa cũ."
+            )
+
+        subject_registration = self.subject_registration_repository.find_one(
+            {"subject": subject.id, "student": req_object.current_student.id},
+        )
+
+        if subject_registration is None:
+            return response_object.ResponseFailure.build_not_found_error(
+                message="Học viên không đăng ký môn học này."
             )
 
         if is_student_request:
@@ -127,8 +146,10 @@ class CreateAbsentUseCase(use_case.UseCase):
                 AbsentInDB(
                     student=req_object.current_student,
                     subject=subject,
+                    type=req_object.type,
                     reason=req_object.reason,
                     note=req_object.note,
+                    created_by=CreatedByEnum.HV if is_student_request else CreatedByEnum.BTC,
                 )
             )
             if not is_student_request:
