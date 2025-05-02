@@ -11,6 +11,7 @@ from app.infra.email.email_smtp_service import EmailSMTPService
 from app.infra.subject.subject_registration_repository import SubjectRegistrationRepository
 from app.infra.subject.subject_repository import SubjectRepository
 from app.models.admin import AdminModel
+from app.models.student import StudentModel
 from app.models.subject_registration import SubjectRegistrationModel
 from app.shared.utils.general import get_current_season_value
 from celery_config import celery_app_with_error_handler
@@ -98,10 +99,10 @@ def send_email_notification_subject_task(subject_id: str):
         absent=settings.FE_STUDENT_BASE_URL + "/xin-nghi-phep",
         documents="\n".join(documents) if len(documents) > 0 else None,
     )
-    docs: list[SubjectRegistrationModel] = subject_registration_repository.get_by_subject_id(
+    docs: list[StudentModel] = subject_registration_repository.get_by_subject_id(
         subject_id=ObjectId(subject_id)
     )
-    emails_to: list[str] = [doc.student.email for doc in docs]
+    emails_to: list[str] = [doc.email for doc in docs]
     emails_to.extend(emails_admin)
 
     job = group(

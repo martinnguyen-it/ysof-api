@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 import mongomock
 
+from app.models.admin import AdminModel
 from app.infra.security.security_service import (
     TokenData,
     get_password_hash,
@@ -16,8 +17,7 @@ from app.models.season import SeasonModel
 from app.models.student import SeasonInfo, StudentModel
 from app.models.subject import SubjectModel
 from app.models.lecturer import LecturerModel
-from app.models.manage_form import ManageFormModel
-from app.domain.manage_form.enum import FormStatus, FormType
+from app.models.subject_registration import SubjectRegistrationModel
 
 
 class TestSubjectRegistrationApi(unittest.TestCase):
@@ -35,6 +35,19 @@ class TestSubjectRegistrationApi(unittest.TestCase):
             academic_year="2023-2024",
             season=3,
             is_current=True,
+        ).save()
+        cls.admin: AdminModel = AdminModel(
+            status="active",
+            roles=[
+                "admin",
+            ],
+            holy_name="Martin",
+            phone_number=["0123456789"],
+            latest_season=3,
+            seasons=[3],
+            email="user@example.com",
+            full_name="Nguyen Thanh Tam",
+            password=get_password_hash(password="local@local"),
         ).save()
         cls.lecturer: LecturerModel = LecturerModel(
             title="Cha",
@@ -56,6 +69,21 @@ class TestSubjectRegistrationApi(unittest.TestCase):
             phone_number="0123456789",
             email="student@example.com",
             full_name="Nguyen Thanh Tam",
+            password=get_password_hash(password="local@local"),
+        ).save()
+        cls.student2: StudentModel = StudentModel(
+            seasons_info=[
+                SeasonInfo(
+                    numerical_order=2,
+                    group=2,
+                    season=3,
+                )
+            ],
+            status="active",
+            holy_name="Martin",
+            phone_number="0123456789",
+            email="student2@example.com",
+            full_name="Hoang Van B",
             password=get_password_hash(password="local@local"),
         ).save()
         cls.subject: SubjectModel = SubjectModel(
@@ -83,50 +111,52 @@ class TestSubjectRegistrationApi(unittest.TestCase):
             season=3,
         ).save()
 
+        cls.registration: SubjectRegistrationModel = SubjectRegistrationModel(
+            student=cls.student.id,
+            subject=cls.subject.id,
+        ).save()
+        cls.registration2: SubjectRegistrationModel = SubjectRegistrationModel(
+            student=cls.student2.id, subject=cls.subject.id
+        )
+
     @classmethod
     def tearDownClass(cls):
         disconnect()
 
     @pytest.mark.order(1)
-    def test_student_registration(self):
+    def test_get_list_registration(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
-            mock_token.return_value = TokenData(email=self.student.email)
+            mock_token.return_value = TokenData(email=self.admin.email)
 
-            r = self.client.post(
-                "/api/v1/student/subjects/registration",
-                json={"subjects": [str(self.subject.id), str(self.subject2.id)]},
-                headers={
-                    "Authorization": "Bearer {}".format("xxx"),
-                },
-            )
-            assert r.status_code == 400
-            assert r.json()["detail"].startswith("Form chưa được mở")
-
-            ManageFormModel(type=FormType.SUBJECT_REGISTRATION, status=FormStatus.ACTIVE).save()
-
-            r = self.client.post(
-                "/api/v1/student/subjects/registration",
-                json={"subjects": [str(self.subject.id), str(self.subject2.id)]},
+            r = self.client.get(
+                "/api/v1/subjects/registration",
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
             )
             assert r.status_code == 200
             resp = r.json()
-            assert resp["student_id"] == str(self.student.id)
-            assert len(resp["subjects_registration"]) == 2
+            assert resp["pagination"]["total"] == 2
+            assert len(resp["data"]) == 2
+            registration = resp["data"][0]
+            assert registration["student"]["id"] == str(self.student.id)
+            assert registration["total"] == 1
+            assert registration["subject_registrations"][0] == str(self.subject.id)
 
     @pytest.mark.order(2)
-    def test_get_student_registration_by_self(self):
+    def test_get_list_student_registration_by_subject_id(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
-            mock_token.return_value = TokenData(email=self.student.email)
+            mock_token.return_value = TokenData(email=self.admin.email)
+
             r = self.client.get(
-                "/api/v1/student/subjects/registration",
+                "/api/v1/subjects/registration/subject/{}".format(self.subject.id),
+                params={"search": self.student.full_name},
                 headers={
                     "Authorization": "Bearer {}".format("xxx"),
                 },
             )
-            resp = r.json()
             assert r.status_code == 200
-            assert resp["student_id"] == str(self.student.id)
-            assert len(resp["subjects_registration"]) == 2
+            resp = r.json()
+            assert len(resp) == 1
+            registration = resp[0]
+            assert registration["id"] == str(self.student.id)

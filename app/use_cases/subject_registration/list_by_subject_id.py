@@ -2,13 +2,13 @@ from fastapi import Depends
 from typing import Optional
 from app.domain.shared.enum import AdminRole
 from app.models.admin import AdminModel
+from app.models.student import StudentModel
 from app.shared import request_object, use_case, response_object
 from app.infra.subject.subject_registration_repository import SubjectRegistrationRepository
 from app.infra.subject.subject_repository import SubjectRepository
 from app.models.subject import SubjectModel
 from app.domain.subject.entity import StudentInSubject
 from app.domain.student.entity import StudentInDB
-from app.models.subject_registration import SubjectRegistrationModel
 
 
 class ListSubjectRegistrationsBySubjectIdRequestObject(request_object.ValidRequestObject):
@@ -16,15 +16,16 @@ class ListSubjectRegistrationsBySubjectIdRequestObject(request_object.ValidReque
         self,
         current_admin: AdminModel,
         subject_id: str,
+        search: str | None = None,
     ):
         self.subject_id = subject_id
         self.current_admin = current_admin
+        self.search = search
 
     @classmethod
-    def builder(cls, current_admin: AdminModel, subject_id: str):
+    def builder(cls, current_admin: AdminModel, subject_id: str, search: str | None = None):
         return ListSubjectRegistrationsBySubjectIdRequestObject(
-            subject_id=subject_id,
-            current_admin=current_admin,
+            subject_id=subject_id, current_admin=current_admin, search=search
         )
 
 
@@ -57,10 +58,8 @@ class ListSubjectRegistrationsBySubjectIdUseCase(use_case.UseCase):
                 f"Bạn không có quyền truy cập môn học thuộc mùa {subject.season}"
             )
 
-        docs: list[SubjectRegistrationModel] = (
-            self.subject_registration_repository.get_by_subject_id(subject_id=subject.id)
+        docs: list[StudentModel] = self.subject_registration_repository.get_by_subject_id(
+            subject_id=subject.id, search=req_object.search
         )
 
-        return [
-            StudentInSubject(**StudentInDB.model_validate(doc.student).model_dump()) for doc in docs
-        ]
+        return [StudentInSubject(**StudentInDB.model_validate(doc).model_dump()) for doc in docs]

@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, Query
 
 from app.models.admin import AdminModel
@@ -59,13 +59,13 @@ def get_subject_registration(
 def get_subject_registration_by_subject_id(
     subject_id: str,
     current_admin: AdminModel = Depends(get_current_admin),
+    search: Optional[str] = Query(None, title="Search"),
     list_subject_registration_use_case: ListSubjectRegistrationsBySubjectIdUseCase = Depends(
         ListSubjectRegistrationsBySubjectIdUseCase
     ),
 ):
     req_object = ListSubjectRegistrationsBySubjectIdRequestObject.builder(
-        subject_id=subject_id,
-        current_admin=current_admin,
+        subject_id=subject_id, current_admin=current_admin, search=search
     )
     response = list_subject_registration_use_case.execute(request_object=req_object)
 
