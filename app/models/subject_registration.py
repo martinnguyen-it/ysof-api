@@ -1,12 +1,10 @@
-from mongoengine import (
-    Document,
-    ReferenceField,
-)
+from mongoengine import Document, ReferenceField, BooleanField
 
 
 class SubjectRegistrationModel(Document):
     student = ReferenceField("StudentModel", required=True)
     subject = ReferenceField("SubjectModel", required=True)
+    attend_zoom = BooleanField()
 
     @classmethod
     def from_mongo(cls, data: dict, id_str=False):

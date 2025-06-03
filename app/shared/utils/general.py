@@ -4,7 +4,6 @@ from fastapi import HTTPException
 from typing import Optional, Union, Tuple
 import calendar
 import re
-
 import pytz
 from redis import Redis
 from app.config import settings
@@ -176,3 +175,7 @@ def get_ttl_until_midnight():
     # Time difference in seconds
     ttl = (midnight - now).total_seconds()
     return max(int(ttl), 1)
+
+
+def get_dict_exclude_field(d: dict, excluded_keys: list[str]) -> dict:
+    return {k: v for k, v in d.items() if k not in excluded_keys}

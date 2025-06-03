@@ -5,6 +5,7 @@ from app.infra.services.google_drive_api import GoogleDriveAPIService
 import logging
 from app.domain.upload.enum import RolePermissionGoogleEnum, TypePermissionGoogleEnum
 from app.domain.upload.entity import AddPermissionDriveFile, GoogleDriveAPIRes
+from app.shared.utils.general import extract_id_spreadsheet_from_url
 
 logger = logging.getLogger(__name__)
 
@@ -52,3 +53,25 @@ class GoogleSheetAPIService:
         )
 
         return GoogleDriveAPIRes.model_validate(file_info)
+
+    def get_data_from_spreadsheet(self, url: str, sheet_name: str) -> list[str]:
+        id = extract_id_spreadsheet_from_url(url)
+        try:
+            data = (
+                self.service.spreadsheets()
+                .values()
+                .get(spreadsheetId=id, range=sheet_name)
+                .execute()
+            )
+        except HttpError as e:
+            if e.resp.status == 404:
+                raise HTTPException(status_code=400, detail="Không tìm thấy spreadsheet hoặc sheet")
+            elif e.resp.status == 403:
+                raise HTTPException(status_code=400, detail="Không có quyền truy cập trang tính")
+            else:
+                raise HTTPException(status_code=400, detail=f"An unexpected error occurred: {e}")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"An unexpected error occurred: {e}")
+        if "values" in data:
+            return data["values"]
+        return None

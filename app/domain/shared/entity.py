@@ -86,3 +86,21 @@ class PayloadWithFile:
         if isinstance(value, str):
             return cls(**json.loads(value))
         return value
+
+
+class ImportSpreadsheetsPayload(BaseEntity):
+    url: str
+    sheet_name: str | None = "main"
+
+
+class ErrorImport(BaseEntity):
+    row: int
+    detail: str
+
+
+class AttentionImport(ErrorImport):
+    pass
+
+
+class WarningImport(ErrorImport):
+    pass

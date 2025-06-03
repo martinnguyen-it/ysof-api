@@ -3,7 +3,14 @@ from typing import Optional, List
 from pydantic import ConfigDict, EmailStr, field_validator
 
 from app.domain.shared.enum import AccountStatus
-from app.domain.shared.entity import BaseEntity, IDModelMixin, DateTimeModelMixin, Pagination
+from app.domain.shared.entity import (
+    AttentionImport,
+    BaseEntity,
+    ErrorImport,
+    IDModelMixin,
+    DateTimeModelMixin,
+    Pagination,
+)
 from app.domain.student.enum import SexEnum
 from app.shared.utils.general import (
     convert_valid_date,
@@ -152,20 +159,6 @@ class StudentInUpdate(BaseEntity):
     note: Optional[str] = None
     _extract_email = field_validator("email", mode="before")(transform_email)
     _convert_valid_date = field_validator("date_of_birth", mode="before")(convert_valid_date)
-
-
-class ImportSpreadsheetsPayload(BaseEntity):
-    url: str
-    sheet_name: str | None = "main"
-
-
-class ErrorImport(BaseEntity):
-    row: int
-    detail: str
-
-
-class AttentionImport(ErrorImport):
-    pass
 
 
 class ImportSpreadsheetsInResponse(BaseEntity):

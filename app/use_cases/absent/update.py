@@ -152,6 +152,12 @@ class UpdateAbsentUseCase(use_case.UseCase):
                             **req_object.payload.model_dump(exclude_none=True),
                             "student_id": req_object.current_student.id,
                             "subject_id": req_object.subject_id,
+                            "student": (
+                                str(req_object.current_student.seasons_info[-1].numerical_order)
+                                + " - "
+                                + req_object.current_student.full_name
+                            ),
+                            "subject": subject.code + " - " + subject.title,
                         },
                         default=str,
                         ensure_ascii=False,

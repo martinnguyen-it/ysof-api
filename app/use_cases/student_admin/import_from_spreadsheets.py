@@ -1,18 +1,18 @@
-from fastapi import Depends, BackgroundTasks, HTTPException
+from fastapi import Depends, BackgroundTasks
 import json
 from mongoengine import NotUniqueError
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
+
 from pydantic import ValidationError
 
+from app.domain.shared.entity import ImportSpreadsheetsPayload
 from app.domain.shared.enum import AccountStatus
+from app.infra.services.google_sheet_api import GoogleSheetAPIService
 from app.shared import request_object, use_case, response_object
 
 from app.domain.student.entity import (
     AttentionImport,
     ErrorImport,
     ImportSpreadsheetsInResponse,
-    ImportSpreadsheetsPayload,
     StudentInDB,
     StudentSeason,
 )
@@ -23,11 +23,9 @@ from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
 from app.infra.security.security_service import get_password_hash
-from app.infra.services.google_drive_api import GoogleDriveAPIService
 from app.shared.utils.general import (
     convert_valid_date,
     copy_dict,
-    extract_id_spreadsheet_from_url,
     get_current_season_value,
 )
 from app.shared.constant import HEADER_IMPORT_STUDENT
@@ -67,35 +65,13 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
         student_repository: StudentRepository = Depends(StudentRepository),
         lecturer_repository: LecturerRepository = Depends(LecturerRepository),
         audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
-        google_drive_service: GoogleDriveAPIService = Depends(GoogleDriveAPIService),
+        google_sheet_api_service: GoogleSheetAPIService = Depends(GoogleSheetAPIService),
     ):
         self.student_repository = student_repository
         self.lecturer_repository = lecturer_repository
         self.background_tasks = background_tasks
         self.audit_log_repository = audit_log_repository
-        self.google_drive_service = google_drive_service
-
-    def get_data_from_spreadsheet(
-        self,
-        url: str,
-        sheet_name: str,
-    ) -> list[str]:
-        id = extract_id_spreadsheet_from_url(url)
-        creds = self.google_drive_service._creds
-        try:
-            service = build("sheets", "v4", credentials=creds)
-            data = service.spreadsheets().values().get(spreadsheetId=id, range=sheet_name).execute()
-        except HttpError as e:
-            if e.resp.status == 404:
-                raise HTTPException(status_code=400, detail="Không tìm thấy spreadsheet hoặc sheet")
-            elif e.resp.status == 403:
-                raise HTTPException(status_code=400, detail="Không có quyền truy cập trang tính")
-            else:
-                raise HTTPException(status_code=400, detail=f"An unexpected error occurred: {e}")
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"An unexpected error occurred: {e}")
-
-        return data["values"]
+        self.google_sheet_api_service = google_sheet_api_service
 
     def convert_value_spreadsheet_to_dict(self, data: list[str]) -> dict:
         return {
@@ -104,9 +80,15 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
         }
 
     def process_request(self, req_object: ImportSpreadsheetsStudentRequestObject):
-        data_import = self.get_data_from_spreadsheet(
-            url=req_object.payload.url, sheet_name=req_object.payload.sheet_name
+        data_import = self.google_sheet_api_service.get_data_from_spreadsheet(
+            url=req_object.payload.url,
+            sheet_name=req_object.payload.sheet_name,
         )
+
+        if not data_import or len(data_import) < 2:
+            return response_object.ResponseFailure.build_parameters_error(
+                "File import không hợp lệ hoặc không có dữ liệu"
+            )
 
         if HEADER_IMPORT_STUDENT != data_import.pop(0):
             return response_object.ResponseFailure.build_parameters_error(

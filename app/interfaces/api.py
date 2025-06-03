@@ -19,6 +19,7 @@ from app.interfaces.api_v1.admin import (
     subject_evaluation,
     subject_registration,
     celery_result,
+    roll_call,
 )
 from app.interfaces.api_v1.student import api as api_student
 
@@ -51,5 +52,6 @@ api_router.include_router(manage_form.router, prefix="/manage-form", tags=["Mana
 api_router.include_router(absent.router, prefix="/absents", tags=["Absent"])
 api_router.include_router(daily_bible.router, prefix="/daily-bible", tags=["Daily Bible"])
 api_router.include_router(celery_result.router, prefix="/celery-result", tags=["Celery Result"])
+api_router.include_router(roll_call.router, prefix="/roll-call", tags=["Roll Call"])
 
 api_router.include_router(api_student.api_router, prefix="/student")

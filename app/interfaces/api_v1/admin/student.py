@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Body, Depends, Query, Path
 from typing import Optional, Annotated
 
+from app.domain.shared.entity import ImportSpreadsheetsPayload
 from app.domain.student.entity import (
     ImportSpreadsheetsInResponse,
-    ImportSpreadsheetsPayload,
     ManyStudentsInResponse,
     ResetPasswordResponse,
     Student,
@@ -137,7 +137,7 @@ def delete_student(
 @response_decorator()
 def import_student_from_spreadsheets(
     payload: ImportSpreadsheetsPayload = Body(..., title="Url spreadsheets"),
-    delete_student_use_case: ImportSpreadsheetsStudentUseCase = Depends(
+    import_student_use_case: ImportSpreadsheetsStudentUseCase = Depends(
         ImportSpreadsheetsStudentUseCase
     ),
     current_admin: AdminModel = Depends(get_current_active_admin),
@@ -146,7 +146,7 @@ def import_student_from_spreadsheets(
     req_object = ImportSpreadsheetsStudentRequestObject.builder(
         payload=payload, current_admin=current_admin
     )
-    response = delete_student_use_case.execute(request_object=req_object)
+    response = import_student_use_case.execute(request_object=req_object)
     return response
 
 
