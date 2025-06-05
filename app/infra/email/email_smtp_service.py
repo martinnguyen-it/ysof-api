@@ -16,14 +16,14 @@ class EmailSMTPService:
         self, emails_to: list[str] | str, subject: str, plain_text: str, html: str | None = None
     ):
         msg = MIMEMultipart("alternative")
-        msg["From"] = formataddr(("YSOF", settings.YSOF_EMAIL_SENDER))
+        msg["From"] = formataddr(("YSOF", settings.YSOF_EMAIL))
         msg["To"] = emails_to if isinstance(emails_to, str) else ", ".join(emails_to)
         msg["Subject"] = subject
         msg["Message-ID"] = make_msgid(domain=settings.SMTP_MAIL_HOST)
         current_time = datetime.now(pytz.timezone(settings.TIMEZONE))
         msg["Date"] = current_time.strftime("%a, %d %b %Y %H:%M:%S %z")
-        msg["Reply-To"] = settings.YSOF_EMAIL_SENDER
-        msg["List-Unsubscribe"] = f"<mailto:{settings.YSOF_EMAIL_SENDER}>"
+        msg["Reply-To"] = settings.YSOF_EMAIL
+        msg["List-Unsubscribe"] = f"<mailto:{settings.YSOF_EMAIL}>"
 
         msg.attach(MIMEText(plain_text, "plain"))
         if html:

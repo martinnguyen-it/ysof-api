@@ -7,6 +7,7 @@ from app.domain.subject.entity import (
     SubjectInCreate,
     SubjectInUpdate,
     SubjectShortResponse,
+    QuestionSpreadsheetResponse,
 )
 from app.domain.shared.enum import AdminRole, Sort
 from app.infra.security.security_service import (
@@ -15,6 +16,10 @@ from app.infra.security.security_service import (
     get_current_admin,
 )
 from app.shared.decorator import response_decorator
+from app.use_cases.subject.generate_question_spreadsheet import (
+    GenerateQuestionSpreadsheetRequestObject,
+    GenerateQuestionSpreadsheetUseCase,
+)
 from app.use_cases.subject.list import ListSubjectsUseCase, ListSubjectsRequestObject
 from app.use_cases.subject.update import UpdateSubjectUseCase, UpdateSubjectRequestObject
 from app.use_cases.subject.get import (
@@ -265,4 +270,23 @@ def delete_subject(
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV])
     req_object = DeleteSubjectRequestObject.builder(id=id, current_admin=current_admin)
     response = delete_subject_use_case.execute(request_object=req_object)
+    return response
+
+
+@router.post(
+    "/generate-question-spreadsheet/{subject_id}", response_model=QuestionSpreadsheetResponse
+)
+@response_decorator()
+def generate_question_spreadsheet(
+    subject_id: str = Path(..., title="Subject Id"),
+    generate_question_spreadsheet_use_case: GenerateQuestionSpreadsheetUseCase = Depends(
+        GenerateQuestionSpreadsheetUseCase
+    ),
+    current_admin: AdminModel = Depends(get_current_active_admin),
+):
+    authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV])
+    req_object = GenerateQuestionSpreadsheetRequestObject.builder(
+        subject_id=subject_id, current_admin=current_admin
+    )
+    response = generate_question_spreadsheet_use_case.execute(request_object=req_object)
     return response

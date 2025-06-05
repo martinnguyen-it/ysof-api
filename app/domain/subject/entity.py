@@ -142,3 +142,7 @@ class _SubjectRegistrationInResponse(BaseEntity):
 class ListSubjectRegistrationInResponse(BaseEntity):
     pagination: Optional[Pagination] = None
     data: Optional[list[_SubjectRegistrationInResponse]] = None
+
+
+class QuestionSpreadsheetResponse(BaseEntity):
+    question_url: str

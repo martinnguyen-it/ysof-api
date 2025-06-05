@@ -39,7 +39,7 @@ class BrevoService:
                 email_sender = sib_api_v3_sdk.SendSmtpEmailSender(email=sender, name=name)
             else:
                 email_sender = sib_api_v3_sdk.SendSmtpEmailSender(
-                    email=settings.YSOF_EMAIL_SENDER, name=name
+                    email=settings.YSOF_EMAIL, name=name
                 )
 
         to = [sib_api_v3_sdk.SendSmtpEmailTo(email=to) for to in emails_to]
@@ -50,7 +50,7 @@ class BrevoService:
             template_id=template_id,
             subject=subject,
             params=params,
-            reply_to={"email": settings.YSOF_EMAIL_SENDER},
+            reply_to={"email": settings.YSOF_EMAIL},
         )
         api_response = self.api_instance.send_transac_email(send_smtp_email)
         return api_response

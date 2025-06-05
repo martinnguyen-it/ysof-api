@@ -189,3 +189,13 @@ class GoogleDriveAPIService:
         except HttpError as error:
             logger.error(f"An error occurred when change permission the file: {error}")
             raise HTTPException(status_code=400, detail="Hệ thống Cloud bị lỗi.")
+
+    def duplicate_file(self, source_file_id: str, new_file_name: str):
+        try:
+            body = {"name": new_file_name}
+            request = self.service.files().copy(fileId=source_file_id, body=body)
+            response = request.execute()
+            return response
+        except HttpError as error:
+            logger.error(f"An error occurred when duplicate the file: {error}")
+            raise HTTPException(status_code=400, detail="Hệ thống Cloud bị lỗi.")

@@ -60,7 +60,7 @@ class Settings(BaseSettings):
     PREFIX_IMAGE_GCLOUD: str = "https://lh3.googleusercontent.com/d/"
 
     BREVO_API_KEY: str
-    YSOF_EMAIL_SENDER: str
+    YSOF_EMAIL: str
 
     SMTP_MAIL_HOST: str
     SMTP_MAIL_PORT: str
