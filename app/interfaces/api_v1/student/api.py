@@ -9,6 +9,7 @@ from app.interfaces.api_v1.student import (
     subject_evaluation,
     absent,
     student,
+    roll_call,
 )
 
 api_router = APIRouter()
@@ -30,3 +31,4 @@ api_router.include_router(absent.router, prefix="/absent", tags=["API Student - 
 api_router.include_router(
     daily_bible.router, prefix="/daily-bible", tags=["API Student - Daily Bible"]
 )
+api_router.include_router(roll_call.router, prefix="/roll-call", tags=["API Student - Roll Call"])

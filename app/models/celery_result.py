@@ -27,6 +27,8 @@ class CeleryResultModel(Document):
     traceback = DynamicField()  # Allow any type
     children = DynamicField()  # Allow any type
     status = DynamicField()  # Allow any type
+    group_id = StringField()
+    parent_id = StringField()
 
     resolved = BooleanField()
     updated_at = DateTimeField()

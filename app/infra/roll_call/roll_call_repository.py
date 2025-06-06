@@ -1,4 +1,5 @@
 from typing import List, Optional
+from app.domain.subject.entity import SubjectInDB, SubjectShortResponse
 from app.domain.subject.enum import StatusSubjectEnum
 from app.models.subject import SubjectModel
 from app.models.subject_registration import SubjectRegistrationModel
@@ -6,9 +7,11 @@ from app.models.student import StudentModel
 from app.models.subject_evaluation import SubjectEvaluationModel
 from app.models.absent import AbsentModel
 from app.domain.roll_call.entity import (
+    StudentRollCallResult,
+    StudentRollCallResultInStudentResponse,
     StudentRollCallResultInResponse,
     SubjectRollCallResult,
-    StudentRollCallResult,
+    SubjectRollCallResultInStudent,
 )
 
 
@@ -106,6 +109,7 @@ class RollCallRepository:
             total += 1
             subject_completed = 0
             subject_not_completed = 0
+            subject_registered = 0
             # Get student's subject registrations
             subject_results = {}
             for subject in completed_subjects:
@@ -115,9 +119,9 @@ class RollCallRepository:
                 ).first()
 
                 if not registration:
-                    # subject_results[str(subject.id)] = None
                     continue
 
+                subject_registered += 1
                 # Check evaluation
                 evaluation = SubjectEvaluationModel.objects(
                     student=student_model.id, subject=subject.id
@@ -159,10 +163,88 @@ class RollCallRepository:
                     subjects=subject_results,
                     subject_completed=subject_completed,
                     subject_not_completed=subject_not_completed,
+                    subject_registered=subject_registered,
                 )
             )
 
         return StudentRollCallResultInResponse(
             data=results,
             summary=summary,
+        )
+
+    def get_student_roll_call_results(
+        self,
+        student_id: str,
+        season: int,
+    ) -> StudentRollCallResultInStudentResponse:
+        """
+        Get roll call results for a single student.
+        """
+        # Get completed subjects
+        completed_subjects = SubjectModel.objects.filter(
+            status=StatusSubjectEnum.COMPLETED, season=season
+        ).order_by("-start_at")
+        if not completed_subjects:
+            return None
+
+        # Get student
+        student = StudentModel.objects(id=student_id).first()
+        if not student:
+            return None
+        # Process student
+        subject_completed = 0
+        subject_not_completed = 0
+        subject_registered = 0
+        subject_results: list[SubjectRollCallResultInStudent] = []
+
+        for subject in completed_subjects:
+            # Check registration
+            registration = SubjectRegistrationModel.objects(
+                student=student.id, subject=subject.id
+            ).first()
+
+            if not registration:
+                continue
+
+            subject_registered += 1
+
+            # Check evaluation
+            evaluation = SubjectEvaluationModel.objects(
+                student=student.id, subject=subject.id
+            ).first()
+
+            # Check absent
+            absent = AbsentModel.objects(
+                student=student.id, subject=subject.id, status=True
+            ).first()
+
+            # Ensure attend_zoom is a boolean
+            attend_zoom = False
+            if registration and hasattr(registration, "attend_zoom"):
+                attend_zoom = bool(registration.attend_zoom)
+
+            subject_results.append(
+                SubjectRollCallResultInStudent(
+                    subject=SubjectShortResponse(
+                        **SubjectInDB.model_validate(subject).model_dump(
+                            exclude=({"lecturer", "attachments"})
+                        ),
+                    ),
+                    attend_zoom=attend_zoom,
+                    evaluation=bool(evaluation),
+                    absent_type=absent.type if absent else None,
+                    result=None,  # Will be computed by the property
+                )
+            )
+
+            if subject_results[-1].result == "completed":
+                subject_completed += 1
+            elif subject_results[-1].result == "no_complete":
+                subject_not_completed += 1
+
+        return StudentRollCallResultInStudentResponse(
+            subjects=subject_results,
+            subject_completed=subject_completed,
+            subject_not_completed=subject_not_completed,
+            subject_registered=subject_registered,
         )

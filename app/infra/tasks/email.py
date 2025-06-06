@@ -97,7 +97,7 @@ def send_email_notification_subject_task(subject_id: str):
         pass_code=subject.zoom.pass_code,
         question_url=subject.question_url,
         absent=settings.FE_STUDENT_BASE_URL + "/xin-nghi-phep",
-        documents="\n".join(documents) if len(documents) > 0 else None,
+        documents=documents if len(documents) > 0 else None,
     )
     docs: list[StudentModel] = subject_registration_repository.get_by_subject_id(
         subject_id=ObjectId(subject_id)

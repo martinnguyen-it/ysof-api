@@ -4,11 +4,8 @@ from app.shared import request_object, use_case, response_object
 from app.domain.subject.entity import SubjectInDB, SubjectShortResponse
 from app.models.subject import SubjectModel
 from app.infra.subject.subject_repository import SubjectRepository
-from app.domain.lecturer.entity import Lecturer, LecturerInDB
 from app.shared.utils.general import get_current_season_value
 from app.models.admin import AdminModel
-from app.domain.document.entity import AdminInDocument, Document, DocumentInDB
-from app.domain.admin.entity import AdminInDB
 from app.domain.shared.enum import AdminRole
 from app.domain.subject.enum import StatusSubjectEnum
 
@@ -96,14 +93,6 @@ class ListSubjectsShortUseCase(use_case.UseCase):
                 **SubjectInDB.model_validate(subject).model_dump(
                     exclude=({"lecturer", "attachments"})
                 ),
-                lecturer=Lecturer(**LecturerInDB.model_validate(subject.lecturer).model_dump()),
-                attachments=[
-                    Document(
-                        **DocumentInDB.model_validate(doc).model_dump(exclude=({"author"})),
-                        author=AdminInDocument(**AdminInDB.model_validate(doc.author).model_dump()),
-                    )
-                    for doc in subject.attachments
-                ],
             )
             for subject in subjects
         ]
