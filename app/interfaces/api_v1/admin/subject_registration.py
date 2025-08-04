@@ -1,19 +1,29 @@
 from typing import Annotated, Optional
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Body, Depends, Query
 
 from app.models.admin import AdminModel
+from app.shared.constant import SUPER_ADMIN
 from app.shared.decorator import response_decorator
-from app.domain.subject.entity import ListSubjectRegistrationInResponse, StudentInSubject
+from app.domain.subject.entity import (
+    ListSubjectRegistrationInResponse,
+    StudentInSubject,
+    SubjectRegistrationInCreateByAdmin,
+    SubjectRegistrationInResponse,
+)
+from app.use_cases.student_endpoint.subject.subject_registration import (
+    SubjectRegistrationStudentCase,
+    SubjectRegistrationStudentRequestObject,
+)
 from app.use_cases.subject_registration.list import (
     ListSubjectRegistrationsRequestObject,
     ListSubjectRegistrationsUseCase,
 )
-from app.domain.shared.enum import Sort
+from app.domain.shared.enum import AdminRole, Sort
 from app.use_cases.subject_registration.list_by_subject_id import (
     ListSubjectRegistrationsBySubjectIdRequestObject,
     ListSubjectRegistrationsBySubjectIdUseCase,
 )
-from app.infra.security.security_service import get_current_admin
+from app.infra.security.security_service import authorization, get_current_admin
 
 router = APIRouter()
 
@@ -69,4 +79,23 @@ def get_subject_registration_by_subject_id(
     )
     response = list_subject_registration_use_case.execute(request_object=req_object)
 
+    return response
+
+
+@router.post("", response_model=SubjectRegistrationInResponse)
+@response_decorator()
+def subject_registration(
+    payload: SubjectRegistrationInCreateByAdmin = Body(
+        ..., title="Subject registration In Create payload"
+    ),
+    subject_registration_use_case: SubjectRegistrationStudentCase = Depends(
+        SubjectRegistrationStudentCase
+    ),
+    current_admin: AdminModel = Depends(get_current_admin),
+):
+    authorization(current_admin, [*SUPER_ADMIN, AdminRole.BKL, AdminRole.BHV])
+    req_object = SubjectRegistrationStudentRequestObject.builder(
+        payload.subjects, payload.student_id, current_admin
+    )
+    response = subject_registration_use_case.execute(request_object=req_object)
     return response

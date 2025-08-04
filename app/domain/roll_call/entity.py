@@ -1,3 +1,4 @@
+from app.domain.shared.entity import ImportSpreadsheetsPayload
 from typing import Optional
 from pydantic import validator
 
@@ -62,3 +63,7 @@ class StudentRollCallResultInStudentResponse(BaseEntity):
 class StudentRollCallResultInResponse(BaseEntity):
     data: list[StudentRollCallResult]
     summary: dict[str, dict[str, int]]
+
+
+class RollCallBulkSheet(ImportSpreadsheetsPayload):
+    subject_id: str

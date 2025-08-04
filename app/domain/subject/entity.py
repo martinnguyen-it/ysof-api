@@ -104,12 +104,20 @@ class SubjectRegistrationInDB(IDModelMixin):
     model_config = ConfigDict(from_attributes=True)
 
 
-class SubjectRegistrationInCreate(BaseEntity):
+class SubjectRegistrationInCreateBase(BaseEntity):
     subjects: list[str]
 
     @field_validator("subjects", mode="after")
     def remove_duplicate(cls, v):
         return list(set(v))
+
+
+class SubjectRegistrationInCreateByStudent(SubjectRegistrationInCreateBase):
+    pass
+
+
+class SubjectRegistrationInCreateByAdmin(SubjectRegistrationInCreateBase):
+    student_id: str
 
 
 class SubjectRegistrationInResponse(BaseEntity):

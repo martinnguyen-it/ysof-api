@@ -160,3 +160,45 @@ class TestSubjectRegistrationApi(unittest.TestCase):
             assert len(resp) == 1
             registration = resp[0]
             assert registration["id"] == str(self.student.id)
+
+    @pytest.mark.order(3)
+    def test_admin_register_student_for_subjects(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.admin.email)
+
+            # Test admin registering a student for subjects
+            r = self.client.post(
+                "/api/v1/subjects/registration",
+                json={
+                    "student_id": str(self.student2.id),
+                    "subjects": [str(self.subject.id), str(self.subject2.id)],
+                },
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 200
+            resp = r.json()
+            assert resp["student_id"] == str(self.student2.id)
+            assert len(resp["subjects_registration"]) == 2
+            assert str(self.subject.id) in resp["subjects_registration"]
+            assert str(self.subject2.id) in resp["subjects_registration"]
+
+    @pytest.mark.order(4)
+    def test_admin_register_nonexistent_student(self):
+        with patch("app.infra.security.security_service.verify_token") as mock_token:
+            mock_token.return_value = TokenData(email=self.admin.email)
+
+            # Test admin trying to register a non-existent student
+            r = self.client.post(
+                "/api/v1/subjects/registration",
+                json={
+                    "student_id": "507f1f77bcf86cd799439011",  # Non-existent student ID
+                    "subjects": [str(self.subject.id)],
+                },
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r.status_code == 404
+            assert "Học viên không tồn tại" in r.json()["detail"]

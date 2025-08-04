@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import Depends, BackgroundTasks
 
 
-from app.domain.rolll_call.entity import RollCallBulkSheet
+from app.domain.roll_call.entity import RollCallBulkSheet
 from app.domain.subject.enum import StatusSubjectEnum
 from app.infra.roll_call.roll_call_repository import RollCallRepository
 from app.infra.services.google_sheet_api import GoogleSheetAPIService

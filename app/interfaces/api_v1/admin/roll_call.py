@@ -1,8 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Body, Depends, Query
 
-from app.domain.roll_call.entity import StudentRollCallResultInResponse
-from app.domain.rolll_call.entity import RollCallBulkSheet
+from app.domain.roll_call.entity import RollCallBulkSheet, StudentRollCallResultInResponse
 from app.domain.shared.enum import AdminRole, Sort
 from app.infra.security.security_service import authorization, get_current_active_admin
 from app.models.admin import AdminModel
@@ -57,7 +56,6 @@ def get_roll_call_results(
     - no_complete: Only has evaluation or attended zoom without evaluation
     - absent: Has NO_ATTEND absent type
     """
-    authorization(current_admin, [*SUPER_ADMIN, AdminRole.BKL])
     if sort_by in ["numerical_order", "season", "group"]:
         sort_by = f"seasons_info.{sort_by}"
     sort_query = {sort_by: 1 if sort is sort.ASCE else -1}

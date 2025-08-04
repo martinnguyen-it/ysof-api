@@ -3,7 +3,10 @@ from fastapi import APIRouter, Depends, Body
 from app.infra.security.security_service import get_current_student
 from app.shared.decorator import response_decorator
 from app.models.student import StudentModel
-from app.domain.subject.entity import SubjectRegistrationInCreate, SubjectRegistrationInResponse
+from app.domain.subject.entity import (
+    SubjectRegistrationInCreateByStudent,
+    SubjectRegistrationInResponse,
+)
 from app.use_cases.student_endpoint.subject.subject_registration import (
     SubjectRegistrationStudentCase,
     SubjectRegistrationStudentRequestObject,
@@ -19,7 +22,7 @@ router = APIRouter()
 @router.post("", response_model=SubjectRegistrationInResponse)
 @response_decorator()
 def subject_registration(
-    payload: SubjectRegistrationInCreate = Body(
+    payload: SubjectRegistrationInCreateByStudent = Body(
         ..., title="Subject registration In Create payload"
     ),
     subject_registration_use_case: SubjectRegistrationStudentCase = Depends(
