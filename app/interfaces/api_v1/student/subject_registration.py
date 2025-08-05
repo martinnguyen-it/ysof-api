@@ -7,7 +7,7 @@ from app.domain.subject.entity import (
     SubjectRegistrationInCreateByStudent,
     SubjectRegistrationInResponse,
 )
-from app.use_cases.student_endpoint.subject.subject_registration import (
+from app.use_cases.subject_registration.registration import (
     SubjectRegistrationStudentCase,
     SubjectRegistrationStudentRequestObject,
 )

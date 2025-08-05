@@ -10,7 +10,7 @@ from app.domain.subject.entity import (
     SubjectRegistrationInCreateByAdmin,
     SubjectRegistrationInResponse,
 )
-from app.use_cases.student_endpoint.subject.subject_registration import (
+from app.use_cases.subject_registration.registration import (
     SubjectRegistrationStudentCase,
     SubjectRegistrationStudentRequestObject,
 )
@@ -46,7 +46,10 @@ def get_subject_registration(
     sort_by: str = "numerical_order",
     season: int | None = None,
 ):
+    if sort_by in ["numerical_order", "season", "group"]:
+        sort_by = f"seasons_info.{sort_by}"
     sort_query = {sort_by: 1 if sort is sort.ASCE else -1}
+
     req_object = ListSubjectRegistrationsRequestObject.builder(
         page_index=page_index,
         page_size=page_size,

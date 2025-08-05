@@ -85,7 +85,7 @@ class ListSubjectRegistrationsUseCase(use_case.UseCase):
             }
 
         if isinstance(req_object.group, int):
-            match_pipeline = {**match_pipeline, "group": req_object.group}
+            match_pipeline = {**match_pipeline, "seasons_info.group": req_object.group}
         data = self.student_repository.list_subject_registrations(
             page_size=req_object.page_size,
             page_index=req_object.page_index,

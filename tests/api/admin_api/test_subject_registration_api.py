@@ -141,6 +141,14 @@ class TestSubjectRegistrationApi(unittest.TestCase):
             resp = r.json()
             assert resp["pagination"]["total"] == 2
             assert len(resp["data"]) == 2
+
+            # Verify summary field exists and contains correct data
+            assert "summary" in resp
+            assert isinstance(resp["summary"], dict)
+            # Should have 1 student registered for subject.id
+            assert str(self.subject.id) in resp["summary"]
+            assert resp["summary"][str(self.subject.id)] == 1
+
             registration = resp["data"][0]
             assert registration["student"]["id"] == str(self.student.id)
             assert registration["total"] == 1
@@ -214,6 +222,25 @@ class TestSubjectRegistrationApi(unittest.TestCase):
             assert str(self.subject.id) in description["subjects_registered"]
             assert str(self.subject2.id) in description["subjects_registered"]
             assert description["season"] == 3
+
+            # Verify summary field is updated correctly after registration
+            r_list = self.client.get(
+                "/api/v1/subjects/registration",
+                headers={
+                    "Authorization": "Bearer {}".format("xxx"),
+                },
+            )
+            assert r_list.status_code == 200
+            resp_list = r_list.json()
+
+            # Verify summary reflects new registrations
+            assert "summary" in resp_list
+            assert str(self.subject.id) in resp_list["summary"]
+            assert str(self.subject2.id) in resp_list["summary"]
+            # subject.id should have 2 students (student and student2)
+            assert resp_list["summary"][str(self.subject.id)] == 2
+            # subject2.id should have 1 student (student2)
+            assert resp_list["summary"][str(self.subject2.id)] == 1
 
     @pytest.mark.order(4)
     def test_admin_register_nonexistent_student(self):

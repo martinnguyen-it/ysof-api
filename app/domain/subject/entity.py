@@ -150,6 +150,7 @@ class _SubjectRegistrationInResponse(BaseEntity):
 class ListSubjectRegistrationInResponse(BaseEntity):
     pagination: Optional[Pagination] = None
     data: Optional[list[_SubjectRegistrationInResponse]] = None
+    summary: Optional[dict[str, int]] = None
 
 
 class QuestionSpreadsheetResponse(BaseEntity):

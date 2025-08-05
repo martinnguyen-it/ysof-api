@@ -145,6 +145,7 @@ class StudentRepository:
         )
         total_pages = 0
 
+        # Optimized: Single aggregation pipeline using $facet for both summary and data
         pipeline = []
         if match_pipeline:
             pipeline.append({"$match": match_pipeline})
@@ -157,18 +158,40 @@ class StudentRepository:
                         "localField": "_id",
                         "foreignField": "student",
                         "as": "subject_registrations",
-                    },
+                    }
                 },
-                {"$sort": sort if sort else {"seasons_info.numerical_order": 1}},
-                {"$skip": page_size * (page_index - 1)},
-                {"$limit": page_size},
+                {
+                    "$facet": {
+                        "summary": [
+                            {"$unwind": "$subject_registrations"},
+                            {
+                                "$group": {
+                                    "_id": "$subject_registrations.subject",
+                                    "count": {"$sum": 1},
+                                }
+                            },
+                        ],
+                        "data": [
+                            {"$sort": sort if sort else {"seasons_info.numerical_order": 1}},
+                            {"$skip": page_size * (page_index - 1)},
+                            {"$limit": page_size},
+                        ],
+                    }
+                },
             ]
         )
 
         cursor = StudentModel.objects().aggregate(pipeline)
-        if not cursor.alive:
-            return resp
-        for record in cursor:
+        result = list(cursor)[0] if cursor.alive else {"summary": [], "data": []}
+
+        # Process summary
+        summary = {}
+        for record in result.get("summary", []):
+            summary[str(record["_id"])] = record["count"]
+        resp.summary = summary
+
+        # Process data
+        for record in result.get("data", []):
             total_pages = total_pages + 1
             total_regis = len(record.get("subject_registrations"))
             subject_registrations = (
