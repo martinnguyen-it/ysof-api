@@ -1,4 +1,4 @@
-from fastapi import Depends
+from fastapi import Depends, BackgroundTasks
 from app.shared import request_object, response_object, use_case
 from app.domain.subject.entity import SubjectRegistrationInResponse
 from app.infra.subject.subject_registration_repository import SubjectRegistrationRepository
@@ -11,6 +11,10 @@ from app.infra.manage_form.manage_form_repository import ManageFormRepository
 from app.models.manage_form import ManageFormModel
 from app.domain.manage_form.enum import FormStatus, FormType
 from app.infra.student.student_repository import StudentRepository
+from app.infra.audit_log.audit_log_repository import AuditLogRepository
+from app.domain.audit_log.entity import AuditLogInDB
+from app.domain.audit_log.enum import AuditLogType, Endpoint
+import json
 
 
 class SubjectRegistrationStudentRequestObject(request_object.ValidRequestObject):
@@ -51,17 +55,21 @@ class SubjectRegistrationStudentRequestObject(request_object.ValidRequestObject)
 class SubjectRegistrationStudentCase(use_case.UseCase):
     def __init__(
         self,
+        background_tasks: BackgroundTasks,
         manage_form_repository: ManageFormRepository = Depends(ManageFormRepository),
         subject_repository: SubjectRepository = Depends(SubjectRepository),
         subject_registration_repository: SubjectRegistrationRepository = Depends(
             SubjectRegistrationRepository
         ),
         student_repository: StudentRepository = Depends(StudentRepository),
+        audit_log_repository: AuditLogRepository = Depends(AuditLogRepository),
     ):
         self.subject_registration_repository = subject_registration_repository
         self.subject_repository = subject_repository
         self.manage_form_repository = manage_form_repository
         self.student_repository = student_repository
+        self.background_tasks = background_tasks
+        self.audit_log_repository = audit_log_repository
 
     def process_request(self, req_object: SubjectRegistrationStudentRequestObject):
         is_student_request = True
@@ -107,6 +115,37 @@ class SubjectRegistrationStudentCase(use_case.UseCase):
             student_id=req_object.current_student.id, subject_ids=req_object.subjects
         )
         assert res, "Something went wrong"
+
+        # Add audit log for admin processing
+        if not is_student_request and req_object.current_admin:
+            self.background_tasks.add_task(
+                self.audit_log_repository.create,
+                AuditLogInDB(
+                    type=AuditLogType.UPDATE,
+                    endpoint=Endpoint.STUDENT,
+                    season=current_season,
+                    author=req_object.current_admin,
+                    author_email=req_object.current_admin.email,
+                    author_name=req_object.current_admin.full_name,
+                    author_roles=req_object.current_admin.roles,
+                    description=json.dumps(
+                        {
+                            "action": "subject_registration_update",
+                            "student_id": str(req_object.current_student.id),
+                            "student_name": req_object.current_student.full_name,
+                            "numerical_order": (
+                                req_object.current_student.seasons_info[-1].numerical_order
+                                if req_object.current_student.seasons_info
+                                else "N/A"
+                            ),
+                            "subjects_registered": req_object.subjects,
+                            "season": current_season,
+                        },
+                        default=str,
+                        ensure_ascii=False,
+                    ),
+                ),
+            )
 
         return SubjectRegistrationInResponse(
             student_id=str(req_object.current_student.id), subjects_registration=req_object.subjects

@@ -1,5 +1,6 @@
 import pytest
 import unittest
+import time
 from unittest.mock import patch
 
 from mongoengine import connect, disconnect
@@ -18,6 +19,8 @@ from app.models.subject import SubjectModel
 from app.models.lecturer import LecturerModel
 from app.models.manage_form import ManageFormModel
 from app.domain.manage_form.enum import FormStatus, FormType
+from app.models.audit_log import AuditLogModel
+from app.domain.audit_log.enum import AuditLogType, Endpoint
 
 
 class TestSubjectRegistrationApi(unittest.TestCase):
@@ -115,6 +118,14 @@ class TestSubjectRegistrationApi(unittest.TestCase):
             resp = r.json()
             assert resp["student_id"] == str(self.student.id)
             assert len(resp["subjects_registration"]) == 2
+
+            # Verify no audit log was created for student self-registration
+            time.sleep(1)
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.STUDENT}
+            )
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 0
 
     @pytest.mark.order(2)
     def test_get_student_registration_by_self(self):

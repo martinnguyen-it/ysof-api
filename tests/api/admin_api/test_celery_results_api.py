@@ -101,7 +101,7 @@ class TestCeleryResultsApi(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # cls.db.drop_database(cls.db_name)
+        cls.db.drop_database(cls.db_name)
         disconnect()
 
     def test_get_list_celery_results(self):

@@ -1,5 +1,6 @@
 import pytest
 import unittest
+import time
 from unittest.mock import patch
 
 from mongoengine import connect, disconnect
@@ -18,6 +19,8 @@ from app.models.student import SeasonInfo, StudentModel
 from app.models.subject import SubjectModel
 from app.models.lecturer import LecturerModel
 from app.models.subject_registration import SubjectRegistrationModel
+from app.models.audit_log import AuditLogModel
+from app.domain.audit_log.enum import AuditLogType, Endpoint
 
 
 class TestSubjectRegistrationApi(unittest.TestCase):
@@ -184,6 +187,34 @@ class TestSubjectRegistrationApi(unittest.TestCase):
             assert str(self.subject.id) in resp["subjects_registration"]
             assert str(self.subject2.id) in resp["subjects_registration"]
 
+            # Verify audit log was created
+            time.sleep(1)
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.STUDENT}
+            )
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
+            assert len(audit_logs) == 1
+
+            # Verify audit log details
+            audit_log = audit_logs[0]
+            assert audit_log.author_name == self.admin.full_name
+            assert audit_log.author_email == self.admin.email
+            assert audit_log.author_roles == self.admin.roles
+            assert audit_log.season == 3
+
+            # Parse description to verify content
+            import json
+
+            description = json.loads(audit_log.description)
+            assert description["action"] == "subject_registration_update"
+            assert description["student_id"] == str(self.student2.id)
+            assert description["student_name"] == self.student2.full_name
+            assert description["numerical_order"] == 2  # numerical_order from seasons_info
+            assert len(description["subjects_registered"]) == 2
+            assert str(self.subject.id) in description["subjects_registered"]
+            assert str(self.subject2.id) in description["subjects_registered"]
+            assert description["season"] == 3
+
     @pytest.mark.order(4)
     def test_admin_register_nonexistent_student(self):
         with patch("app.infra.security.security_service.verify_token") as mock_token:
@@ -202,3 +233,12 @@ class TestSubjectRegistrationApi(unittest.TestCase):
             )
             assert r.status_code == 404
             assert "Học viên không tồn tại" in r.json()["detail"]
+
+            # Verify no audit log was created for failed operation
+            time.sleep(1)
+            cursor = AuditLogModel._get_collection().find(
+                {"type": AuditLogType.UPDATE, "endpoint": Endpoint.STUDENT}
+            )
+            audit_logs = [AuditLogModel.from_mongo(doc) for doc in cursor] if cursor else []
+            # Should still be 1 from the previous successful test
+            assert len(audit_logs) == 1
