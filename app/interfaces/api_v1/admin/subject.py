@@ -3,6 +3,7 @@ from fastapi import APIRouter, Body, Depends, Query, HTTPException, Path
 from typing import Optional
 
 from app.domain.subject.entity import (
+    SendNotificationRequest,
     Subject,
     SubjectInCreate,
     SubjectInUpdate,
@@ -105,6 +106,7 @@ def get_subject_last_sent_evaluation(
 @response_decorator()
 def send_subject_notification(
     subject_id: str = Path(..., title="Subject id"),
+    payload: SendNotificationRequest = Body(..., title="Send notification payload"),
     current_admin: AdminModel = Depends(get_current_active_admin),
     subject_send_notification_use_case: SubjectSendNotificationUseCase = Depends(
         SubjectSendNotificationUseCase
@@ -112,7 +114,7 @@ def send_subject_notification(
 ):
     authorization(current_admin, [*SUPER_ADMIN, AdminRole.BHV])
     subject_send_notification_request_object = SubjectSendNotificationRequestObject.builder(
-        subject_id=subject_id, current_admin=current_admin
+        subject_id=subject_id, current_admin=current_admin, extra_emails=payload.extra_emails
     )
     response = subject_send_notification_use_case.execute(
         request_object=subject_send_notification_request_object

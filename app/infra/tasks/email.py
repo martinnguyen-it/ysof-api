@@ -112,6 +112,52 @@ def send_email_notification_subject_task(subject_id: str):
 
 
 @celery_app_with_error_handler(CeleryResultTag.SEND_MAIL)
+def send_email_notification_subject_task_for_extra_mails(subject_id: str, emails: list[str]):
+    subject_repository = SubjectRepository()
+    subject = subject_repository.get_by_id(subject_id)
+    if not subject:
+        raise Exception("Not found subject")
+
+    lecturer = (
+        (subject.lecturer.title + " " if subject.lecturer.title else "")
+        + (subject.lecturer.holy_name + " " if subject.lecturer.holy_name else "")
+        + (subject.lecturer.full_name)
+    )
+
+    documents: list[str] = []
+    for attachment in subject.attachments:
+        if attachment.mimeType == "application/vnd.google-apps.spreadsheet":
+            documents.append(f"https://docs.google.com/spreadsheets/d/{attachment.file_id}")
+        elif attachment.mimeType in [
+            "application/vnd.google-apps.document",
+            "application/vnd.google-apps.kix",
+        ]:
+            documents.append(f"https://docs.google.com/document/d/{attachment.file_id}")
+        else:
+            documents.append(
+                f"https://drive.google.com/file/d/{attachment.file_id}/view?usp=drivesdk"
+            )
+    documents.extend(subject.documents_url)
+
+    params = dict(
+        code=subject.code,
+        start_at=subject.start_at.strftime("%d.%m.%Y"),
+        subdivision=subject.subdivision,
+        title=subject.title,
+        lecturer=lecturer,
+        link=subject.zoom.link,
+        meeting_id=subject.zoom.meeting_id,
+        pass_code=subject.zoom.pass_code,
+        question_url=subject.question_url,
+        absent=settings.FE_STUDENT_BASE_URL + "/xin-nghi-phep",
+        documents=documents if len(documents) > 0 else None,
+    )
+
+    job = group([send_email_notification_subject_to_user_task.s(email, params) for email in emails])
+    job.apply_async()
+
+
+@celery_app_with_error_handler(CeleryResultTag.SEND_MAIL)
 def send_email_notification_subject_to_user_task(email: str, params: dict):
     brevo_service.send_student_notification_subject(email_to=email, params=params)
 

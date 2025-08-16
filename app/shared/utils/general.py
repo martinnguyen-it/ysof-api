@@ -11,6 +11,7 @@ from app.config.redis import get_redis_client
 from app.infra.season.season_repository import SeasonRepository
 
 TTL_30_DAYS = 60 * 60 * 24 * 30
+TTL_5_DAYS = 60 * 60 * 24 * 5
 
 
 class ExtendedEnum(Enum):
@@ -134,7 +135,7 @@ def mask_phone_number(phone_number: str | None = None) -> str | None:
     return phone_number[:3] + 4 * "*" + phone_number[-3:]
 
 
-def copy_dict(data: dict, exclude_keys: list[str] = []) -> dict:
+def copy_dict(data: dict, exclude_keys: list[str] = None) -> dict:
     """
     Exclude specific fields from a dictionary.
 
@@ -179,3 +180,8 @@ def get_ttl_until_midnight():
 
 def get_dict_exclude_field(d: dict, excluded_keys: list[str]) -> dict:
     return {k: v for k, v in d.items() if k not in excluded_keys}
+
+
+def get_subject_extra_emails_redis_key(subject_id: str) -> str:
+    """Generate Redis key for storing subject extra emails"""
+    return f"subject:extra_emails:{subject_id}"

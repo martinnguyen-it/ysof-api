@@ -51,6 +51,11 @@ class Subject(SubjectBase, DateTimeModelMixin):
     season: int
     status: StatusSubjectEnum
     attachments: Optional[list[Document]] = None
+    extra_emails: Optional[set[str]] = None
+
+
+class SendNotificationRequest(BaseEntity):
+    extra_emails: Optional[set[str]] = None
 
 
 class SubjectShortResponse(BaseEntity):
@@ -108,6 +113,7 @@ class SubjectRegistrationInCreateBase(BaseEntity):
     subjects: list[str]
 
     @field_validator("subjects", mode="after")
+    @classmethod
     def remove_duplicate(cls, v):
         return list(set(v))
 
@@ -125,6 +131,7 @@ class SubjectRegistrationInResponse(BaseEntity):
     subjects_registration: list[str]
 
     @field_validator("student_id", "subjects_registration", mode="before")
+    @classmethod
     def convert_to_string(cls, v, info: ValidationInfo):
         if info.field_name == "student_id":
             v = str(v)
