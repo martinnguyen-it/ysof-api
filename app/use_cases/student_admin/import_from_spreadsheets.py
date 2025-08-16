@@ -22,7 +22,7 @@ from app.models.admin import AdminModel
 from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
-from app.infra.security.security_service import get_password_hash
+from app.infra.security.security_service import generate_random_password, get_password_hash
 from app.shared.utils.general import (
     convert_valid_date,
     copy_dict,
@@ -112,8 +112,8 @@ class ImportSpreadsheetsStudentUseCase(use_case.UseCase):
                 )
                 del data_copy["numerical_order"]
                 del data_copy["group"]
-                password = "12345678"
-                # password = generate_random_password()
+                # password = "12345678"
+                password = generate_random_password()
                 student_in_db = StudentInDB(
                     **data_copy,
                     seasons_info=[seasons_info],

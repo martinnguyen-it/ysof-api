@@ -17,7 +17,7 @@ from app.models.admin import AdminModel
 from app.infra.audit_log.audit_log_repository import AuditLogRepository
 from app.domain.audit_log.entity import AuditLogInDB
 from app.domain.audit_log.enum import AuditLogType, Endpoint
-from app.infra.security.security_service import get_password_hash
+from app.infra.security.security_service import generate_random_password, get_password_hash
 from app.shared.common_exception import CustomException
 from app.shared.utils.general import get_current_season_value
 
@@ -96,8 +96,8 @@ class CreateStudentUseCase(use_case.UseCase):
             )
 
         else:
-            password = "12345678"
-            # password = generate_random_password()
+            # password = "12345678"
+            password = generate_random_password()
 
             obj_in: StudentInDB = StudentInDB(
                 **req_object.student_in.model_dump(exclude={"numerical_order", "group"}),

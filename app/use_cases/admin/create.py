@@ -2,7 +2,7 @@ import json
 from typing import Optional
 from fastapi import Depends, BackgroundTasks
 
-from app.infra.security.security_service import get_password_hash
+from app.infra.security.security_service import generate_random_password, get_password_hash
 from app.shared import request_object, use_case, response_object
 
 from app.domain.admin.entity import Admin, AdminInCreate, AdminInDB, AdminInUpdateTime
@@ -79,8 +79,8 @@ class CreateAdminUseCase(use_case.UseCase):
             )
             return Admin(**AdminInDB.model_validate(existing_admin).model_dump())
 
-        password = "12345678"
-        # password = generate_random_password()
+        # password = "12345678"
+        password = generate_random_password()
         obj_in: AdminInDB = AdminInDB(
             **admin_in.model_dump(exclude={"password"}),
             password=get_password_hash(password),
