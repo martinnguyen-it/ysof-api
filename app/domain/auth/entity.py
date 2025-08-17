@@ -37,3 +37,25 @@ class UpdatePassword(BaseEntity):
 
 class ForgotPassword(BaseEntity):
     email: str
+
+
+class VerifyOTP(BaseEntity):
+    email: str
+    otp: str
+
+
+class ResetPassword(BaseEntity):
+    token: str
+    new_password: str
+
+
+class ForgotPasswordResponse(BaseEntity):
+    message: str
+
+
+class VerifyOTPResponse(BaseEntity):
+    reset_token: str
+
+
+class ResetPasswordResponse(BaseEntity):
+    message: str

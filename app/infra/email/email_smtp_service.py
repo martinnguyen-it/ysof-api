@@ -37,3 +37,11 @@ class EmailSMTPService:
 
     def send_email_welcome(self, email: str, plain_text: str):
         self._send(emails_to=email, subject="YSOF - Tài khoản truy cập", plain_text=plain_text)
+
+    def send_email_forgot_password_otp(self, email: str, plain_text: str):
+        self._send(emails_to=email, subject="YSOF - Mã OTP đặt lại mật khẩu", plain_text=plain_text)
+
+    def send_email_password_changed(self, email: str, plain_text: str):
+        self._send(
+            emails_to=email, subject="YSOF - Thông báo thay đổi mật khẩu", plain_text=plain_text
+        )

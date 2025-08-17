@@ -50,6 +50,24 @@ def send_email_welcome_with_exist_account_task(
 
 
 @celery_app_with_error_handler(CeleryResultTag.SEND_MAIL)
+def send_email_forgot_password_otp_task(
+    email: str, otp: str, full_name: str, is_admin: bool = False
+):
+    plain_text = EMAIL_TEMPLATE[Template.FORGOT_PASSWORD_OTP][TemplateContent.PLAIN_TEXT]
+    plain_text = plain_text.replace("{{full_name}}", full_name)
+    plain_text = plain_text.replace("{{otp}}", otp)
+    email_smtp_service.send_email_forgot_password_otp(email=email, plain_text=plain_text)
+
+
+@celery_app_with_error_handler(CeleryResultTag.SEND_MAIL)
+def send_email_password_changed_task(email: str, full_name: str, is_admin: bool = False):
+    plain_text = EMAIL_TEMPLATE[Template.PASSWORD_CHANGED][TemplateContent.PLAIN_TEXT]
+    plain_text = plain_text.replace("{{full_name}}", full_name)
+    plain_text = plain_text.replace("{{contact_email}}", settings.YSOF_EMAIL)
+    email_smtp_service.send_email_password_changed(email=email, plain_text=plain_text)
+
+
+@celery_app_with_error_handler(CeleryResultTag.SEND_MAIL)
 def send_email_notification_subject_task(subject_id: str):
     admin_repository = AdminRepository()
     subject_repository = SubjectRepository()
