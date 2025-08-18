@@ -86,7 +86,7 @@ def get_list_admins(
     page_size: Annotated[int, Query(title="Page size", le=300)] = 100,
     search: Optional[str] = Query(None, title="Search"),
     sort: Optional[Sort] = Sort.DESC,
-    sort_by: Optional[str] = "id",
+    sort_by: Optional[str] = "roles",
     season: Optional[int] = None,
     current_admin: AdminModel = Depends(get_current_admin),
 ):
