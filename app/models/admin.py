@@ -32,6 +32,8 @@ class AdminModel(Document):
     latest_season = IntField()
     seasons = ListField(IntField())
 
+    patronal_day = StringField()
+
     avatar = StringField()
     created_at = DateTimeField(required=True)
     updated_at = DateTimeField()

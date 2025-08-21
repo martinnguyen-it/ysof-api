@@ -58,7 +58,11 @@ class UpdateAvatarUseCase(use_case.UseCase):
 
     def process_request(self, req_object: UpdateAvatarRequestObject):
         res: GoogleDriveAPIRes = self.google_drive_service.create(
-            req_object.image, folder_id=settings.FOLDER_GCLOUD_AVATAR_ID
+            req_object.image,
+            folder_id=settings.FOLDER_GCLOUD_AVATAR_ID,
+            name=str(req_object.user.id)
+            + f"_{req_object.user.full_name.replace(' ', '_')}"
+            + f".{req_object.image.filename.split('.')[-1]}",
         )
 
         old_avatar = req_object.user.avatar

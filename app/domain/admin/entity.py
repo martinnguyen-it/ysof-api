@@ -27,6 +27,7 @@ class AdminBase(BaseEntity):
     latest_season: int | None = None
     seasons: list[int] | None = None
     avatar: Optional[str] = None
+    patronal_day: Optional[str] = None
     _convert_valid_date = field_validator("date_of_birth", mode="before")(convert_valid_date)
 
 
@@ -64,6 +65,7 @@ class AdminInCreate(BaseEntity):
     address: Optional[Address] = None
     date_of_birth: Optional[date] = None
     facebook: Optional[str] = None
+    patronal_day: Optional[str] = None
     _extract_email = field_validator("email", mode="before")(transform_email)
     _convert_valid_date = field_validator("date_of_birth", mode="before")(convert_valid_date)
 
@@ -89,6 +91,7 @@ class AdminInUpdateMe(BaseEntity):
     address: Optional[Address] = None
     date_of_birth: Optional[date] = None
     facebook: Optional[str] = None
+    patronal_day: Optional[str] = None
     _extract_email = field_validator("email", mode="before")(transform_email)
 
 
